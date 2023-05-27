@@ -8,7 +8,6 @@ import net.thewinnt.cutscenes.path.Path;
 import net.thewinnt.cutscenes.path.PathLike;
 
 public class CutsceneType {
-    // TODO custom cutscenes ingame
     public final int length;
     public final Path path;
     public final Path rotationProvider;

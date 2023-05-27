@@ -126,7 +126,6 @@ public class CutsceneCommand {
                 return 1;
             })))
 
-            // TODO server sync for preview
             .then(literal("preview")
             .then(literal("set")
             .then(argument("cutscene", ResourceLocationArgument.id())
@@ -175,7 +174,7 @@ public class CutsceneCommand {
                 CutsceneManager.setPreviewedCutscene(null, Vec3.ZERO, 0, 0, 0);
                 source.sendSuccess(Component.translatable("commands.cutscene.preview.hide"), true);
                 return 1;
-            })))); // TODO finish creating cutscenes
+            }))));
 
             
     }

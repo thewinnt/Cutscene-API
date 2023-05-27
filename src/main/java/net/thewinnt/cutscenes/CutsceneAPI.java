@@ -49,7 +49,6 @@ public class CutsceneAPI {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 CutsceneManager.REGISTRY.clear();
-                CutsceneManager.registerBuiltInCutscenes();
                 files.forEach((id, element) -> {
                     JsonObject json = GsonHelper.convertToJsonObject(element, "cutscene");
                     CutsceneManager.registerCutscene(id, CutsceneType.fromJSON(json));
@@ -60,7 +59,6 @@ public class CutsceneAPI {
 
     public void commonSetup(final FMLCommonSetupEvent event) {
         CutsceneNetworkHandler.register();
-        CutsceneManager.registerBuiltInCutscenes();
     }
 
 }

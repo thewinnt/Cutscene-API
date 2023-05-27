@@ -1,0 +1,123 @@
+{
+  "length": 500,
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:line",
+        "start": [0, 0, 0],
+        "end": [10, 10, 10],
+        "is_rotation": false,
+        "easing_x": "in_out_elastic",
+        "easing_y": "in_out_elastic",
+        "easing_z": "in_out_elastic"
+      },
+      {
+        "type": "cutscenes:catmull_rom",
+        "points": [
+          [10, 10, 10],
+          [13, 13, 13],
+          [15, 5, 15],
+          [10, 0, 10]
+        ],
+        "weight": 4
+      },
+      {
+        "type": "cutscenes:bezier",
+        "start": [10, 0, 10],
+        "control_a": [10, 10, 0],
+        "control_b": [0, 10, 10],
+        "end": [0, 0, 0],
+        "weight": 2
+      },
+      {
+        "type": "cutscenes:constant",
+        "point": [0, 0, 0]
+      },
+      {
+        "type": "cutscenes:path",
+        "segments": [
+          {
+            "type": "cutscenes:catmull_rom",
+            "points": [
+              [0, 0, 0],
+              [1, 5, 1],
+              [8, 7, 6],
+              [9, 4, 0],
+              [10, 10, 10]
+            ],
+            "weight": 26
+          },
+          {
+            "type": "cutscenes:constant",
+            "point": [10, 10, 10]
+          },
+          {
+            "type": "cutscenes:bezier",
+            "start": [10, 10, 10],
+            "control_a": [20, 10, 15],
+            "control_b": [10, 20, 20],
+            "end": [20, 20, 20],
+            "weight": 4
+          },
+          {
+            "type": "cutscenes:bezier",
+            "start": [20, 20, 20],
+            "control_a": [30, 20, 20],
+            "control_b": [10, 0, 20],
+            "end": [0, 0, 0]
+          }
+        ],
+        "weight": 3
+      }
+    ]
+  },
+  "rotation": {
+    "segments": [
+      {
+        "type": "cutscenes:line",
+        "start": [-45, -45, -20],
+        "end": [45, 45, 20],
+        "is_rotation": true,
+        "easing_x": "in_out_elastic",
+        "easing_y": "in_out_elastic",
+        "easing_z": "in_out_elastic",
+        "weight": 6
+      },
+      {
+        "type": "cutscenes:bezier",
+        "start": [45, 45, 20],
+        "control_a": [0, 0, 20],
+        "control_b": [90, 90, 0],
+        "end": [-20, 0, 0],
+        "weight": 2
+      },
+      {
+        "type": "cutscenes:transition",
+        "easing_x": "out_quint",
+        "easing_y": "out_quint",
+        "easing_z": "out_quint",
+        "is_rotation": true
+      },
+      {
+        "type": "cutscenes:look_at_point",
+        "point": [15, 15, 15],
+        "weight": 9
+      },
+      {
+        "type": "cutscenes:transition",
+        "easing_x": "out_quint",
+        "easing_y": "out_quint",
+        "easing_z": "out_quint",
+        "is_rotation": true
+      },
+      {
+        "type": "cutscenes:catmull_rom",
+        "points": [
+          [15, 15, 15],
+          [10, 0, 15],
+          [0, 0, 0]
+        ]
+      }
+    ]
+  }
+}

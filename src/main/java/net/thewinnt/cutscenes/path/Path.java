@@ -92,9 +92,9 @@ public class Path implements PathLike {
 
     public Path continueBezier(Vec3 control_b, Vec3 end, int weight) {
         if (this.last() instanceof BezierCurve bezier && bezier.getControlB() != null) {
-            this.segments.add(new BezierCurve(bezier.getEnd(), bezier.getControlA(), bezier.getControlA().lerp(bezier.getControlB(), 2), end, weight));
+            this.segments.add(new BezierCurve(bezier.getEnd(), bezier.getControlB().lerp(bezier.getEnd(), 2), control_b, end, weight));
         } else {
-            this.segments.add(new BezierCurve(this.last().getEnd(), control_b, null, end, weight));
+            this.segments.add(new BezierCurve(this.last().getEnd(), null, control_b, end, weight));
         }
         this.weightSum += weight;
         return this;

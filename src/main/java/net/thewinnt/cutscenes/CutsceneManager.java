@@ -24,14 +24,30 @@ import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
 
 @Mod.EventBusSubscriber(bus = Bus.FORGE)
 public class CutsceneManager {
-    public static final BiMap<ResourceLocation, CutsceneType> REGISTRY = HashBiMap.create(5);
-    private static final BiMap<ResourceLocation, SegmentSerializer<?>> SEGMENT_TYPE_REGISTRY = HashBiMap.create(7);
+    /** The cutscene registry, where all cutscenes are stored. Only read from this, please */
+    public static final BiMap<ResourceLocation, CutsceneType> REGISTRY = HashBiMap.create();
+
+    /** The segment type registry, where the segment types are stored */
+    private static final BiMap<ResourceLocation, SegmentSerializer<?>> SEGMENT_TYPE_REGISTRY = HashBiMap.create();
+
+    /** The currently previewed cutscene */
     private static CutsceneType previewedCutscene;
+
+    /** The start position of the preview */
     private static Vec3 previewOffset;
+
+    /** The x rotation of the preview path */
     public static float previewPathYaw;
+
+    /** The y rotation of the preview path */
     public static float previewPathPitch;
+
+    /** The z rotation of the preview path */
     public static float previewPathRoll;
-    public static boolean isPreviewRelative;
+
+    // BUILT-IN CUTSCENES //
+    // They're not used anywhere and are here to show how you can make some yourself with code
+    // You can also use datapacks to create cutscenes, it has all the same functionality, except it's better
 
     public static final ResourceLocation ASCEND_ID = new ResourceLocation("cutscenes:tests/ascend");
     public static final ResourceLocation COOL_PATH_ID = new ResourceLocation("cutscenes:tests/cool_path");
@@ -39,19 +55,24 @@ public class CutsceneManager {
     public static final ResourceLocation HORIZONTAL_LINE_ID = new ResourceLocation("cutscenes:tests/horizontal_line");
     public static final ResourceLocation CATMULL_ROM_TEST_ID = new ResourceLocation("cutscenes:tests/catmull_rom_test");
 
+    /** Ascends you 25 blocks up with a little twist */
     public static final CutsceneType ASCEND = new CutsceneType(
         new Path(new BezierCurve(new Vec3(0, 0, 0), new Vec3(10, 12.5, 10), null, new Vec3(0, 25, 0))),
         new Path(new ConstantPoint(Vec3.ZERO)),
         100
     );
+
+    /** A cool path made of continuous Bezier curves, also features rotation changes */
     public static final CutsceneType COOL_PATH = new CutsceneType(
         new Path(new BezierCurve(new Vec3(0, 0, 0), null, null, new Vec3(0, 10, 0)))
-                .continueBezier(new Vec3(-50, 1, 0), new Vec3(-50, 10, 25))
-                .continueBezier(new Vec3(-25, 50, 0), new Vec3(-25, 30, 10), 10)
-                .continueBezier(new Vec3(-25, 0, 10), new Vec3(0, 0, 0)),
+                .continueBezier(new Vec3(-50, 1, 0), new Vec3(-50, 10, 25)) // adds a new Bezier curve with arguments: (see below)
+                .continueBezier(new Vec3(-25, 50, 0), new Vec3(-25, 30, 10), 10) // start = prev.end; control_a = prev.control_b.lerp(prev.end, 2); control_b and end are specified by user
+                .continueBezier(new Vec3(-25, 0, 10), new Vec3(0, 0, 0)), // if previous is not Bezier or doesn't have control_b, args are: start = prev.end; control_b; null; end
         new Path(new LineSegment(new Vec3(-30, 30, 0), new Vec3(20, -20, 0), EasingFunction.LINEAR, EasingFunction.IN_CUBIC, EasingFunction.LINEAR, true)),
         500
     );
+
+    /** A path that combines some Bezier curve configurations */
     public static final CutsceneType MULTI_TYPE = new CutsceneType(
         new Path(new BezierCurve(new Vec3(0, 0, 0), new Vec3(10, 0, 0), new Vec3(0, 10, 0), new Vec3(10, 10, 0)))
                 .continueBezier(null, new Vec3(10, 10, 10)) // +/-
@@ -62,12 +83,14 @@ public class CutsceneManager {
         500
     );
 
+    /** A horizontal line going 12 blocks towards +X */
     public static final CutsceneType HORIZONTAL_LINE = new CutsceneType(
         new Path(new LineSegment(new Vec3(-6, 0, 0), new Vec3(6, 0, 0))),
         new Path(new ConstantPoint(Vec3.ZERO)), 
         200
     );
 
+    /** A path consisting of a Catmull-Rom spline with a lot of random points */
     public static final CutsceneType CATMULL_ROM_TEST = new CutsceneType(
         new Path(new CatmullRomSpline(
             new Vec3(0, 0, 0),
@@ -76,15 +99,15 @@ public class CutsceneManager {
             new Vec3(-6, 19.3, -8.37),
             new Vec3(-9.71, -8.98, -7.5), // starting from here, the points were generated using a script
             new Vec3(-17.89, -11.57, -17.17),
-            new Vec3(0.1, -10.19, 6.9),      
-            new Vec3(12.87, -21.55, -9.95),  
-            new Vec3(-17.36, 23.98, 14.78),  
+            new Vec3(0.1, -10.19, 6.9),
+            new Vec3(12.87, -21.55, -9.95),
+            new Vec3(-17.36, 23.98, 14.78),
             new Vec3(-16.87, -23.58, -23.87),
-            new Vec3(-6.15, 14.8, -3.45),    
-            new Vec3(-16.72, 16.56, -16.24), 
-            new Vec3(-1.63, -17.64, 16.57),  
-            new Vec3(-3.98, 4.25, 11.01),    
-            new Vec3(-19.31, -16.89, -8.79), 
+            new Vec3(-6.15, 14.8, -3.45),
+            new Vec3(-16.72, 16.56, -16.24),
+            new Vec3(-1.63, -17.64, 16.57),
+            new Vec3(-3.98, 4.25, 11.01),
+            new Vec3(-19.31, -16.89, -8.79),
             new Vec3(-12.12, 18.33, -1.0),
             new Vec3(-4.78, 16.29, -8.53),
             new Vec3(-8.76, 19.35, 21.01),
@@ -94,6 +117,10 @@ public class CutsceneManager {
         200
     );
 
+    // SEGMENT TYPES //
+    // Segment serializers are used to identify and read segment types. The writing is performed on instances of segments
+    // obtained from these serializers
+
     public static final SegmentSerializer<LineSegment> LINE = SegmentSerializer.of(LineSegment::fromNetwork, LineSegment::fromJSON);
     public static final SegmentSerializer<BezierCurve> BEZIER = SegmentSerializer.of(BezierCurve::fromNetwork, BezierCurve::fromJSON);
     public static final SegmentSerializer<CatmullRomSpline> CATMULL_ROM = SegmentSerializer.of(CatmullRomSpline::fromNetwork, CatmullRomSpline::fromJSON);
@@ -102,23 +129,37 @@ public class CutsceneManager {
     public static final SegmentSerializer<LookAtPoint> LOOK_AT_POINT = SegmentSerializer.of(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
     public static final SegmentSerializer<Transition> TRANSITION = SegmentSerializer.of(Transition::fromNetwork, Transition::fromJSON);
 
+    /** 
+     * Registers a cutscene
+     * @param id The ID of the cutscene that will be used in commands
+     * @param type The actual cutscene type you want to register
+     * @return Your cutscene for storing
+     */
     public static CutsceneType registerCutscene(ResourceLocation id, @Nonnull CutsceneType type) {
         REGISTRY.put(id, type);
         return type;
     }
 
+    /**
+     * Registers a segment serializer
+     * @param id The ID of the segment type that will be used in datapacks
+     * @param type The serializer to register
+     */
     public static void registerSegmentType(ResourceLocation id, SegmentSerializer<?> type) {
         SEGMENT_TYPE_REGISTRY.put(id, type);
     }
 
+    /** Returns the ID of the specified serializer, or {@code null} if it's not registered */
     public static ResourceLocation getSegmentTypeId(SegmentSerializer<?> type) {
         return SEGMENT_TYPE_REGISTRY.inverse().get(type);
     }
 
+    /** Returns the segment serializer with this ID, or {@code null} if it doesn't exist */
     public static SegmentSerializer<?> getSegmentType(ResourceLocation id) {
         return SEGMENT_TYPE_REGISTRY.get(id);
     }
 
+    /** Sets the currently previewed cutscene and tells the clients */
     public static void setPreviewedCutscene(CutsceneType type, Vec3 offset, float pathYaw, float pathPitch, float pathRoll) {
         previewedCutscene = type;
         previewOffset = offset;
@@ -128,18 +169,12 @@ public class CutsceneManager {
         CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new PreviewCutscenePacket(REGISTRY.inverse().get(type), offset, pathYaw, pathPitch, pathRoll));
     }
 
+    // self-explanatory
     public static CutsceneType getPreviewedCutscene() {
         return previewedCutscene;
     }
 
-    public static void registerBuiltInCutscenes() {
-        REGISTRY.put(ASCEND_ID, ASCEND);
-        REGISTRY.put(COOL_PATH_ID, COOL_PATH);
-        REGISTRY.put(MULTI_TYPE_ID, MULTI_TYPE);
-        REGISTRY.put(HORIZONTAL_LINE_ID, HORIZONTAL_LINE);
-        REGISTRY.put(CATMULL_ROM_TEST_ID, CATMULL_ROM_TEST);
-    }
-
+    /** Returns the starting position of the current cutscene preview, or [0, 100, 0] if there isn't one */
     public static Vector3f getOffset() {
         if (previewOffset != null) {
             return new Vector3f(previewOffset);
@@ -148,6 +183,7 @@ public class CutsceneManager {
         }
     }
 
+    /** Sends the cutscene registry to client */
     @SubscribeEvent
     public static void sendRegistry(OnDatapackSyncEvent event) {
         if (event != null && event.getPlayer() != null) {
@@ -157,6 +193,14 @@ public class CutsceneManager {
         }
     }
 
+    /** 
+     * Starts a cutscene for a player
+     * @param id The ID of the cutscene to start
+     * @param startPos The starting position for the cutscene
+     * @param camRot The initial camera rotation of the player as a vector of (yaw, pitch, roll)
+     * @param pathRot The path rotation as a vector of (yaw, pitch, roll)
+     * @param player The player to play the cutscene to
+     */
     public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
         CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
     }

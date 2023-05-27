@@ -1,0 +1,22 @@
+{
+  "length": 100,
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:bezier",
+        "start": [0, 0, 0],
+        "control_a": [10, 12.5, 10],
+        "control_b": null,
+        "end": [0, 25, 0]
+      }
+    ]
+  },
+  "rotation": {
+    "segments": [
+      {
+        "type": "cutscenes:constant",
+        "point": [0, 0, 0]
+      }
+    ]
+  }
+}

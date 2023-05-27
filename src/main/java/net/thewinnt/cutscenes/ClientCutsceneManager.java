@@ -146,7 +146,6 @@ public class ClientCutsceneManager {
             // CutsceneAPI.LOGGER.info("Cutscene rotation - {} / {} / {}", event.getYaw(), event.getPitch(), event.getRoll());
             event.getRenderer().getMinecraft().options.hideGui = true;
         } else if (cutsceneStatus == CutsceneStatus.NONE) {
-            // TODO smooth stopping
             hidGuiBefore = event.getRenderer().getMinecraft().options.hideGui;
             initPosition = event.getCamera().getPosition();
             initCameraYaw = event.getYaw();

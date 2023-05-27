@@ -1,0 +1,48 @@
+{
+  "length": 500,
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:bezier",
+        "start": [0, 0, 0],
+        "control_a": null,
+        "control_b": null,
+        "end": [0, 10, 0]
+      },
+      {
+        "type": "cutscenes:bezier",
+        "start": [0, 10, 0],
+        "control_a": null,
+        "control_b": [-50, 1, 0],
+        "end": [-50, 10, 25]
+      },
+      {
+        "type": "cutscenes:bezier",
+        "start": [-50, 10, 25],
+        "control_a": [-50, 19, 50],
+        "control_b": [-25, 50, 0],
+        "end": [-25, 30, 10]
+      },
+      {
+        "type": "cutscenes:bezier",
+        "start": [-25, 30, 10],
+        "control_a": [-25, 10, 20],
+        "control_b": [-25, 0, 10],
+        "end": [0, 0, 0]
+      }
+    ]
+  },
+  "rotation": {
+    "segments": [
+      {
+        "type": "cutscenes:line",
+        "start": [-30, 30, 0],
+        "end": [20, -20, 0],
+        "easing_x": "linear",
+        "easing_y": "in_cubic",
+        "easing_z": "linear",
+        "is_rotation": true
+      }
+    ]
+  }
+}
