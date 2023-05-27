@@ -1,0 +1,16 @@
+{
+  "commands.cutscene.error.no_preview": "No cutscenes are being previewed",
+  "commands.cutscene.error.no_runner": "This command must be run by some entity",
+  "commands.cutscene.error.no_such_cutscene": "No such cutscene: %s",
+  "commands.cutscene.error.player_already_in_cutscene": "%1$s is already watching a cutscene",
+  "commands.cutscene.error.player_not_in_cutscene": "%1$s is not watching a cutscene",
+  "commands.cutscene.preview.change": "Changing the previewed cutscene to %1$s",
+  "commands.cutscene.preview.from_block": "Previewing the camera path of cutscene %1$s from given coordinates",
+  "commands.cutscene.preview.from_current": "Previewing the camera path of cutscene %1$s from your position",
+  "commands.cutscene.preview.from_entity": "Previewing the camera path of cutscene %1$s from %2$s\u0027s position at execution time",
+  "commands.cutscene.preview.hide": "Hiding any cutscene previews",
+  "commands.cutscene.preview.tracking": "Previewing the camera path of cutscene %1$s from %2$s\u0027s live position",
+  "commands.cutscene.showing": "Showing cutscene %1$s to %2$s",
+  "commands.cutscene.stopped": "%1$s is no longer watching a cutscene",
+  "commands.cutscene.warning.cutscene_mismatch": "Warning: the cutscene you\u0027re playing doesn\u0027t match the one being previewed"
+}

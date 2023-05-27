@@ -1,0 +1,15 @@
+{
+  "commands.cutscene.error.no_preview": "Ни одна катсцена не показывается",
+  "commands.cutscene.error.no_runner": "Эта команда должна выполняться от имени какой-либо сущности",
+  "commands.cutscene.error.no_such_cutscene": "Катсцены типа %s не существует",
+  "commands.cutscene.error.player_already_in_cutscene": "%1$s уже наблюдает катсцену",
+  "commands.cutscene.error.player_not_in_cutscene": "%1$s не наблюдает катсцену",
+  "commands.cutscene.preview.from_block": "Показываем путь камеры в катсцене %1$s с данных координат",
+  "commands.cutscene.preview.from_current": "Показываем путь камеры в катсцене %1$s с текущего местоположения",
+  "commands.cutscene.preview.from_entity": "Показываем путь камеры в катсцене %1$s с местоположения %2$s в момент исполнения",
+  "commands.cutscene.preview.hide": "Скрываем предпросмотр катсцен",
+  "commands.cutscene.preview.tracking": "Показываем путь камеры в катсцене %1$s с местоположения %2$s в текущий момент",
+  "commands.cutscene.showing": "Показываем катсцену %1$s игроку %2$s",
+  "commands.cutscene.stopped": "%1$s больше не наблюдает катсцену",
+  "commands.cutscene.warning.cutscene_mismatch": "Внимание: просматриваемая катсцена отличается от той, что в предпросмотре"
+}
