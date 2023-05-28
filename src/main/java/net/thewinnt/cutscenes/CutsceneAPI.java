@@ -24,7 +24,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 
 /** The main class of Cutscene API. Sort of. */
-@Mod("cutscenes")
+@Mod("cutscene_api")
 public class CutsceneAPI {
     public static final Logger LOGGER = LogUtils.getLogger();
 
