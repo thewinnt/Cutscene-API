@@ -2,6 +2,7 @@ package net.thewinnt.cutscenes.path.point;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import com.google.gson.JsonObject;
 
@@ -14,6 +15,7 @@ import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
 
 public record WaypointProvider(String name, int searchRadius, SortType sorting) implements PointProvider {
+
     @Override
     public Vec3 getPoint(Level level, Vec3 cutsceneStart) {
         List<WaypointEntity> entities = level.getEntitiesOfClass(WaypointEntity.class, new AABB(cutsceneStart, cutsceneStart).inflate(searchRadius), e -> e.getWaypointName().equals(name));
@@ -26,6 +28,9 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting) 
                     entities.sort((a, b) -> (int)(b.distanceToSqr(cutsceneStart) - a.distanceToSqr(cutsceneStart)));
                     break;
                 case RANDOM:
+                    Collections.shuffle(entities, new Random(Double.doubleToLongBits(cutsceneStart.x * cutsceneStart.y * cutsceneStart.z)));
+                    break;
+                case TRUE_RANDOM:
                     Collections.shuffle(entities);
                 default:
                     break;
@@ -71,6 +76,7 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting) 
         NEAREST,
         FURTHEST,
         FIRST_FOUND,
-        RANDOM;
+        RANDOM,
+        TRUE_RANDOM;
     }
 }

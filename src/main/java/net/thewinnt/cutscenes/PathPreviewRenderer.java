@@ -1,7 +1,5 @@
 package net.thewinnt.cutscenes;
 
-import java.util.List;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
@@ -11,12 +9,10 @@ import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.Mod;
-import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.path.Path;
 import net.thewinnt.cutscenes.path.PathLike;
 
@@ -46,7 +42,7 @@ public class PathPreviewRenderer {
             end.add(offset);
             drawPoint(stack, consumer, start, 0.3F, COLOR_POINT);
             drawPoint(stack, consumer, end, 0.3F, COLOR_POINT);
-            float ticksPerWeight = type.length * 18 / path.getWeightSum(); // roughly one line per frame at 60 fps
+            float ticksPerWeight = type.length * 300 / path.getWeightSum(); // roughly one line per frame at 60 fps
             int thisLength = (int)(ticksPerWeight * segment.getWeight());
             for (int j = 0; j < thisLength; j++) {
                 Vector3f a = new Vector3f(segment.getPoint(j / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot));

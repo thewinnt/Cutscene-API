@@ -18,6 +18,10 @@
             "name": "type2",
             "sort_type": "random"
           },
+          {
+            "type": "cutscenes:world",
+            "point": [44.5, 76.5, -31.5]
+          },
           [10, 10, 10]
         ]
       }
