@@ -1,4 +1,4 @@
-package net.thewinnt.cutscenes.math;
+package net.thewinnt.cutscenes.path;
 
 import java.util.function.Function;
 

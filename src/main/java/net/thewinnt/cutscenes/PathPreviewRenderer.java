@@ -1,5 +1,7 @@
 package net.thewinnt.cutscenes;
 
+import java.util.List;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
@@ -8,10 +10,13 @@ import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.Mod;
+import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.path.Path;
 import net.thewinnt.cutscenes.path.PathLike;
 
@@ -20,7 +25,9 @@ import net.thewinnt.cutscenes.path.PathLike;
 public class PathPreviewRenderer {
     private static final Vector3f COLOR_POINT = new Vector3f(1, 0.5f, 1);
     private static final Vector3f COLOR_CONTROL_LINE = new Vector3f(0.5f, 0.5f, 1);
+    private static final Vector3f COLOR_START = new Vector3f(0.25f, 0.5f, 1);
 
+    @SuppressWarnings("resource")
     public static void beforeDebugRender(PoseStack stack, VertexConsumer consumer) {
         if (ClientCutsceneManager.previewedCutscene == null) return;
         CutsceneType type = ClientCutsceneManager.previewedCutscene;
@@ -28,25 +35,28 @@ public class PathPreviewRenderer {
         float yRot = (float)Math.toRadians(ClientCutsceneManager.previewPathYaw);
         float zRot = (float)Math.toRadians(ClientCutsceneManager.previewPathPitch);
         float xRot = (float)Math.toRadians(ClientCutsceneManager.previewPathRoll);
+        Vec3 s = new Vec3(ClientCutsceneManager.getOffset());
+        Level l = Minecraft.getInstance().level;
         for (int i = 0; i < path.size(); i++) {
             PathLike segment = path.getSegment(i);
             Vector3f offset = ClientCutsceneManager.getOffset();
-            Vector3f start = new Vector3f(segment.getStart().yRot(yRot).zRot(zRot).xRot(xRot));
-            Vector3f end = new Vector3f(segment.getEnd().yRot(yRot).zRot(zRot).xRot(xRot));
+            Vector3f start = new Vector3f(segment.getStart(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot));
+            Vector3f end = new Vector3f(segment.getEnd(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot));
             start.add(offset);
             end.add(offset);
             drawPoint(stack, consumer, start, 0.3F, COLOR_POINT);
             drawPoint(stack, consumer, end, 0.3F, COLOR_POINT);
-            float ticksPerWeight = type.length * 3 / path.getWeightSum(); // roughly one line per frame at 60 fps
+            float ticksPerWeight = type.length * 18 / path.getWeightSum(); // roughly one line per frame at 60 fps
             int thisLength = (int)(ticksPerWeight * segment.getWeight());
             for (int j = 0; j < thisLength; j++) {
-                Vector3f a = new Vector3f(segment.getPoint(j / (double)thisLength).yRot(yRot).zRot(zRot).xRot(xRot));
-                Vector3f b = new Vector3f(segment.getPoint((j + 1) / (double)thisLength).yRot(yRot).zRot(zRot).xRot(xRot));
+                Vector3f a = new Vector3f(segment.getPoint(j / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot));
+                Vector3f b = new Vector3f(segment.getPoint((j + 1) / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot));
                 a.add(offset);
                 b.add(offset);
                 drawLineGlobal(stack, consumer, a, b, getColorAtPoint(i + j / (float)thisLength));
             }
         }
+        drawPoint(stack, consumer, ClientCutsceneManager.getOffset(), 0.25f, COLOR_START);
     }
 
     /** Draws a line relative to the camera */

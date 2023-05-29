@@ -3,6 +3,7 @@ package net.thewinnt.cutscenes;
 import com.google.gson.JsonObject;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.path.Path;
 import net.thewinnt.cutscenes.path.PathLike;
@@ -22,12 +23,12 @@ public class CutsceneType {
         this.length = length;
     }
 
-    public Vec3 getPathPoint(double point) {
-        return path.getPoint(point);
+    public Vec3 getPathPoint(double point, Level l, Vec3 s) {
+        return path.getPoint(point, l, s);
     }
 
-    public Vec3 getRotationAt(double point) {
-        return rotationProvider.getPoint(point);
+    public Vec3 getRotationAt(double point, Level l, Vec3 s) {
+        return rotationProvider.getPoint(point, l, s);
     }
 
     public void toNetwork(FriendlyByteBuf buf) {

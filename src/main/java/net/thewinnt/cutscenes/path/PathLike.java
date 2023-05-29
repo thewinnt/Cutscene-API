@@ -5,13 +5,14 @@ import java.util.function.BiFunction;
 import com.google.gson.JsonObject;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.thewinnt.cutscenes.path.point.PointProvider;
 
 public interface PathLike {
-    Vec3 getPoint(double t);
-    double getLength();
-    Vec3 getStart();
-    Vec3 getEnd();
+    Vec3 getPoint(double t, Level level, Vec3 cutsceneStart);
+    PointProvider getStart(Level level, Vec3 cutsceneStart);
+    PointProvider getEnd(Level level, Vec3 cutsceneStart);
     int getWeight();
     void toNetwork(FriendlyByteBuf buf);
     SegmentSerializer<?> getSerializer();

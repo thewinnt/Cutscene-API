@@ -10,6 +10,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -111,13 +112,14 @@ public class ClientCutsceneManager {
                 return;
             }
             double progress = (currentTime - startTime + event.getPartialTick()) / runningCutscene.length;
-            Vec3 targetPosition = runningCutscene.getPathPoint(progress);
+            Level level = Minecraft.getInstance().level;
+            Vec3 targetPosition = runningCutscene.getPathPoint(progress, level, startPosition);
             float yRot = (float)Math.toRadians(startPathYaw);
             float zRot = (float)Math.toRadians(startPathPitch);
             float xRot = (float)Math.toRadians(startPathRoll);
             targetPosition = targetPosition.yRot(yRot).zRot(zRot).xRot(xRot);
             targetPosition = startPosition.add(targetPosition);
-            Vec3 rotation = runningCutscene.getRotationAt(progress);
+            Vec3 rotation = runningCutscene.getRotationAt(progress, level, startPosition);
             Camera cam = event.getCamera();
             double targetYaw = rotation.x + startCameraYaw;
             double targetPitch = rotation.y + startCameraPitch;
@@ -128,11 +130,11 @@ public class ClientCutsceneManager {
             event.setPitch((float)targetPitch);
             event.setRoll((float)targetRoll);
             if (currentTime - startTime + event.getPartialTick() < 40) {
-                if (!startPosition.add(runningCutscene.getPathPoint(0).yRot(yRot).zRot(zRot).xRot(xRot)).equals(initPosition)) {
+                if (!startPosition.add(runningCutscene.getPathPoint(0, level, startPosition).yRot(yRot).zRot(zRot).xRot(xRot)).equals(initPosition)) {
                     Vec3 target = initPosition.lerp(targetPosition, 1 - Math.pow(1 - lerpProgress, 5));
                     cam.setPosition(target);
                 }
-                Vec3 startRot = runningCutscene.getRotationAt(0);
+                Vec3 startRot = runningCutscene.getRotationAt(0, level, startPosition);
                 if (initCameraYaw != startRot.x + startCameraYaw) {
                     event.setYaw(Mth.rotLerp((float)(1 - Math.pow(1 - lerpProgress, 5)), initCameraYaw, (float)targetYaw));
                 }
@@ -163,19 +165,20 @@ public class ClientCutsceneManager {
         initCameraRoll = event.getRoll();
         long currentTime = event.getRenderer().getMinecraft().level.getGameTime();
         double progress = (currentTime - startTime - runningCutscene.length + event.getPartialTick()) / 40;
+        Level level = Minecraft.getInstance().level;
         if (progress < 1) {
             float yRot = (float)Math.toRadians(startPathYaw);
             float zRot = (float)Math.toRadians(startPathPitch);
             float xRot = (float)Math.toRadians(startPathRoll);
-            Vec3 rotation = runningCutscene.getRotationAt(1);
+            Vec3 rotation = runningCutscene.getRotationAt(1, level, startPosition);
             double targetYaw = rotation.x + startCameraYaw;
             double targetPitch = rotation.y + startCameraPitch;
             double targetRoll = rotation.z + startCameraRoll;
-            if (!startPosition.add(runningCutscene.getPathPoint(1).yRot(yRot).zRot(zRot).xRot(xRot)).equals(initPosition)) {
-                Vec3 target = startPosition.add(runningCutscene.getPathPoint(1).yRot(yRot).zRot(zRot).xRot(xRot)).lerp(initPosition, 1 - Math.pow(1 - progress, 5));
+            if (!startPosition.add(runningCutscene.getPathPoint(1, level, startPosition).yRot(yRot).zRot(zRot).xRot(xRot)).equals(initPosition)) {
+                Vec3 target = startPosition.add(runningCutscene.getPathPoint(1, level, startPosition).yRot(yRot).zRot(zRot).xRot(xRot)).lerp(initPosition, 1 - Math.pow(1 - progress, 5));
                 event.getCamera().setPosition(target);
             }
-            Vec3 endRot = runningCutscene.getRotationAt(1);
+            Vec3 endRot = runningCutscene.getRotationAt(1, level, startPosition);
             if (initCameraYaw != endRot.x + startCameraYaw) {
                 event.setYaw(Mth.rotLerp((float)(1 - Math.pow(1 - progress, 5)), (float)targetYaw, initCameraYaw));
             }

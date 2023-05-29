@@ -6,7 +6,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.networking.packets.*;
+import net.thewinnt.cutscenes.path.point.PointProvider;
 
 public class CutsceneNetworkHandler {
     private static int id_counter = 0;
@@ -16,9 +18,9 @@ public class CutsceneNetworkHandler {
     public static void register() {
         INSTANCE = NetworkRegistry.newSimpleChannel(
             new ResourceLocation("cutscenes:networking"),
-            () -> "0.1",
-            i -> true,
-            i -> true // there's really only one version you can be using
+            () -> "1.1",
+            i -> i.equals("1.1"),
+            i -> i.equals("1.1")
         );
         INSTANCE.messageBuilder(StartCutscenePacket.class, id_counter++, NetworkDirection.PLAY_TO_CLIENT)
             .encoder(StartCutscenePacket::write)
@@ -32,12 +34,6 @@ public class CutsceneNetworkHandler {
             .consumerMainThread(UpdateCutscenesPacket::handle)
             .add();
 
-        INSTANCE.messageBuilder(AddCutscenePacket.class, id_counter++, NetworkDirection.PLAY_TO_CLIENT)
-            .encoder(AddCutscenePacket::write)
-            .decoder(AddCutscenePacket::read)
-            .consumerMainThread(AddCutscenePacket::handle)
-            .add();
-
         INSTANCE.messageBuilder(PreviewCutscenePacket.class, id_counter++, NetworkDirection.PLAY_TO_CLIENT)
             .encoder(PreviewCutscenePacket::write)
             .decoder(PreviewCutscenePacket::read)
@@ -46,21 +42,45 @@ public class CutsceneNetworkHandler {
     }
 
     public static Vec3 readVec3(FriendlyByteBuf buf) {
-        double x = buf.readDouble();
-        double y = buf.readDouble();
-        double z = buf.readDouble();
-        if (Double.isNaN(x) && Double.isNaN(y) && Double.isNaN(z)) {
+        if (buf.readBoolean()) {
+            double x = buf.readDouble();
+            double y = buf.readDouble();
+            double z = buf.readDouble();
+            return new Vec3(x, y, z);
+        } else {
             return null;
         }
-        return new Vec3(x, y, z);
+    }
+
+    public static PointProvider readPointProvider(FriendlyByteBuf buf) {
+        if (buf.readBoolean()) {
+            ResourceLocation id = buf.readResourceLocation();
+            return CutsceneManager.getPointType(id).fromNetwork(buf);
+        } else {
+            return null;
+        }
     }
 
     public static void writeVec3(FriendlyByteBuf buf, Vec3 vec) {
         if (vec == null) {
-            vec = new Vec3(Double.NaN, Double.NaN, Double.NaN);
+            buf.writeBoolean(false); // is present
+            return;
+        } else {
+            buf.writeBoolean(true);
         }
         buf.writeDouble(vec.x);
         buf.writeDouble(vec.y);
         buf.writeDouble(vec.z);
+    }
+
+    public static void writePointProvider(FriendlyByteBuf buf, PointProvider point) {
+        if (point == null) {
+            buf.writeBoolean(false); // is present
+            return;
+        } else {
+            buf.writeBoolean(true);
+        }
+        buf.writeResourceLocation(CutsceneManager.getPointTypeId(point.getSerializer()));
+        point.toNetwork(buf);
     }
 }

@@ -14,13 +14,14 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.network.PacketDistributor;
-import net.thewinnt.cutscenes.math.*;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
-import net.thewinnt.cutscenes.path.Path;
+import net.thewinnt.cutscenes.path.*;
 import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
+import net.thewinnt.cutscenes.path.point.*;
+import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 
 @Mod.EventBusSubscriber(bus = Bus.FORGE)
 public class CutsceneManager {
@@ -29,6 +30,9 @@ public class CutsceneManager {
 
     /** The segment type registry, where the segment types are stored */
     private static final BiMap<ResourceLocation, SegmentSerializer<?>> SEGMENT_TYPE_REGISTRY = HashBiMap.create();
+
+    /** The point type registry, where the point types are stored */
+    private static final BiMap<ResourceLocation, PointSerializer<?>> POINT_TYPE_REGISTRY = HashBiMap.create();
 
     /** The currently previewed cutscene */
     private static CutsceneType previewedCutscene;
@@ -118,8 +122,8 @@ public class CutsceneManager {
     );
 
     // SEGMENT TYPES //
-    // Segment serializers are used to identify and read segment types. The writing is performed on instances of segments
-    // obtained from these serializers
+    // Segment serializers are used to identify and read segment types. The writing is performed on instances of
+    // segments obtained from these serializers
 
     public static final SegmentSerializer<LineSegment> LINE = SegmentSerializer.of(LineSegment::fromNetwork, LineSegment::fromJSON);
     public static final SegmentSerializer<BezierCurve> BEZIER = SegmentSerializer.of(BezierCurve::fromNetwork, BezierCurve::fromJSON);
@@ -128,6 +132,13 @@ public class CutsceneManager {
     public static final SegmentSerializer<ConstantPoint> CONSTANT = SegmentSerializer.of(ConstantPoint::fromNetwork, ConstantPoint::fromJSON);
     public static final SegmentSerializer<LookAtPoint> LOOK_AT_POINT = SegmentSerializer.of(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
     public static final SegmentSerializer<Transition> TRANSITION = SegmentSerializer.of(Transition::fromNetwork, Transition::fromJSON);
+
+    // POINT TYPES //
+    // Point serializers are used to identify and read point types. A point type gets a Level in and returns
+    // a point based on that
+
+    public static final PointSerializer<StaticPointProvider> STATIC = PointSerializer.of(StaticPointProvider::fromNetwork, StaticPointProvider::fromJSON);
+    public static final PointSerializer<WaypointProvider> WAYPOINT = PointSerializer.of(WaypointProvider::fromNetwork, WaypointProvider::fromJSON);
 
     /** 
      * Registers a cutscene
@@ -149,6 +160,15 @@ public class CutsceneManager {
         SEGMENT_TYPE_REGISTRY.put(id, type);
     }
 
+    /**
+     * Registers a point serializer
+     * @param id The ID of the point type that will be used in datapacks
+     * @param type The serializer to register
+     */
+    public static void registerPointType(ResourceLocation id, PointSerializer<?> type) {
+        POINT_TYPE_REGISTRY.put(id, type);
+    }
+
     /** Returns the ID of the specified serializer, or {@code null} if it's not registered */
     public static ResourceLocation getSegmentTypeId(SegmentSerializer<?> type) {
         return SEGMENT_TYPE_REGISTRY.inverse().get(type);
@@ -157,6 +177,16 @@ public class CutsceneManager {
     /** Returns the segment serializer with this ID, or {@code null} if it doesn't exist */
     public static SegmentSerializer<?> getSegmentType(ResourceLocation id) {
         return SEGMENT_TYPE_REGISTRY.get(id);
+    }
+
+    /** Returns the ID of the specified point type, or {@code null} if it's not registered */
+    public static ResourceLocation getPointTypeId(PointSerializer<?> type) {
+        return POINT_TYPE_REGISTRY.inverse().get(type);
+    }
+
+    /** Returns the point serializer with this ID, or {@code null} if it doesn't exist */
+    public static PointSerializer<?> getPointType(ResourceLocation id) {
+        return POINT_TYPE_REGISTRY.get(id);
     }
 
     /** Sets the currently previewed cutscene and tells the clients */

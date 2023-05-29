@@ -1,14 +1,14 @@
-package net.thewinnt.cutscenes.math;
+package net.thewinnt.cutscenes.path;
 
 import com.google.gson.JsonObject;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
-import net.thewinnt.cutscenes.path.Path;
-import net.thewinnt.cutscenes.path.PathLike;
+import net.thewinnt.cutscenes.path.point.PointProvider;
 
 public class Transition implements PathLike {
     private final Path path;
@@ -40,7 +40,7 @@ public class Transition implements PathLike {
     }
 
     @Override
-    public Vec3 getPoint(double t) {
+    public Vec3 getPoint(double t, Level l, Vec3 s) {
         double x, y, z;
         Vec3 a, b;
         PathLike previous, next;
@@ -51,14 +51,14 @@ public class Transition implements PathLike {
             throw new IllegalStateException("Attempted to use a Transition without one of the points");
         }
         if (previous instanceof LookAtPoint) {
-            a = previous.getPoint(path.getSegmentRange(previous).getB() - 0.00000001);
+            a = previous.getPoint(path.getSegmentRange(previous).getB() - 0.00000001, l, s);
         } else {
-            a = previous.getEnd();
+            a = previous.getEnd(l, s).getPoint(l, s);
         }
         if (next instanceof LookAtPoint) {
-            b = next.getPoint(path.getSegmentRange(next).getA() + 0.00000001);
+            b = next.getPoint(path.getSegmentRange(next).getA() + 0.00000001, l, s);
         } else {
-            b = next.getStart();
+            b = next.getStart(l, s).getPoint(l, s);
         }
         if (isRotation) {
             x = Mth.rotLerp((float)easingX.apply(t), (float)a.x, (float)b.x);
@@ -73,20 +73,14 @@ public class Transition implements PathLike {
     }
 
     @Override
-    public Vec3 getStart() {
-        return path.getSegment(index - 1).getEnd();
+    public PointProvider getStart(Level l, Vec3 s) {
+        return path.getSegment(index - 1).getEnd(l, s);
     }
 
     @Override
-    public Vec3 getEnd() {
-        return path.getSegment(index + 1).getStart();
+    public PointProvider getEnd(Level l, Vec3 s) {
+        return path.getSegment(index + 1).getStart(l, s);
     }
-
-    @Override
-    public double getLength() {
-        return 0; // TODO length calculation
-    }
-
     @Override
     public int getWeight() {
         return weight;

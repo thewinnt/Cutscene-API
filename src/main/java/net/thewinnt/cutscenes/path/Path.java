@@ -10,13 +10,12 @@ import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
-import net.thewinnt.cutscenes.math.BezierCurve;
-import net.thewinnt.cutscenes.math.LineSegment;
-import net.thewinnt.cutscenes.math.LookAtPoint;
+import net.thewinnt.cutscenes.path.point.PointProvider;
+import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import oshi.util.tuples.Pair;
-import net.thewinnt.cutscenes.math.EasingFunction;
 
 public class Path implements PathLike {
     private final ArrayList<PathLike> segments;
@@ -46,18 +45,9 @@ public class Path implements PathLike {
     }
 
     @Override
-    public double getLength() {
-        double total = 0;
-        for (PathLike i : this.segments) {
-            total += i.getLength();
-        }
-        return total;
-    }
-
-    @Override
-    public Vec3 getPoint(double delta) {
-        if (delta <= 0) return this.getStart();
-        if (delta >= 1) return this.getEnd();
+    public Vec3 getPoint(double delta, Level l, Vec3 s) {
+        if (delta <= 0) return this.getStart(l, s).getPoint(l, s);
+        if (delta >= 1) return this.getEnd(l, s).getPoint(l, s);
         double val = delta * weightSum;
         int i; // define the variable outside the loop to use it later
         for (i = 0; i < this.segments.size() && val >= this.segments.get(i).getWeight(); i++) {
@@ -65,20 +55,20 @@ public class Path implements PathLike {
         }
         PathLike segment = this.segments.get(i);
         if (segment instanceof LookAtPoint) { // special handling!
-            return segment.getPoint(delta);
+            return segment.getPoint(delta, l, s);
         } else {
-            return segment.getPoint(val / segment.getWeight());
+            return segment.getPoint(val / segment.getWeight(), l, s);
         }
     }
 
     @Override
-    public Vec3 getStart() {
-        return this.segments.get(0).getStart();
+    public PointProvider getStart(Level level, Vec3 cutsceneStart) {
+        return this.segments.get(0).getStart(level, cutsceneStart);
     }
 
     @Override
-    public Vec3 getEnd() {
-        return this.segments.get(this.segments.size() - 1).getEnd();
+    public PointProvider getEnd(Level level, Vec3 cutsceneStart) {
+        return this.segments.get(this.segments.size() - 1).getEnd(level, cutsceneStart);
     }
 
     @Override
@@ -90,34 +80,50 @@ public class Path implements PathLike {
         return this.segments.get(this.segments.size() - 1);
     }
 
+    /** Literally makes it shorter
+     * @deprecated for the same reason as everything else. Just look at this code, it's awful!
+     */
+    @Deprecated(since = "1.1", forRemoval = true)
+    private static StaticPointProvider s(Vec3 v) {
+        if (v == null) return null;
+        return new StaticPointProvider(v);
+    }
+
+    @Deprecated(since = "1.1", forRemoval = true)
     public Path continueBezier(Vec3 control_b, Vec3 end, int weight) {
         if (this.last() instanceof BezierCurve bezier && bezier.getControlB() != null) {
-            this.segments.add(new BezierCurve(bezier.getEnd(), bezier.getControlB().lerp(bezier.getEnd(), 2), control_b, end, weight));
+            // THIS is why i deprecate this stuff. use datapacks instead. you can do all the same stuff, except it's easier
+            this.segments.add(new BezierCurve(bezier.getEnd(null, null), new StaticPointProvider(bezier.getControlB().getPoint(null, null).lerp(bezier.getEnd(null, null).getPoint(null, null), 2)), s(control_b), s(end), weight));
         } else {
-            this.segments.add(new BezierCurve(this.last().getEnd(), null, control_b, end, weight));
+            this.segments.add(new BezierCurve(this.last().getEnd(null, null), null, s(control_b), s(end), weight));
         }
         this.weightSum += weight;
         return this;
     }
 
+    @Deprecated(since = "1.1", forRemoval = true)
     public Path continueBezier(Vec3 control_b, Vec3 end) {
         return continueBezier(control_b, end, 1);
     }
 
+    @Deprecated(since = "1.1", forRemoval = true)
     public Path addBezier(Vec3 control_a, Vec3 control_b, Vec3 end, int weight) {
-        this.segments.add(new BezierCurve(this.last().getEnd(), control_a, control_b, end, weight));
+        this.segments.add(new BezierCurve(this.last().getEnd(null, null), s(control_a), s(control_b), s(end), weight));
         return this;
     }
 
+    @Deprecated(since = "1.1", forRemoval = true)
     public Path addBezier(Vec3 control_a, Vec3 control_b, Vec3 end) {
         return addBezier(control_a, control_b, end, 1);
     }
 
+    @Deprecated(since = "1.1", forRemoval = true)
     public Path addLinear(Vec3 end, EasingFunction easingX, EasingFunction easingY, EasingFunction easingZ, boolean isRotation, int weight) {
-        this.segments.add(new LineSegment(this.last().getEnd(), end, easingX, easingY, easingZ, weight, isRotation));
+        this.segments.add(new LineSegment(this.last().getEnd(null, null), s(end), easingX, easingY, easingZ, weight, isRotation));
         return this;
     }
 
+    @Deprecated(since = "1.1", forRemoval = true)
     public Path addLinear(Vec3 end, EasingFunction easingX, EasingFunction easingY, EasingFunction easingZ, boolean isRotation) {
         return this.addLinear(end, easingX, easingY, easingZ, isRotation, 1);
     }
