@@ -1,10 +1,11 @@
 package net.thewinnt.cutscenes;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
@@ -36,17 +37,17 @@ public class PathPreviewRenderer {
         for (int i = 0; i < path.size(); i++) {
             PathLike segment = path.getSegment(i);
             Vector3f offset = ClientCutsceneManager.getOffset();
-            Vector3f start = new Vector3f(segment.getStart(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot));
-            Vector3f end = new Vector3f(segment.getEnd(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot));
+            Vector3f start = segment.getStart(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).toVector3f();
+            Vector3f end = segment.getEnd(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).toVector3f();
             start.add(offset);
             end.add(offset);
             drawPoint(stack, consumer, start, 0.3F, COLOR_POINT);
             drawPoint(stack, consumer, end, 0.3F, COLOR_POINT);
-            float ticksPerWeight = type.length * 300 / path.getWeightSum(); // roughly one line per frame at 60 fps
+            float ticksPerWeight = type.length * 3 / path.getWeightSum(); // roughly one line per frame at 60 fps
             int thisLength = (int)(ticksPerWeight * segment.getWeight());
             for (int j = 0; j < thisLength; j++) {
-                Vector3f a = new Vector3f(segment.getPoint(j / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot));
-                Vector3f b = new Vector3f(segment.getPoint((j + 1) / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot));
+                Vector3f a = segment.getPoint(j / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).toVector3f();
+                Vector3f b = segment.getPoint((j + 1) / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).toVector3f();
                 a.add(offset);
                 b.add(offset);
                 drawLineGlobal(stack, consumer, a, b, getColorAtPoint(i + j / (float)thisLength));
@@ -100,7 +101,7 @@ public class PathPreviewRenderer {
         red = Mth.sqrt(red);
         green = Mth.sqrt(green);
         blue = Mth.sqrt(blue);
-        return new Vector3f(red, green, blue); // allows me to pack three values into one
+        return new Vector3f(red, green, blue); // allows me to pack three values into o.toVector3f()e
     }
 
     private static void drawPoint(PoseStack stack, VertexConsumer consumer, Vector3f pos, float size, Vector3f color) {

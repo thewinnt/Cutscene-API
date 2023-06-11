@@ -2,9 +2,10 @@ package net.thewinnt.cutscenes;
 
 import javax.annotation.Nonnull;
 
+import org.joml.Vector3f;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -208,7 +209,7 @@ public class CutsceneManager {
     /** Returns the starting position of the current cutscene preview, or [0, 100, 0] if there isn't one */
     public static Vector3f getOffset() {
         if (previewOffset != null) {
-            return new Vector3f(previewOffset);
+            return previewOffset.toVector3f();
         } else {
             return new Vector3f(0, 100, 0);
         }

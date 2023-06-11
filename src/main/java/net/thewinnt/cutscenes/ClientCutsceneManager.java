@@ -2,9 +2,10 @@ package net.thewinnt.cutscenes;
 
 import java.util.Map;
 
+import org.joml.Vector3f;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -89,7 +90,7 @@ public class ClientCutsceneManager {
 
     public static Vector3f getOffset() {
         if (previewOffset != null) {
-            return new Vector3f(previewOffset);
+            return previewOffset.toVector3f();
         } else {
             return new Vector3f(0, 100, 0);
         }
