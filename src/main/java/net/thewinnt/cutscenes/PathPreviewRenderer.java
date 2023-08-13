@@ -32,24 +32,20 @@ public class PathPreviewRenderer {
         float yRot = (float)Math.toRadians(ClientCutsceneManager.previewPathYaw);
         float zRot = (float)Math.toRadians(ClientCutsceneManager.previewPathPitch);
         float xRot = (float)Math.toRadians(ClientCutsceneManager.previewPathRoll);
-        Vec3 s = new Vec3(ClientCutsceneManager.getOffset());
+        Vec3 s = ClientCutsceneManager.getOffset();
         Level l = Minecraft.getInstance().level;
         for (int i = 0; i < path.size(); i++) {
             PathLike segment = path.getSegment(i);
-            Vector3f offset = ClientCutsceneManager.getOffset();
-            Vector3f start = segment.getStart(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).toVector3f();
-            Vector3f end = segment.getEnd(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).toVector3f();
-            start.add(offset);
-            end.add(offset);
+            Vec3 offset = ClientCutsceneManager.getOffset();
+            Vec3 start = segment.getStart(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
+            Vec3 end = segment.getEnd(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
             drawPoint(stack, consumer, start, 0.3F, COLOR_POINT);
             drawPoint(stack, consumer, end, 0.3F, COLOR_POINT);
             float ticksPerWeight = type.length * 3 / path.getWeightSum(); // roughly one line per frame at 60 fps
             int thisLength = (int)(ticksPerWeight * segment.getWeight());
             for (int j = 0; j < thisLength; j++) {
-                Vector3f a = segment.getPoint(j / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).toVector3f();
-                Vector3f b = segment.getPoint((j + 1) / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).toVector3f();
-                a.add(offset);
-                b.add(offset);
+                Vec3 a = segment.getPoint(j / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
+                Vec3 b = segment.getPoint((j + 1) / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
                 drawLineGlobal(stack, consumer, a, b, getColorAtPoint(i + j / (float)thisLength));
             }
         }
@@ -67,19 +63,19 @@ public class PathPreviewRenderer {
 
     /** Draws a line relative to the world center */
     @SuppressWarnings("resource")
-    private static void drawLineGlobal(PoseStack stack, VertexConsumer comsumer, float x1, float y1, float z1, float x2, float y2, float z2, Vector3f color) {
+    private static void drawLineGlobal(PoseStack stack, VertexConsumer comsumer, double x1, double y1, double z1, double x2, double y2, double z2, Vector3f color) {
         Vec3 cam_pos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-        x1 -= (float)cam_pos.x;
-        y1 -= (float)cam_pos.y;
-        z1 -= (float)cam_pos.z;
-        x2 -= (float)cam_pos.x;
-        y2 -= (float)cam_pos.y;
-        z2 -= (float)cam_pos.z;
-        drawLineLocal(stack, comsumer, x1, y1, z1, x2, y2, z2, color);
+        x1 -= cam_pos.x;
+        y1 -= cam_pos.y;
+        z1 -= cam_pos.z;
+        x2 -= cam_pos.x;
+        y2 -= cam_pos.y;
+        z2 -= cam_pos.z;
+        drawLineLocal(stack, comsumer, (float)x1, (float)y1, (float)z1, (float)x2, (float)y2, (float)z2, color);
     }
 
-    private static void drawLineGlobal(PoseStack stack, VertexConsumer consumer, Vector3f a, Vector3f b, Vector3f color) {
-        drawLineGlobal(stack, consumer, a.x(), a.y(), a.z(), b.x(), b.y(), b.z(), color);
+    private static void drawLineGlobal(PoseStack stack, VertexConsumer consumer, Vec3 a, Vec3 b, Vector3f color) {
+        drawLineGlobal(stack, consumer, a.x, a.y, a.z, b.x, b.y, b.z, color);
     }
 
     private static Vector3f getColorAtPoint(float point) {
@@ -101,13 +97,13 @@ public class PathPreviewRenderer {
         red = Mth.sqrt(red);
         green = Mth.sqrt(green);
         blue = Mth.sqrt(blue);
-        return new Vector3f(red, green, blue); // allows me to pack three values into o.toVector3f()e
+        return new Vector3f(red, green, blue); // allows me to pack three values into one
     }
 
-    private static void drawPoint(PoseStack stack, VertexConsumer consumer, Vector3f pos, float size, Vector3f color) {
-        float x = pos.x();
-        float y = pos.y();
-        float z = pos.z();
+    private static void drawPoint(PoseStack stack, VertexConsumer consumer, Vec3 pos, float size, Vector3f color) {
+        double x = pos.x;
+        double y = pos.y;
+        double z = pos.z;
         drawLineGlobal(stack, consumer, x-size, y, z, x+size, y, z, color);
         drawLineGlobal(stack, consumer, x, y-size, z, x, y+size, z, color);
         drawLineGlobal(stack, consumer, x, y, z-size, x, y, z+size, color);

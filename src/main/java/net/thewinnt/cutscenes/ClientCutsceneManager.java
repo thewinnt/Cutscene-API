@@ -2,8 +2,6 @@ package net.thewinnt.cutscenes;
 
 import java.util.Map;
 
-import org.joml.Vector3f;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
@@ -88,11 +86,11 @@ public class ClientCutsceneManager {
         return previewedCutscene;
     }
 
-    public static Vector3f getOffset() {
+    public static Vec3 getOffset() {
         if (previewOffset != null) {
-            return previewOffset.toVector3f();
+            return previewOffset;
         } else {
-            return new Vector3f(0, 100, 0);
+            return new Vec3(0, 100, 0);
         }
     }
 
