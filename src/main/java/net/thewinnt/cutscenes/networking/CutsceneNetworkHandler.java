@@ -11,16 +11,16 @@ import net.thewinnt.cutscenes.networking.packets.*;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 
 public class CutsceneNetworkHandler {
-    private static int id_counter = 0;
-
+    public static final String PROTOCOL_VERSION = "1.2-pre";
     public static SimpleChannel INSTANCE;
+    private static int id_counter = 0;
 
     public static void register() {
         INSTANCE = NetworkRegistry.newSimpleChannel(
             new ResourceLocation("cutscenes:networking"),
-            () -> "1.1",
-            i -> i.equals("1.1"),
-            i -> i.equals("1.1")
+            () -> PROTOCOL_VERSION,
+            i -> i.equals(PROTOCOL_VERSION),
+            i -> i.equals(PROTOCOL_VERSION)
         );
         INSTANCE.messageBuilder(StartCutscenePacket.class, id_counter++, NetworkDirection.PLAY_TO_CLIENT)
             .encoder(StartCutscenePacket::write)
@@ -38,6 +38,12 @@ public class CutsceneNetworkHandler {
             .encoder(PreviewCutscenePacket::write)
             .decoder(PreviewCutscenePacket::read)
             .consumerMainThread(PreviewCutscenePacket::handle)
+            .add();
+
+        INSTANCE.messageBuilder(StopCutscenePacket.class, id_counter++, NetworkDirection.PLAY_TO_CLIENT)
+            .encoder((t, u) -> {})
+            .decoder(buf -> new StopCutscenePacket())
+            .consumerMainThread(StopCutscenePacket::handle)
             .add();
     }
 

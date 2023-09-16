@@ -26,6 +26,7 @@ import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
+import net.thewinnt.cutscenes.networking.packets.StopCutscenePacket;
 import net.thewinnt.cutscenes.util.ServerPlayerExt;
 
 @Mod.EventBusSubscriber
@@ -122,6 +123,7 @@ public class CutsceneCommand {
             .executes((arg) -> {
                 CommandSourceStack source = arg.getSource();
                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
+                CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new StopCutscenePacket());
                 source.sendSuccess(() -> Component.translatable("commands.cutscene.stopped", player.getDisplayName()), true);
                 return 1;
             })))
