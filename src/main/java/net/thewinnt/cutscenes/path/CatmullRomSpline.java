@@ -1,6 +1,7 @@
 package net.thewinnt.cutscenes.path;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gson.JsonArray;
@@ -12,6 +13,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
+import net.thewinnt.cutscenes.client.preview.PathPreviewRenderer.Line;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
@@ -24,12 +26,10 @@ public class CatmullRomSpline implements PathLike {
     private final int weight;
     private final boolean staticEndPoints;
 
-    @Deprecated(since = "1.1", forRemoval = true)
     public CatmullRomSpline(Vec3... points) {
         this(1, points);
     }
 
-    @Deprecated(since = "1.1", forRemoval = true)
     public CatmullRomSpline(int weight, Vec3... points) {
         if (points.length < 2) {
             throw new IllegalArgumentException("A Catmull-Rom spline must have at least 2 points");
@@ -106,6 +106,19 @@ public class CatmullRomSpline implements PathLike {
     @Override
     public int getWeight() {
         return weight;
+    }
+
+    @Override
+    public Collection<Line> getUtilityPoints(Level level, Vec3 cutsceneStart, int initLevel) {
+        List<Line> output = new ArrayList<>();
+        List<PointProvider> allPoints = new ArrayList<>(this.points);
+        allPoints.add(end);
+        PointProvider previous = start;
+        for (PointProvider i : allPoints) {
+            output.add(new Line(previous, i, initLevel));
+            previous = i;
+        }
+        return output;
     }
 
     public static CatmullRomSpline fromNetwork(FriendlyByteBuf buf, Path path) {

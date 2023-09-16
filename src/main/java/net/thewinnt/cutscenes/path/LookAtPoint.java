@@ -7,8 +7,8 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.thewinnt.cutscenes.ClientCutsceneManager;
 import net.thewinnt.cutscenes.CutsceneManager;
+import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
@@ -31,14 +31,12 @@ public class LookAtPoint implements PathLike {
         this.weight = weight;
     }
 
-    @Deprecated(since = "1.1", forRemoval = true)
     public LookAtPoint(Vec3 point, PathLike pathSupplier) {
         this.point = new StaticPointProvider(point);
         this.pathSupplier = pathSupplier;
         this.weight = 1;
     }
     
-    @Deprecated(since = "1.1", forRemoval = true)
     public LookAtPoint(Vec3 point, PathLike pathSupplier, int weight) {
         this.point = new StaticPointProvider(point);
         this.pathSupplier = pathSupplier;

@@ -6,7 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
-import net.thewinnt.cutscenes.ClientCutsceneManager;
+import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 
 public class PreviewCutscenePacket {

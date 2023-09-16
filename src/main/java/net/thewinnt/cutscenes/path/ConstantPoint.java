@@ -16,13 +16,11 @@ public class ConstantPoint implements PathLike {
     private final PointProvider point;
     private final int weight;
 
-    @Deprecated(since = "1.1", forRemoval = true)
     public ConstantPoint(Vec3 point) {
         this.point = new StaticPointProvider(point);
         this.weight = 1;
     }
 
-    @Deprecated(since = "1.1", forRemoval = true)
     public ConstantPoint(Vec3 point, int weight) {
         this.point = new StaticPointProvider(point);
         this.weight = weight;

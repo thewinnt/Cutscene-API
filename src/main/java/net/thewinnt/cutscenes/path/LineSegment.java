@@ -54,7 +54,6 @@ public class LineSegment implements PathLike {
         this(start, end, easing, easing, easing, false);
     }
 
-    @Deprecated(since = "1.1", forRemoval = true)
     public LineSegment(Vec3 a, Vec3 b, EasingFunction easingX, EasingFunction easingY, EasingFunction easingZ, int weight, boolean isRotation) {
         this.a = new StaticPointProvider(a);
         this.b = new StaticPointProvider(b);
@@ -65,7 +64,6 @@ public class LineSegment implements PathLike {
         this.isRotation = isRotation;
     }
     
-    @Deprecated(since = "1.1", forRemoval = true)
     public LineSegment(Vec3 a, Vec3 b, EasingFunction easingX, EasingFunction easingY, EasingFunction easingZ, boolean isRotation) {
         this.a = new StaticPointProvider(a);
         this.b = new StaticPointProvider(b);
@@ -76,17 +74,14 @@ public class LineSegment implements PathLike {
         this.isRotation = isRotation;
     }
     
-    @Deprecated(since = "1.1", forRemoval = true)
     public LineSegment(Vec3 start, Vec3 end) {
         this(start, end, EasingFunction.LINEAR, EasingFunction.LINEAR, EasingFunction.LINEAR, false);
     }
     
-    @Deprecated(since = "1.1", forRemoval = true)
     public LineSegment(Vec3 start, Vec3 end, boolean isRotation) {
         this(start, end, EasingFunction.LINEAR, EasingFunction.LINEAR, EasingFunction.LINEAR, isRotation);
     }
     
-    @Deprecated(since = "1.1", forRemoval = true)
     public LineSegment(Vec3 start, Vec3 end, EasingFunction easing, boolean isRotation) {
         this(start, end, easing, easing, easing, false);
     }

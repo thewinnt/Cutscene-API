@@ -1,5 +1,8 @@
 package net.thewinnt.cutscenes.path;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
@@ -9,6 +12,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
+import net.thewinnt.cutscenes.client.preview.PathPreviewRenderer.Line;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
@@ -24,7 +28,6 @@ public class BezierCurve implements PathLike {
     private final Vec3 cache_t2;
     private final Vec3 cache_t3;
 
-    @Deprecated(since = "1.1", forRemoval = true)
     public BezierCurve(Vec3 start, @Nullable Vec3 control_a, @Nullable Vec3 control_b, Vec3 end) {
         this(start, control_a, control_b, end, 1);
     }
@@ -40,7 +43,6 @@ public class BezierCurve implements PathLike {
         cache_t3 = null;
     }
 
-    @Deprecated(since = "1.1", forRemoval = true)
     public BezierCurve(Vec3 start, @Nullable Vec3 control_a, @Nullable Vec3 control_b, Vec3 end, int weight) {
         // init values
         this.start = new StaticPointProvider(start);
@@ -67,7 +69,7 @@ public class BezierCurve implements PathLike {
             return quad(start.getPoint(l, s), control_b.getPoint(l, s), end.getPoint(l, s), t);
         } else if (control_a != null && control_b == null) { // only 1st control point
             return quad(start.getPoint(l, s), control_a.getPoint(l, s), end.getPoint(l, s), t);
-        } else if (control_a == null && control_b == null) { // no c
+        } else if (control_a == null && control_b == null) { // no control points
             return start.getPoint(l, s).lerp(end.getPoint(l, s), t);
         }
         if (cache_t != null && cache_t2 != null && cache_t3 != null) {
@@ -109,6 +111,29 @@ public class BezierCurve implements PathLike {
     @Override
     public int getWeight() {
         return weight;
+    }
+
+    @Override
+    public Collection<Line> getUtilityPoints(Level level, Vec3 cutsceneStart, int initLevel) {
+        if (control_a == null && control_b == null) {
+            return List.of();
+        } else if (control_a != null && control_b == null) {
+            return List.of(
+                new Line(start, control_a, initLevel),
+                new Line(control_a, end, initLevel)
+            );
+        } else if (control_a == null && control_b != null) {
+            return List.of(
+                new Line(start, control_b, initLevel),
+                new Line(control_b, end, initLevel)
+            );
+        } else {
+            return List.of(
+                new Line(start, control_a, initLevel),
+                new Line(control_a, control_b, initLevel),
+                new Line(control_b, end, initLevel)
+            );
+        }
     }
 
     public static BezierCurve fromNetwork(FriendlyByteBuf buf, Path path) {

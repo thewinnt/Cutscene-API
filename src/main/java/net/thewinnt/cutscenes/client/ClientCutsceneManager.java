@@ -1,4 +1,4 @@
-package net.thewinnt.cutscenes;
+package net.thewinnt.cutscenes.client;
 
 import java.util.Map;
 
@@ -13,10 +13,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
 import net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.thewinnt.cutscenes.CutsceneAPI;
+import net.thewinnt.cutscenes.CutsceneType;
 
 @SuppressWarnings("resource")
 @Mod.EventBusSubscriber(bus = Bus.FORGE, value = Dist.CLIENT)
@@ -74,6 +77,11 @@ public class ClientCutsceneManager {
         cutsceneStatus = CutsceneStatus.STOPPING;
         Minecraft.getInstance().options.hideGui = hidGuiBefore;
         stopProgress = Float.NaN;
+    }
+
+    public static void stopCutsceneImmediate() {
+        cutsceneStatus = CutsceneStatus.NONE;
+        Minecraft.getInstance().options.hideGui = hidGuiBefore;
     }
 
     public static void setPreviewedCutscene(CutsceneType preview, Vec3 offset, float pathYaw, float pathPitch, float pathRoll) {
@@ -162,6 +170,12 @@ public class ClientCutsceneManager {
             }
             endCutscene(event);
         }
+    }
+
+    @SubscribeEvent
+    public static void onLogout(LoggingOut event) {
+        stopCutsceneImmediate();
+        previewedCutscene = null;
     }
 
     private static void endCutscene(ComputeCameraAngles event) {

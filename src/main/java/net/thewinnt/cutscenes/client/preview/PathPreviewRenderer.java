@@ -1,4 +1,8 @@
-package net.thewinnt.cutscenes;
+package net.thewinnt.cutscenes.client.preview;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -14,14 +18,23 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.Mod;
+import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.path.Path;
 import net.thewinnt.cutscenes.path.PathLike;
+import net.thewinnt.cutscenes.path.point.PointProvider;
 
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class PathPreviewRenderer {
-    private static final Vector3f COLOR_POINT = new Vector3f(1, 0.5f, 1);
-    private static final Vector3f COLOR_CONTROL_LINE = new Vector3f(0.5f, 0.5f, 1);
+    private static final List<Vector3f> POINT_COLORS = List.of(
+        new Vector3f(1, 0.5f, 1),
+        new Vector3f(0.75f, 0.5f, 1),
+        new Vector3f(0.5f, 0.5f, 1),
+        new Vector3f(0.5f, 0.75f, 1),
+        new Vector3f(0.75f, 0.75f, 1),
+        new Vector3f(1, 0.75f, 1)
+    );
     private static final Vector3f COLOR_START = new Vector3f(0.25f, 0.5f, 1);
 
     @SuppressWarnings("resource")
@@ -39,14 +52,23 @@ public class PathPreviewRenderer {
             Vec3 offset = ClientCutsceneManager.getOffset();
             Vec3 start = segment.getStart(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
             Vec3 end = segment.getEnd(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
-            drawPoint(stack, consumer, start, 0.3F, COLOR_POINT);
-            drawPoint(stack, consumer, end, 0.3F, COLOR_POINT);
+            drawPoint(stack, consumer, start, 0.3F, POINT_COLORS.get(0));
+            drawPoint(stack, consumer, end, 0.3F, POINT_COLORS.get(0));
             float ticksPerWeight = type.length * 3 / path.getWeightSum(); // roughly one line per frame at 60 fps
             int thisLength = (int)(ticksPerWeight * segment.getWeight());
             for (int j = 0; j < thisLength; j++) {
                 Vec3 a = segment.getPoint(j / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
                 Vec3 b = segment.getPoint((j + 1) / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
                 drawLineGlobal(stack, consumer, a, b, getColorAtPoint(i + j / (float)thisLength));
+            }
+        }
+        for (Line line : path.getUtilityPoints(l, s, 0)) {
+            if (line.isPoint()) {
+                drawPoint(stack, consumer, line.start.getPoint(l, s).add(s), 0.2f, POINT_COLORS.get(line.level % POINT_COLORS.size()));
+            } else {
+                drawLineGlobal(stack, consumer, line, l, s);
+                drawPoint(stack, consumer, line.start.getPoint(l, s).add(s), 0.2f, POINT_COLORS.get(line.level % POINT_COLORS.size()));
+                drawPoint(stack, consumer, line.end.getPoint(l, s).add(s), 0.2f, POINT_COLORS.get(line.level % POINT_COLORS.size()));
             }
         }
         drawPoint(stack, consumer, ClientCutsceneManager.getOffset(), 0.25f, COLOR_START);
@@ -56,14 +78,13 @@ public class PathPreviewRenderer {
     private static void drawLineLocal(PoseStack stack, VertexConsumer consumer, float x1, float y1, float z1, float x2, float y2, float z2, Vector3f color) {
         Matrix4f matrix4f = stack.last().pose();
         Matrix3f matrix3f = stack.last().normal();
-        // i have no idea what normals do - seems to work fine without them
         consumer.vertex(matrix4f, x1, y1, z1).color(color.x(), color.y(), color.z(), 1f).normal(matrix3f, 0, 0, 0).endVertex();
         consumer.vertex(matrix4f, x2, y2, z2).color(color.x(), color.y(), color.z(), 1f).normal(matrix3f, 0, 0, 0).endVertex();
     }
 
     /** Draws a line relative to the world center */
     @SuppressWarnings("resource")
-    private static void drawLineGlobal(PoseStack stack, VertexConsumer comsumer, double x1, double y1, double z1, double x2, double y2, double z2, Vector3f color) {
+    private static void drawLineGlobal(PoseStack stack, VertexConsumer consumer, double x1, double y1, double z1, double x2, double y2, double z2, Vector3f color) {
         Vec3 cam_pos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
         x1 -= cam_pos.x;
         y1 -= cam_pos.y;
@@ -71,11 +92,15 @@ public class PathPreviewRenderer {
         x2 -= cam_pos.x;
         y2 -= cam_pos.y;
         z2 -= cam_pos.z;
-        drawLineLocal(stack, comsumer, (float)x1, (float)y1, (float)z1, (float)x2, (float)y2, (float)z2, color);
+        drawLineLocal(stack, consumer, (float)x1, (float)y1, (float)z1, (float)x2, (float)y2, (float)z2, color);
     }
 
     private static void drawLineGlobal(PoseStack stack, VertexConsumer consumer, Vec3 a, Vec3 b, Vector3f color) {
         drawLineGlobal(stack, consumer, a.x, a.y, a.z, b.x, b.y, b.z, color);
+    }
+
+    public static void drawLineGlobal(PoseStack stack, VertexConsumer consumer, Line line, Level l, Vec3 s) {
+        drawLineGlobal(stack, consumer, line.start.getPoint(l, s).add(s), line.end.getPoint(l, s).add(s), POINT_COLORS.get(line.level % POINT_COLORS.size()));
     }
 
     private static Vector3f getColorAtPoint(float point) {
@@ -108,4 +133,10 @@ public class PathPreviewRenderer {
         drawLineGlobal(stack, consumer, x, y-size, z, x, y+size, z, color);
         drawLineGlobal(stack, consumer, x, y, z-size, x, y, z+size, color);
     }
+
+    public static record Line(PointProvider start, @Nullable PointProvider end, int level) {
+        private boolean isPoint() {
+            return end == null;
+        }
+    };
 }

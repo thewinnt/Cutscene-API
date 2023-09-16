@@ -1,5 +1,7 @@
 package net.thewinnt.cutscenes.path;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.function.BiFunction;
 
 import com.google.gson.JsonObject;
@@ -7,6 +9,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.thewinnt.cutscenes.client.preview.PathPreviewRenderer.Line;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 
 public interface PathLike {
@@ -16,6 +19,9 @@ public interface PathLike {
     int getWeight();
     void toNetwork(FriendlyByteBuf buf);
     SegmentSerializer<?> getSerializer();
+    default Collection<Line> getUtilityPoints(Level level, Vec3 cutsceneStart, int initLevel) {
+        return Collections.emptySet();
+    };
 
     public static interface SegmentSerializer<T extends PathLike> {
         T fromNetwork(FriendlyByteBuf buf, Path path);

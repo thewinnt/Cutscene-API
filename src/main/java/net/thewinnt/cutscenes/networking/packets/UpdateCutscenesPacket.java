@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent;
-import net.thewinnt.cutscenes.ClientCutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 
 public class UpdateCutscenesPacket {
     private final Map<ResourceLocation, CutsceneType> registry;
