@@ -23,6 +23,7 @@ import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.path.Path;
 import net.thewinnt.cutscenes.path.PathLike;
 import net.thewinnt.cutscenes.path.point.PointProvider;
+import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -49,20 +50,29 @@ public class PathPreviewRenderer {
         Level l = Minecraft.getInstance().level;
         for (int i = 0; i < path.size(); i++) {
             PathLike segment = path.getSegment(i);
-            Vec3 offset = ClientCutsceneManager.getOffset();
-            Vec3 start = segment.getStart(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
-            Vec3 end = segment.getEnd(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
+            Vec3 start = segment.getStart(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
+            Vec3 end = segment.getEnd(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
             drawPoint(stack, consumer, start, 0.3F, POINT_COLORS.get(0));
             drawPoint(stack, consumer, end, 0.3F, POINT_COLORS.get(0));
             float ticksPerWeight = type.length * 3 / path.getWeightSum(); // roughly one line per frame at 60 fps
             int thisLength = (int)(ticksPerWeight * segment.getWeight());
             for (int j = 0; j < thisLength; j++) {
-                Vec3 a = segment.getPoint(j / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
-                Vec3 b = segment.getPoint((j + 1) / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(offset);
+                Vec3 a = segment.getPoint(j / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
+                Vec3 b = segment.getPoint((j + 1) / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
                 drawLineGlobal(stack, consumer, a, b, getColorAtPoint(i + j / (float)thisLength));
             }
         }
-        for (Line line : path.getUtilityPoints(l, s, 0)) {
+        for (Line i : path.getUtilityPoints(l, s, 0)) {
+            Line line;
+            if (i.isPoint()) {
+                line = new Line(new StaticPointProvider(i.start.getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot)), null, i.level);
+            } else {
+                line = new Line(
+                    new StaticPointProvider(i.start.getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot)),
+                    new StaticPointProvider(i.end.getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot)),
+                    i.level
+                );
+            }
             if (line.isPoint()) {
                 drawPoint(stack, consumer, line.start.getPoint(l, s).add(s), 0.2f, POINT_COLORS.get(line.level % POINT_COLORS.size()));
             } else {

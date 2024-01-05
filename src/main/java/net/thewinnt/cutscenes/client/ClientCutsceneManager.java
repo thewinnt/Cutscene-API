@@ -8,6 +8,7 @@ import com.google.common.collect.HashBiMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.Input;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -17,6 +18,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
 import net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles;
+import net.minecraftforge.event.TickEvent.ClientTickEvent;
+import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -141,7 +144,7 @@ public class ClientCutsceneManager {
         if (cutsceneStatus == CutsceneStatus.RUNNING) {
             if (runningCutscene == null) {
                 CutsceneAPI.LOGGER.error("Attempted to run an invalid cutscene!");
-                cutsceneStatus = CutsceneStatus.NONE;
+                stopCutsceneImmediate();
                 // event.getRenderer().getMinecraft().options.hideGui = hidGuiBefore;
                 return;
             }
@@ -244,6 +247,20 @@ public class ClientCutsceneManager {
             cutsceneStatus = CutsceneStatus.NONE;
         }
         // CutsceneAPI.LOGGER.info("Stopping rotation - {} / {} / {}", event.getYaw(), event.getPitch(), event.getRoll());
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent event) {
+        if (event.phase == Phase.START) {
+            Minecraft minecraft = Minecraft.getInstance();
+            if (cutsceneStatus != CutsceneStatus.NONE) {
+                if (minecraft.player != null && minecraft.player.input instanceof KeyboardInput) {
+                    Input input = new Input();
+                    input.shiftKeyDown = minecraft.player.input.shiftKeyDown;
+                    minecraft.player.input = input;
+                }
+            }
+        }
     }
 
     public static enum CutsceneStatus {

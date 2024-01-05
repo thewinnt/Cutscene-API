@@ -6,7 +6,12 @@
   "mixins": [
     "ServerPlayerMixin",
     "DebugRendererMixin",
-    "EntityMixin"
+    "EntityMixin",
+    "MultiPlayerGameModeMixin",
+    "MinecraftMixin",
+    "CameraMixin",
+    "OptionsMixin",
+    "GuiMixin"
   ],
   "client": [],
   "injectors": {

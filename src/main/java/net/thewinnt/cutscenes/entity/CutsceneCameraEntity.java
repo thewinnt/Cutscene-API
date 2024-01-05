@@ -115,8 +115,15 @@ public class CutsceneCameraEntity extends LocalPlayer {
     public void aiStep() {
         double progress = (clientLevel.getGameTime() - startTick) / (double)cutscene.length;
         if (progress <= 1) {
-            this.setPos(cutscene.getPathPoint(progress, clientLevel, startPos).add(startPos));
+            Vec3 position = cutscene.getPathPoint(progress, clientLevel, startPos);
+            float yRot = (float)Math.toRadians(pathYaw);
+            float zRot = (float)Math.toRadians(pathPitch);
+            float xRot = (float)Math.toRadians(pathRoll);
+            this.setPos(position.yRot(yRot).zRot(zRot).xRot(xRot).add(startPos));
             Vec3 rotation = cutscene.getRotationAt(progress, clientLevel, startPos);
+            this.setXRot((float)(rotation.y + camStartPitch));
+            this.setYRot((float)(rotation.x + camStartYaw));
+            // TODO transitions
         } else {
             ClientCutsceneManager.stopCutsceneImmediate();
         }
@@ -127,11 +134,27 @@ public class CutsceneCameraEntity extends LocalPlayer {
 
     public Vec3 getProperPosition(float partialTick) {
         double progress = (clientLevel.getGameTime() - startTick + partialTick) / (double)cutscene.length;
-        return cutscene.getPathPoint(progress, clientLevel, startPos);
+        Vec3 position = cutscene.getPathPoint(progress, clientLevel, startPos);
+        float yRot = (float)Math.toRadians(pathYaw);
+        float zRot = (float)Math.toRadians(pathPitch);
+        float xRot = (float)Math.toRadians(pathRoll);
+        return position.yRot(yRot).zRot(zRot).xRot(xRot).add(startPos);
     }
 
     @Override
     public boolean isSpectator() {
         return true;
+    }
+
+    @Override
+    public float getViewXRot(float pPartialTick) {
+        double progress = (clientLevel.getGameTime() - startTick + pPartialTick) / (double)cutscene.length;
+        return (float)cutscene.getRotationAt(progress, clientLevel, startPos).y + camStartPitch;
+    }
+
+    @Override
+    public float getViewYRot(float pPartialTick) {
+        double progress = (clientLevel.getGameTime() - startTick + pPartialTick) / (double)cutscene.length;
+        return (float)cutscene.getRotationAt(progress, clientLevel, startPos).x + camStartYaw;
     }
 }
