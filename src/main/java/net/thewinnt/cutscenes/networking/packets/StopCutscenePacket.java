@@ -8,7 +8,7 @@ import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 public class StopCutscenePacket {
     public void handle(Supplier<NetworkEvent.Context> supplier) {
         supplier.get().enqueueWork(() -> {
-            ClientCutsceneManager.stopCutscene();
+            ClientCutsceneManager.stopCutsceneImmediate();
         });
         supplier.get().setPacketHandled(true);
     }

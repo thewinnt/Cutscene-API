@@ -6,7 +6,9 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
@@ -20,6 +22,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
 
 @SuppressWarnings("resource")
 @Mod.EventBusSubscriber(bus = Bus.FORGE, value = Dist.CLIENT)
@@ -43,6 +46,8 @@ public class ClientCutsceneManager {
     public static float previewPathPitch;
     public static float previewPathRoll;
 
+    public static CameraType prevF5state;
+    public static CutsceneCameraEntity camera;
     private static Vec3 initPosition;
     public static float initCameraYaw;
     public static float initCameraPitch;
@@ -51,8 +56,6 @@ public class ClientCutsceneManager {
     
     @OnlyIn(Dist.CLIENT)
     public static void startCutscene(CutsceneType type, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll) {
-        cutsceneStatus = CutsceneStatus.RUNNING;
-        startPosition = startPos;
         // if the specified rotation value is NaN, use the initial values
         startCameraYaw = Float.isNaN(cameraYaw) ? initCameraYaw : cameraYaw;
         startCameraPitch = Float.isNaN(cameraPitch) ? initCameraPitch : cameraPitch;
@@ -62,6 +65,22 @@ public class ClientCutsceneManager {
         startPathRoll = pathRoll;
         runningCutscene = type;
         startTime = Minecraft.getInstance().level.getGameTime();
+
+        // initialize minecraft
+        Minecraft minecraft = Minecraft.getInstance();
+        minecraft.smartCull = false;
+        minecraft.gameRenderer.setRenderHand(false);
+        minecraft.gameRenderer.setRenderBlockOutline(false);
+        prevF5state = minecraft.options.getCameraType();
+        if (minecraft.gameRenderer.getMainCamera().isDetached()) {
+            minecraft.options.setCameraType(CameraType.FIRST_PERSON);
+        }
+        camera = new CutsceneCameraEntity(-69420, type, startPos, startCameraYaw, startCameraPitch, pathYaw, pathPitch, pathRoll);
+        camera.spawn();
+        minecraft.setCameraEntity(camera);
+
+        cutsceneStatus = CutsceneStatus.RUNNING;
+        startPosition = startPos;
     }
 
     public static void updateRegistry(Map<ResourceLocation, CutsceneType> registry) {
@@ -74,14 +93,27 @@ public class ClientCutsceneManager {
     }
 
     public static void stopCutscene() {
+        Minecraft minecraft = Minecraft.getInstance();
         cutsceneStatus = CutsceneStatus.STOPPING;
-        Minecraft.getInstance().options.hideGui = hidGuiBefore;
-        stopProgress = Float.NaN;
+        minecraft.options.hideGui = hidGuiBefore;
+        stopProgress = Double.NaN;
     }
 
     public static void stopCutsceneImmediate() {
+        Minecraft minecraft = Minecraft.getInstance();
         cutsceneStatus = CutsceneStatus.NONE;
-        Minecraft.getInstance().options.hideGui = hidGuiBefore;
+        minecraft.options.hideGui = hidGuiBefore;
+        minecraft.smartCull = true;
+        minecraft.gameRenderer.setRenderHand(true);
+        minecraft.setCameraEntity(minecraft.player);
+        minecraft.gameRenderer.setRenderBlockOutline(true);
+        if (camera != null) {
+            camera.despawn();
+        }
+        camera = null;
+        if (minecraft.player != null) {
+            minecraft.player.input = new KeyboardInput(minecraft.options);
+        }
     }
 
     public static void setPreviewedCutscene(CutsceneType preview, Vec3 offset, float pathYaw, float pathPitch, float pathRoll) {
@@ -110,13 +142,13 @@ public class ClientCutsceneManager {
             if (runningCutscene == null) {
                 CutsceneAPI.LOGGER.error("Attempted to run an invalid cutscene!");
                 cutsceneStatus = CutsceneStatus.NONE;
-                event.getRenderer().getMinecraft().options.hideGui = hidGuiBefore;
+                // event.getRenderer().getMinecraft().options.hideGui = hidGuiBefore;
                 return;
             }
             long currentTime = event.getRenderer().getMinecraft().level.getGameTime();
             if (currentTime - startTime >= runningCutscene.length) {
                 cutsceneStatus = CutsceneStatus.STOPPING;
-                event.getRenderer().getMinecraft().options.hideGui = hidGuiBefore;
+                // event.getRenderer().getMinecraft().options.hideGui = hidGuiBefore;
                 stopProgress = 1;
                 endCutscene(event);
                 return;
@@ -135,28 +167,28 @@ public class ClientCutsceneManager {
             double targetPitch = rotation.y + startCameraPitch;
             double targetRoll = rotation.z + startCameraRoll;
             double lerpProgress = (currentTime - startTime + event.getPartialTick()) / 40;
-            cam.setPosition(targetPosition);
-            event.setYaw((float)targetYaw);
-            event.setPitch((float)targetPitch);
+            // cam.setPosition(targetPosition);
+            // event.setYaw((float)targetYaw);
+            // event.setPitch((float)targetPitch);
             event.setRoll((float)targetRoll);
-            if (currentTime - startTime + event.getPartialTick() < 40) {
-                if (!startPosition.add(runningCutscene.getPathPoint(0, level, startPosition).yRot(yRot).zRot(zRot).xRot(xRot)).equals(initPosition)) {
-                    Vec3 target = initPosition.lerp(targetPosition, 1 - Math.pow(1 - lerpProgress, 5));
-                    cam.setPosition(target);
-                }
-                Vec3 startRot = runningCutscene.getRotationAt(0, level, startPosition);
-                if (initCameraYaw != startRot.x + startCameraYaw) {
-                    event.setYaw(Mth.rotLerp((float)(1 - Math.pow(1 - lerpProgress, 5)), initCameraYaw, (float)targetYaw));
-                }
-                if (initCameraPitch != startRot.y + startCameraPitch) {
-                    event.setPitch(Mth.lerp((float)(1 - Math.pow(1 - lerpProgress, 5)), initCameraPitch, (float)targetPitch));
-                }
-                if (initCameraRoll != startRot.z + startCameraRoll) {
-                    event.setRoll(Mth.lerp((float)(1 - Math.pow(1 - lerpProgress, 5)), initCameraRoll, (float)targetRoll));
-                }
-            }
+            // if (currentTime - startTime + event.getPartialTick() < 40) {
+            //     if (!startPosition.add(runningCutscene.getPathPoint(0, level, startPosition).yRot(yRot).zRot(zRot).xRot(xRot)).equals(initPosition)) {
+            //         Vec3 target = initPosition.lerp(targetPosition, 1 - Math.pow(1 - lerpProgress, 5));
+            //         // cam.setPosition(target);
+            //     }
+            //     Vec3 startRot = runningCutscene.getRotationAt(0, level, startPosition);
+            //     if (initCameraYaw != startRot.x + startCameraYaw) {
+            //         event.setYaw(Mth.rotLerp((float)(1 - Math.pow(1 - lerpProgress, 5)), initCameraYaw, (float)targetYaw));
+            //     }
+            //     if (initCameraPitch != startRot.y + startCameraPitch) {
+            //         event.setPitch(Mth.lerp((float)(1 - Math.pow(1 - lerpProgress, 5)), initCameraPitch, (float)targetPitch));
+            //     }
+            //     if (initCameraRoll != startRot.z + startCameraRoll) {
+            //         event.setRoll(Mth.lerp((float)(1 - Math.pow(1 - lerpProgress, 5)), initCameraRoll, (float)targetRoll));
+            //     }
+            // }
             // CutsceneAPI.LOGGER.info("Cutscene rotation - {} / {} / {}", event.getYaw(), event.getPitch(), event.getRoll());
-            event.getRenderer().getMinecraft().options.hideGui = true;
+            // event.getRenderer().getMinecraft().options.hideGui = true;
         } else if (cutsceneStatus == CutsceneStatus.NONE) {
             hidGuiBefore = event.getRenderer().getMinecraft().options.hideGui;
             initPosition = event.getCamera().getPosition();
@@ -196,14 +228,14 @@ public class ClientCutsceneManager {
             double targetRoll = rotation.z + startCameraRoll;
             if (!startPosition.add(runningCutscene.getPathPoint(stopProgress, level, startPosition).yRot(yRot).zRot(zRot).xRot(xRot)).equals(initPosition)) {
                 Vec3 target = startPosition.add(runningCutscene.getPathPoint(stopProgress, level, startPosition).yRot(yRot).zRot(zRot).xRot(xRot)).lerp(initPosition, 1 - Math.pow(1 - progress, 5));
-                event.getCamera().setPosition(target);
+                // event.getCamera().setPosition(target);
             }
             Vec3 endRot = runningCutscene.getRotationAt(stopProgress, level, startPosition);
             if (initCameraYaw != endRot.x + startCameraYaw) {
-                event.setYaw(Mth.rotLerp((float)(1 - Math.pow(1 - progress, 5)), (float)targetYaw, initCameraYaw));
+                // event.setYaw(Mth.rotLerp((float)(1 - Math.pow(1 - progress, 5)), (float)targetYaw, initCameraYaw));
             }
             if (initCameraPitch != endRot.y + startCameraPitch) {
-                event.setPitch(Mth.lerp((float)(1 - Math.pow(1 - progress, 5)), (float)targetPitch, initCameraPitch));
+                // event.setPitch(Mth.lerp((float)(1 - Math.pow(1 - progress, 5)), (float)targetPitch, initCameraPitch));
             }
             if (initCameraRoll != endRot.z + startCameraRoll) {
                 event.setRoll(Mth.lerp((float)(1 - Math.pow(1 - progress, 5)), (float)targetRoll, initCameraRoll));

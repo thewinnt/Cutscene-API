@@ -23,12 +23,12 @@ public class CutsceneType {
         this.length = length;
     }
 
-    public Vec3 getPathPoint(double point, Level l, Vec3 s) {
-        return path.getPoint(point, l, s);
+    public Vec3 getPathPoint(double point, Level level, Vec3 cutsceneStart) {
+        return path.getPoint(point, level, cutsceneStart);
     }
 
-    public Vec3 getRotationAt(double point, Level l, Vec3 s) {
-        return rotationProvider.getPoint(point, l, s);
+    public Vec3 getRotationAt(double point, Level level, Vec3 cutsceneStart) {
+        return rotationProvider.getPoint(point, level, cutsceneStart);
     }
 
     public void toNetwork(FriendlyByteBuf buf) {

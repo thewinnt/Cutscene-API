@@ -23,6 +23,7 @@ import net.thewinnt.cutscenes.path.*;
 import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
 import net.thewinnt.cutscenes.path.point.*;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
+import net.thewinnt.cutscenes.util.ServerPlayerExt;
 
 @Mod.EventBusSubscriber(bus = Bus.FORGE)
 public class CutsceneManager {
@@ -234,6 +235,7 @@ public class CutsceneManager {
      * @param player The player to play the cutscene to
      */
     public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
+        ((ServerPlayerExt)player).setCutsceneTicks(REGISTRY.get(id).length);
         CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
     }
 }
