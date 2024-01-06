@@ -222,6 +222,16 @@ public class CutsceneManager {
         return POINT_TYPE_REGISTRY.get(id);
     }
 
+    /** Returns the ID of the specified transition type, or {@code null} if it's not registered */
+    public static ResourceLocation getTransitionTypeId(TransitionSerializer<?> type) {
+        return TRANSITION_TYPE_REGISTRY.inverse().get(type);
+    }
+
+    /** Returns the transition serializer with this ID, or {@code null} if it doesn't exist */
+    public static TransitionSerializer<?> getTransitionType(ResourceLocation id) {
+        return TRANSITION_TYPE_REGISTRY.get(id);
+    }
+
     /** Sets the currently previewed cutscene and tells the clients */
     public static void setPreviewedCutscene(CutsceneType type, Vec3 offset, float pathYaw, float pathPitch, float pathRoll) {
         previewedCutscene = type;
@@ -266,6 +276,7 @@ public class CutsceneManager {
      */
     public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
         ((ServerPlayerExt)player).setCutsceneTicks(REGISTRY.get(id).length);
+        player.setCamera(null);
         CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
     }
 }

@@ -123,6 +123,7 @@ public class CutsceneCommand {
             .executes((arg) -> {
                 CommandSourceStack source = arg.getSource();
                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
+                ((ServerPlayerExt)player).setCutsceneTicks(0);
                 CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new StopCutscenePacket());
                 source.sendSuccess(() -> Component.translatable("commands.cutscene.stopped", player.getDisplayName()), true);
                 return 1;

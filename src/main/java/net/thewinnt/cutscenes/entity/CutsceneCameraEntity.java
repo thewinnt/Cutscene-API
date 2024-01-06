@@ -40,8 +40,6 @@ public class CutsceneCameraEntity extends LocalPlayer {
     private final long startTick;
     private final Vec3 startPos;
     private final Vec3 startRot;
-    private final Vec3 initCamPos;
-    private final Vec3 initCamRot;
     private final Vec3 pathRot;
     private final float camStartYaw;
     private final float camStartPitch;
@@ -55,8 +53,6 @@ public class CutsceneCameraEntity extends LocalPlayer {
         this.setId(id);
         super.setPose(Pose.SWIMMING);
         LocalPlayer mcplayer = MINECRAFT.player;
-        this.initCamPos = mcplayer.getEyePosition();
-        this.initCamRot = new Vec3(mcplayer.getYHeadRot(), mcplayer.getXRot(), 0);
         Vec3 startReal = cutscene.getPathPoint(0, MINECRAFT.level, startPos);
         this.moveTo(startReal.x, startReal.y, startReal.z, mcplayer.getYRot(), mcplayer.getXRot());
         this.xBob = getXRot();
@@ -75,7 +71,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
         this.pathYaw = (float)Math.toRadians(pathYaw);
         this.pathPitch = (float)Math.toRadians(pathPitch);
         this.pathRoll = (float)Math.toRadians(pathRoll);
-        this.pathRot = new Vec3(this.pathYaw, this.pathPitch, this.pathRoll);
+        this.pathRot = new Vec3(this.pathRoll, this.pathYaw, this.pathPitch);
     }
 
     public void spawn() {
@@ -142,7 +138,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
                 transition.onStart(cutscene);
             }
             transition.onFrame(progress, cutscene);
-            return transition.getPos(progress, clientLevel, startPos, pathRot, initCamPos, cutscene);
+            return transition.getPos(progress, clientLevel, startPos, pathRot, minecraft.player.getEyePosition(partialTick), cutscene);
         } else if (isTimeForEnd(partialTick)) {
             Transition transition = cutscene.endTransition;
             double progress = getEndProress(partialTick);
@@ -155,7 +151,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
                 ClientCutsceneManager.stopCutsceneImmediate();
                 cutscene.endTransition.onEnd(cutscene);
             }
-            return transition.getPos(progress, clientLevel, startPos, pathRot, initCamPos, cutscene);
+            return transition.getPos(progress, clientLevel, startPos, pathRot, minecraft.player.getEyePosition(partialTick), cutscene);
         }
         if (cutscenePhase == 1) {
             cutscenePhase++;
@@ -176,8 +172,8 @@ public class CutsceneCameraEntity extends LocalPlayer {
 
     public long getEndTime() {
         long output = startTick + cutscene.length;
-        if (cutscene.startTransition.countTowardsCutsceneTime()) output += cutscene.startTransition.getLength();
-        if (cutscene.endTransition.countTowardsCutsceneTime()) output += cutscene.endTransition.getLength();
+        if (!cutscene.startTransition.countTowardsCutsceneTime()) output += cutscene.startTransition.getLength();
+        if (!cutscene.endTransition.countTowardsCutsceneTime()) output += cutscene.endTransition.getLength();
         return output;
     }
 
@@ -203,10 +199,10 @@ public class CutsceneCameraEntity extends LocalPlayer {
     public float getViewXRot(float partialTick) {
         if (isTimeForStart(partialTick)) {
             double progress = (clientLevel.getGameTime() + partialTick - startTick) / (double)cutscene.startTransition.getLength();
-            return (float)cutscene.startTransition.getRot(progress, clientLevel, startPos, startRot, initCamRot, cutscene).y;
+            return (float)cutscene.startTransition.getRot(progress, clientLevel, startPos, startRot, getPlayerCamRot(), cutscene).y;
         } else if (isTimeForEnd(partialTick)) {
             double progress = getEndProress(partialTick);
-            return (float)cutscene.endTransition.getRot(progress, clientLevel, startPos, startRot, initCamRot, cutscene).y;
+            return (float)cutscene.endTransition.getRot(progress, clientLevel, startPos, startRot, getPlayerCamRot(), cutscene).y;
         }
         double progress = (clientLevel.getGameTime() - startTick + partialTick) / (double)cutscene.length;
         return (float)cutscene.getRotationAt(progress, clientLevel, startPos).y + camStartPitch;
@@ -217,13 +213,17 @@ public class CutsceneCameraEntity extends LocalPlayer {
     public float getViewYRot(float partialTick) {
         if (isTimeForStart(partialTick)) {
             double progress = (clientLevel.getGameTime() + partialTick - startTick) / (double)cutscene.startTransition.getLength();
-            return (float)cutscene.startTransition.getRot(progress, clientLevel, startPos, startRot, initCamRot, cutscene).x;
+            return (float)cutscene.startTransition.getRot(progress, clientLevel, startPos, startRot, getPlayerCamRot(), cutscene).x;
         } else if (isTimeForEnd(partialTick)) {
             double progress = getEndProress(partialTick);
-            return (float)cutscene.endTransition.getRot(progress, clientLevel, startPos, startRot, initCamRot, cutscene).x;
+            return (float)cutscene.endTransition.getRot(progress, clientLevel, startPos, startRot, getPlayerCamRot(), cutscene).x;
         }
         double progress = (clientLevel.getGameTime() - startTick + partialTick) / (double)cutscene.length;
         return (float)cutscene.getRotationAt(progress, clientLevel, startPos).x + camStartYaw;
+    }
+
+    public Vec3 getPlayerCamRot() {
+        return new Vec3(minecraft.player.getYHeadRot(), minecraft.player.getXRot(), 0);
     }
 
     @Override

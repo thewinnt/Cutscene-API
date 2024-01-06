@@ -5,8 +5,11 @@ import java.util.function.Function;
 import com.google.gson.JsonObject;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
 
 public interface Transition {
@@ -38,9 +41,21 @@ public interface Transition {
     default void onEnd(CutsceneType cutscene) {}
     default void onFrame(double progress, CutsceneType cutscene) {}
 
+    public static Transition fromJSON(JsonObject json) {
+        ResourceLocation type = new ResourceLocation(GsonHelper.getAsString(json, "type"));
+        TransitionSerializer<?> serializer = CutsceneManager.getTransitionType(type);
+        return serializer.fromJSON(json);
+    }
+
+    public static Transition fromNetwork(FriendlyByteBuf buf) {
+        ResourceLocation type = buf.readResourceLocation();
+        TransitionSerializer<?> serializer = CutsceneManager.getTransitionType(type);
+        return serializer.fromNetwork(buf);
+    }
+
     public static interface TransitionSerializer<T extends Transition> {
         T fromNetwork(FriendlyByteBuf buf);
-        T fromJSON(JsonObject buf);
+        T fromJSON(JsonObject json);
         
         public static <T extends Transition> TransitionSerializer<T> of(Function<FriendlyByteBuf, T> network, Function<JsonObject, T> json) {
             return new TransitionSerializer<T>() {
