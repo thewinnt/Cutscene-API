@@ -11,7 +11,7 @@ import net.thewinnt.cutscenes.networking.packets.*;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 
 public class CutsceneNetworkHandler {
-    public static final String PROTOCOL_VERSION = "1.2-pre";
+    public static final String PROTOCOL_VERSION = "1.2";
     public static SimpleChannel INSTANCE;
     private static int id_counter = 0;
 
