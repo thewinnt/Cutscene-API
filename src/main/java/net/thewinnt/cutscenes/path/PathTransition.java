@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 
-public class Transition implements PathLike {
+public class PathTransition implements PathLike {
     private final Path path;
     private final int index;
     private final EasingFunction easingX;
@@ -19,7 +19,7 @@ public class Transition implements PathLike {
     private final boolean isRotation;
     private final int weight;
 
-    public Transition(Path path, int index, EasingFunction easingX, EasingFunction easingY, EasingFunction easingZ, boolean isRotation) {
+    public PathTransition(Path path, int index, EasingFunction easingX, EasingFunction easingY, EasingFunction easingZ, boolean isRotation) {
         this.path = path;
         this.index = index;
         this.easingX = easingX;
@@ -29,7 +29,7 @@ public class Transition implements PathLike {
         this.isRotation = isRotation;
     }
     
-    public Transition(Path path, int index, EasingFunction easingX, EasingFunction easingY, EasingFunction easingZ, boolean isRotation, int weight) {
+    public PathTransition(Path path, int index, EasingFunction easingX, EasingFunction easingY, EasingFunction easingZ, boolean isRotation, int weight) {
         this.path = path;
         this.index = index;
         this.easingX = easingX;
@@ -97,24 +97,24 @@ public class Transition implements PathLike {
 
     @Override
     public SegmentSerializer<?> getSerializer() {
-        return CutsceneManager.TRANSITION;
+        return CutsceneManager.PATH_TRANSITION;
     }
 
-    public static Transition fromNetwork(FriendlyByteBuf buf, Path path) {
+    public static PathTransition fromNetwork(FriendlyByteBuf buf, Path path) {
         EasingFunction easingX = buf.readEnum(EasingFunction.class);
         EasingFunction easingY = buf.readEnum(EasingFunction.class);
         EasingFunction easingZ = buf.readEnum(EasingFunction.class);
         boolean isRotation = buf.readBoolean();
         int weight = buf.readInt();
-        return new Transition(path, path.size(), easingX, easingY, easingZ, isRotation, weight);
+        return new PathTransition(path, path.size(), easingX, easingY, easingZ, isRotation, weight);
     }
 
-    public static Transition fromJSON(JsonObject json, Path path) {
+    public static PathTransition fromJSON(JsonObject json, Path path) {
         EasingFunction easingX = EasingFunction.valueOf(GsonHelper.getAsString(json, "easing_x", "linear").toUpperCase());
         EasingFunction easingY = EasingFunction.valueOf(GsonHelper.getAsString(json, "easing_y", "linear").toUpperCase());
         EasingFunction easingZ = EasingFunction.valueOf(GsonHelper.getAsString(json, "easing_z", "linear").toUpperCase());
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         boolean isRotation = GsonHelper.getAsBoolean(json, "is_rotation", false);
-        return new Transition(path, path.size(), easingX, easingY, easingZ, isRotation, weight);
+        return new PathTransition(path, path.size(), easingX, easingY, easingZ, isRotation, weight);
     }
 }

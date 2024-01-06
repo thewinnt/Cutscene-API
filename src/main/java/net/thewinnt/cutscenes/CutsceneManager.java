@@ -19,10 +19,22 @@ import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
-import net.thewinnt.cutscenes.path.*;
+import net.thewinnt.cutscenes.path.BezierCurve;
+import net.thewinnt.cutscenes.path.CatmullRomSpline;
+import net.thewinnt.cutscenes.path.ConstantPoint;
+import net.thewinnt.cutscenes.path.EasingFunction;
+import net.thewinnt.cutscenes.path.LineSegment;
+import net.thewinnt.cutscenes.path.LookAtPoint;
+import net.thewinnt.cutscenes.path.Path;
 import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
-import net.thewinnt.cutscenes.path.point.*;
+import net.thewinnt.cutscenes.path.PathTransition;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
+import net.thewinnt.cutscenes.transition.NoopTransition;
+import net.thewinnt.cutscenes.transition.SmoothEaseTransition;
+import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
+import net.thewinnt.cutscenes.path.point.StaticPointProvider;
+import net.thewinnt.cutscenes.path.point.WaypointProvider;
+import net.thewinnt.cutscenes.path.point.WorldPointProvider;
 import net.thewinnt.cutscenes.util.ServerPlayerExt;
 
 @Mod.EventBusSubscriber(bus = Bus.FORGE)
@@ -35,6 +47,9 @@ public class CutsceneManager {
 
     /** The point type registry, where the point types are stored */
     private static final BiMap<ResourceLocation, PointSerializer<?>> POINT_TYPE_REGISTRY = HashBiMap.create();
+
+    /** The transition type registry, where the transition types are stored */
+    private static final BiMap<ResourceLocation, TransitionSerializer<?>> TRANSITION_TYPE_REGISTRY = HashBiMap.create();
 
     /** The currently previewed cutscene */
     private static CutsceneType previewedCutscene;
@@ -125,7 +140,7 @@ public class CutsceneManager {
 
     // SEGMENT TYPES //
     // Segment serializers are used to identify and read segment types. The writing is performed on instances of
-    // segments obtained from these serializers
+    // segments obtained from these serializers.
 
     public static final SegmentSerializer<LineSegment> LINE = SegmentSerializer.of(LineSegment::fromNetwork, LineSegment::fromJSON);
     public static final SegmentSerializer<BezierCurve> BEZIER = SegmentSerializer.of(BezierCurve::fromNetwork, BezierCurve::fromJSON);
@@ -133,15 +148,21 @@ public class CutsceneManager {
     public static final SegmentSerializer<Path> PATH = SegmentSerializer.of(Path::fromNetwork, Path::fromJSON);
     public static final SegmentSerializer<ConstantPoint> CONSTANT = SegmentSerializer.of(ConstantPoint::fromNetwork, ConstantPoint::fromJSON);
     public static final SegmentSerializer<LookAtPoint> LOOK_AT_POINT = SegmentSerializer.of(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
-    public static final SegmentSerializer<Transition> TRANSITION = SegmentSerializer.of(Transition::fromNetwork, Transition::fromJSON);
+    public static final SegmentSerializer<PathTransition> PATH_TRANSITION = SegmentSerializer.of(PathTransition::fromNetwork, PathTransition::fromJSON);
 
     // POINT TYPES //
     // Point serializers are used to identify and read point types. A point type gets a Level in and returns
-    // a point based on that
+    // a point based on that.
 
     public static final PointSerializer<StaticPointProvider> STATIC = PointSerializer.of(StaticPointProvider::fromNetwork, StaticPointProvider::fromJSON);
     public static final PointSerializer<WaypointProvider> WAYPOINT = PointSerializer.of(WaypointProvider::fromNetwork, WaypointProvider::fromJSON);
     public static final PointSerializer<WorldPointProvider> WORLD = PointSerializer.of(WorldPointProvider::fromNetwork, WorldPointProvider::fromJSON);
+
+    // TRANSITION TYPES //
+    // Transitions make you enter and leave a cutscene with beauty, instead of simply snapping into it.
+
+    public static final TransitionSerializer<NoopTransition> NO_OP = TransitionSerializer.of(NoopTransition::fromNetwork, NoopTransition::fromJSON);
+    public static final TransitionSerializer<SmoothEaseTransition> SMOOTH_EASE = TransitionSerializer.of(SmoothEaseTransition::fromNetwork, SmoothEaseTransition::fromJSON);
 
     /** 
      * Registers a cutscene
@@ -170,6 +191,15 @@ public class CutsceneManager {
      */
     public static void registerPointType(ResourceLocation id, PointSerializer<?> type) {
         POINT_TYPE_REGISTRY.put(id, type);
+    }
+
+    /**
+     * Registers a transition serializer
+     * @param id The ID of the transition type that will be used in datapacks
+     * @param type The serializer to register
+     */
+    public static void registerTransitionType(ResourceLocation id, TransitionSerializer<?> type) {
+        TRANSITION_TYPE_REGISTRY.put(id, type);
     }
 
     /** Returns the ID of the specified serializer, or {@code null} if it's not registered */

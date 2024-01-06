@@ -59,7 +59,7 @@ public class CutsceneCommand {
                 CommandSourceStack source = arg.getSource();
                 ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
-                if (CutsceneManager.getPreviewedCutscene() != null && type != CutsceneManager.REGISTRY.inverse().get(CutsceneManager.getPreviewedCutscene())) {
+                if (CutsceneManager.getPreviewedCutscene() != null && !type.equals(CutsceneManager.REGISTRY.inverse().get(CutsceneManager.getPreviewedCutscene()))) {
                     arg.getSource().sendSuccess(() -> Component.translatable("commands.cutscene.warning.cutscene_mismatch").withStyle(ChatFormatting.GOLD), false);
                 }
                 return showCutscene(source, type, player, new Vec3(CutsceneManager.getOffset()), Vec3.ZERO, new Vec3(CutsceneManager.previewPathYaw, CutsceneManager.previewPathPitch, CutsceneManager.previewPathRoll));
