@@ -1,0 +1,49 @@
+{
+  "length": 200,
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:line",
+        "start": [-10, 0, -10],
+        "end": [10, 0, 10],
+        "weight": 1
+      },
+      {
+        "type": "cutscenes:catmull_rom",
+        "points": [
+          [10, 0, 10],
+          [10, 10, 10],
+          [-10, 10, -10],
+          [-10, 0, -10],
+          [0, 0, 0]
+        ]
+      }
+    ]
+  },
+  "rotation": {
+    "segments": [
+      {
+        "type": "cutscenes:constant",
+        "point": [0, 0, 0]
+      }
+    ]
+  },
+  "start_transition": {
+    "type": "cutscenes:smooth_ease",
+    "length": 100,
+    "count_towards_cutscene_time": true,
+    "is_start": true,
+    "easing_x": "in_quint",
+    "easing_y": "linear",
+    "easing_z": "in_out_bounce",
+    "easing_rot_x": "in_out_sine",
+    "easing_rot_y": "in_out_back",
+    "easing_rot_z": "in_quint"
+  },
+  "end_transition": {
+    "type": "cutscenes:smooth_ease",
+    "is_start": false,
+    "_comment1": "Everything except is_start is optional, and is set to",
+    "_comment2": "40 (length), is_start (count_towards_cutscene_time) and 'out_quint' (easings) by default."
+  }
+}
