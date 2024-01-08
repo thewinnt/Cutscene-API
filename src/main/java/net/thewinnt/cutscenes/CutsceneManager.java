@@ -29,6 +29,7 @@ import net.thewinnt.cutscenes.path.Path;
 import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
 import net.thewinnt.cutscenes.path.PathTransition;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
+import net.thewinnt.cutscenes.transition.FadeToColorTransition;
 import net.thewinnt.cutscenes.transition.NoopTransition;
 import net.thewinnt.cutscenes.transition.SmoothEaseTransition;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
@@ -163,6 +164,7 @@ public class CutsceneManager {
 
     public static final TransitionSerializer<NoopTransition> NO_OP = TransitionSerializer.of(NoopTransition::fromNetwork, NoopTransition::fromJSON);
     public static final TransitionSerializer<SmoothEaseTransition> SMOOTH_EASE = TransitionSerializer.of(SmoothEaseTransition::fromNetwork, SmoothEaseTransition::fromJSON);
+    public static final TransitionSerializer<FadeToColorTransition> FADE = TransitionSerializer.of(FadeToColorTransition::fromNetwork, FadeToColorTransition::fromJSON);
 
     /** 
      * Registers a cutscene

@@ -157,10 +157,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
             cutscenePhase++;
             cutscene.startTransition.onEnd(cutscene);
         }
-        double progress = (clientLevel.getGameTime() - startTick + partialTick) / (double)cutscene.length;
-        if (!cutscene.startTransition.countTowardsCutsceneTime()) {
-            progress += (double)cutscene.startTransition.getLength() / cutscene.length;
-        }
+        double progress = (clientLevel.getGameTime() - startTick - cutscene.startTransition.getOffCutsceneTime() + partialTick) / (double)cutscene.length;
         Vec3 position = cutscene.getPathPoint(progress, clientLevel, startPos);
         return position.yRot(pathYaw).zRot(pathPitch).xRot(pathRoll).add(startPos);
     }
@@ -172,8 +169,8 @@ public class CutsceneCameraEntity extends LocalPlayer {
 
     public long getEndTime() {
         long output = startTick + cutscene.length;
-        if (!cutscene.startTransition.countTowardsCutsceneTime()) output += cutscene.startTransition.getLength();
-        if (!cutscene.endTransition.countTowardsCutsceneTime()) output += cutscene.endTransition.getLength();
+        output += cutscene.startTransition.getOffCutsceneTime();
+        output += cutscene.endTransition.getOffCutsceneTime();
         return output;
     }
 
@@ -204,7 +201,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
             double progress = getEndProress(partialTick);
             return (float)cutscene.endTransition.getRot(progress, clientLevel, startPos, startRot, getPlayerCamRot(), cutscene).y;
         }
-        double progress = (clientLevel.getGameTime() - startTick + partialTick) / (double)cutscene.length;
+        double progress = (clientLevel.getGameTime() - startTick - cutscene.startTransition.getOffCutsceneTime() + partialTick) / (double)cutscene.length;
         return (float)cutscene.getRotationAt(progress, clientLevel, startPos).y + camStartPitch;
     }
 
@@ -218,7 +215,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
             double progress = getEndProress(partialTick);
             return (float)cutscene.endTransition.getRot(progress, clientLevel, startPos, startRot, getPlayerCamRot(), cutscene).x;
         }
-        double progress = (clientLevel.getGameTime() - startTick + partialTick) / (double)cutscene.length;
+        double progress = (clientLevel.getGameTime() - startTick - cutscene.startTransition.getOffCutsceneTime() + partialTick) / (double)cutscene.length;
         return (float)cutscene.getRotationAt(progress, clientLevel, startPos).x + camStartYaw;
     }
 
@@ -239,5 +236,10 @@ public class CutsceneCameraEntity extends LocalPlayer {
     @Override
     public float getStandingEyeHeight(Pose pPose, EntityDimensions pSize) {
         return 0;
+    }
+
+    @Override
+    public boolean hasEffect(MobEffect pEffect) {
+        return minecraft.player.hasEffect(pEffect);
     }
 }

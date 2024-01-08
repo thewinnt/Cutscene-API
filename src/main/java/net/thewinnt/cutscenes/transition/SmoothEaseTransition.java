@@ -44,10 +44,15 @@ public class SmoothEaseTransition implements Transition {
     public int getLength() {
         return length;
     }
+    
+    @Override
+    public int getOffCutsceneTime() {
+        return countTowardsCutsceneTime ? 0 : length;
+    }
 
     @Override
-    public boolean countTowardsCutsceneTime() {
-        return countTowardsCutsceneTime;
+    public int getOnCutsceneTime() {
+        return countTowardsCutsceneTime ? length : 0;
     }
 
     @Override

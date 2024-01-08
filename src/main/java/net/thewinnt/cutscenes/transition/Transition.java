@@ -14,7 +14,8 @@ import net.thewinnt.cutscenes.CutsceneType;
 
 public interface Transition {
     int getLength();
-    boolean countTowardsCutsceneTime();
+    int getOffCutsceneTime();
+    int getOnCutsceneTime();
     /**
      * Returns the camera position at the specified moment
      * @param progress the progress of the transition [0-1]

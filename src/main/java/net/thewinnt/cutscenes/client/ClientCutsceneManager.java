@@ -91,12 +91,6 @@ public class ClientCutsceneManager {
         CLIENT_REGISTRY.put(id, type);
     }
 
-    public static void stopCutscene() {
-        Minecraft minecraft = Minecraft.getInstance();
-        cutsceneStatus = CutsceneStatus.STOPPING;
-        minecraft.options.hideGui = hidGuiBefore;
-    }
-
     public static void stopCutsceneImmediate() {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.options.hideGui = hidGuiBefore;
@@ -106,6 +100,12 @@ public class ClientCutsceneManager {
         minecraft.gameRenderer.setRenderBlockOutline(true);
         if (camera != null) {
             camera.despawn();
+            if (camera.isTimeForStart(minecraft.getPartialTick())) {
+                runningCutscene.startTransition.onEnd(runningCutscene);
+            }
+            if (camera.isTimeForEnd(minecraft.getPartialTick())) {
+                runningCutscene.endTransition.onEnd(runningCutscene);
+            }
         }
         camera = null;
         if (minecraft.player != null) {

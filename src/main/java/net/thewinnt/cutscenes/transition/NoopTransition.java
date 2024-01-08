@@ -31,10 +31,15 @@ public class NoopTransition implements Transition {
     public TransitionSerializer<?> getSerializer() {
         return CutsceneManager.NO_OP;
     }
+    
+    @Override
+    public int getOffCutsceneTime() {
+        return 0;
+    }
 
     @Override
-    public boolean countTowardsCutsceneTime() {
-        return false;
+    public int getOnCutsceneTime() {
+        return 0;
     }
 
     public static NoopTransition fromNetwork(FriendlyByteBuf buf) {

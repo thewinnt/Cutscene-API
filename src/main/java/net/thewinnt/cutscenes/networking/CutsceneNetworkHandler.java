@@ -89,4 +89,19 @@ public class CutsceneNetworkHandler {
         buf.writeResourceLocation(CutsceneManager.getPointTypeId(point.getSerializer()));
         point.toNetwork(buf);
     }
+
+    public static float[] readColorRGBA(FriendlyByteBuf buf) {
+        float r = buf.readFloat();
+        float g = buf.readFloat();
+        float b = buf.readFloat();
+        float a = buf.readFloat();
+        return new float[]{r, g, b, a};
+    }
+
+    public static void writeColorRGBA(FriendlyByteBuf buf, float[] color) {
+        buf.writeFloat(color[0]);
+        buf.writeFloat(color[1]);
+        buf.writeFloat(color[2]);
+        buf.writeFloat(color[3]);
+    }
 }

@@ -54,6 +54,7 @@ public class CutsceneAPI {
         CutsceneManager.registerPointType(new ResourceLocation("cutscenes", "world"), CutsceneManager.WORLD);
         CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "no_op"), CutsceneManager.NO_OP);
         CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "smooth_ease"), CutsceneManager.SMOOTH_EASE);
+        CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "fade"), CutsceneManager.FADE);
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(CutsceneAPI.class);
@@ -70,6 +71,7 @@ public class CutsceneAPI {
                     JsonObject json = GsonHelper.convertToJsonObject(element, "cutscene");
                     CutsceneManager.registerCutscene(id, CutsceneType.fromJSON(json));
                 });
+                LOGGER.info("Loaded {} cutscenes", files.size());
             }
         });
     }
