@@ -1,0 +1,47 @@
+{
+  "length": 200,
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:line",
+        "start": [0, 0, 0],
+        "end": [0, 0, 20]
+      }
+    ]
+  },
+  "rotation": {
+    "segments": [
+      {
+        "type": "cutscenes:constant",
+        "point": [0, 0, 0]
+      }
+    ]
+  },
+  "start_transition": {
+    "type": "cutscenes:fade",
+    "length_a": 20,
+    "length_b": 20,
+    "color": [0, 0, 0],
+    "is_start": true
+  },
+  "end_transition": {
+    "type": "cutscenes:fade",
+    "length_a": 20,
+    "length_b": 80,
+    "color_definition": "four_angles",
+    "start_color_bottom_left": [1, 0, 0],
+    "start_color_top_left": [0, 1, 0],
+    "start_color_top_right": [0, 0, 1],
+    "start_color_bottom_right": [0.25, 0.25, 0.25, 1],
+    "end_color_bottom_left": "00FF00",
+    "end_color_top_left": "0000FF",
+    "end_color_top_right": "FF0000",
+    "end_color_bottom_right": "FFFFFF40",
+    "gradient_time_a": 20,
+    "gradient_time_b": 40,
+    "ease_in": "in_out_bounce",
+    "ease_out": "in_quint",
+    "color_ease": "linear",
+    "is_start": false
+  }
+}

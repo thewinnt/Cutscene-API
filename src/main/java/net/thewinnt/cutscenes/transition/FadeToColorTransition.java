@@ -95,7 +95,7 @@ public class FadeToColorTransition implements Transition {
             if (progress > progressLengthA) {
                 return initCamPos;
             } else {
-                double cutsceneProgress = 1 - progress / progressLengthB * lengthB / cutscene.length;
+                double cutsceneProgress = (cutscene.length - lengthA + lengthA * (progress / progressLengthA)) / cutscene.length;
                 return cutscene.getPathPoint(cutsceneProgress, level, startPos).yRot((float)pathRot.y).zRot((float)pathRot.z).xRot((float)pathRot.x).add(startPos);
             }
         }
@@ -114,7 +114,7 @@ public class FadeToColorTransition implements Transition {
             if (progress > progressLengthA) {
                 return initCamRot;
             } else {
-                double cutsceneProgress = 1 - progress / progressLengthB * lengthB / cutscene.length;
+                double cutsceneProgress = (cutscene.length - lengthA + lengthA * (progress / progressLengthA)) / cutscene.length;
                 return cutscene.getRotationAt(cutsceneProgress, level, startPos).add(startRot);
             }
         }
