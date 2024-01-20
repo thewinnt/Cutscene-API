@@ -1,11 +1,9 @@
 package net.thewinnt.cutscenes.networking.packets;
 
-import java.util.function.Supplier;
-
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 
@@ -53,10 +51,10 @@ public class StartCutscenePacket {
         buf.writeFloat(pathRoll);
     }
 
-    public void handle(Supplier<NetworkEvent.Context> supplier) {
-        supplier.get().enqueueWork(() -> {
+    public void handle(CustomPayloadEvent.Context context) {
+        context.enqueueWork(() -> {
            ClientCutsceneManager.startCutscene(ClientCutsceneManager.CLIENT_REGISTRY.get(type), startPos, cameraYaw, cameraPitch, cameraRoll, pathYaw, pathPitch, pathRoll);
         });
-        supplier.get().setPacketHandled(true);
+        context.setPacketHandled(true);
     }
 }

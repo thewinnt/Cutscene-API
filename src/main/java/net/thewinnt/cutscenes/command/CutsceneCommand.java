@@ -124,7 +124,7 @@ public class CutsceneCommand {
                 CommandSourceStack source = arg.getSource();
                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                 ((ServerPlayerExt)player).setCutsceneTicks(0);
-                CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new StopCutscenePacket());
+                CutsceneNetworkHandler.INSTANCE.send(new StopCutscenePacket(), PacketDistributor.PLAYER.with(player));
                 source.sendSuccess(() -> Component.translatable("commands.cutscene.stopped", player.getDisplayName()), true);
                 return 1;
             })))
@@ -187,7 +187,7 @@ public class CutsceneCommand {
             throw NO_CUTSCENE.create(id);
         }
         CutsceneType type = CutsceneManager.REGISTRY.get(id);
-        CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new StartCutscenePacket(id, pos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
+        CutsceneNetworkHandler.INSTANCE.send(new StartCutscenePacket(id, pos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), PacketDistributor.PLAYER.with(player));
         ((ServerPlayerExt)player).setCutsceneTicks(type.length);
         source.sendSuccess(() -> Component.translatable("commands.cutscene.showing", id, player.getDisplayName()), true);
         return 1;

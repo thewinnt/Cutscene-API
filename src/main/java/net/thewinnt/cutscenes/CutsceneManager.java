@@ -241,7 +241,7 @@ public class CutsceneManager {
         previewPathYaw = pathYaw;
         previewPathPitch = pathPitch;
         previewPathRoll = pathRoll;
-        CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new PreviewCutscenePacket(REGISTRY.inverse().get(type), offset, pathYaw, pathPitch, pathRoll));
+        CutsceneNetworkHandler.INSTANCE.send(new PreviewCutscenePacket(REGISTRY.inverse().get(type), offset, pathYaw, pathPitch, pathRoll), PacketDistributor.ALL.noArg());
     }
 
     // self-explanatory
@@ -262,9 +262,9 @@ public class CutsceneManager {
     @SubscribeEvent
     public static void sendRegistry(OnDatapackSyncEvent event) {
         if (event != null && event.getPlayer() != null) {
-            CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> event.getPlayer()), new UpdateCutscenesPacket(REGISTRY));
+            CutsceneNetworkHandler.INSTANCE.send(new UpdateCutscenesPacket(REGISTRY), PacketDistributor.PLAYER.with(event.getPlayer()));
         } else {
-            CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new UpdateCutscenesPacket(REGISTRY));
+            CutsceneNetworkHandler.INSTANCE.send(new UpdateCutscenesPacket(REGISTRY), PacketDistributor.ALL.noArg());
         }
     }
 
@@ -279,6 +279,6 @@ public class CutsceneManager {
     public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
         ((ServerPlayerExt)player).setCutsceneTicks(REGISTRY.get(id).length);
         player.setCamera(null);
-        CutsceneNetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
+        CutsceneNetworkHandler.INSTANCE.send(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), PacketDistributor.PLAYER.with(player));
     }
 }

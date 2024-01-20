@@ -3,25 +3,32 @@ package net.thewinnt.cutscenes.networking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.Channel.VersionTest;
+import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.SimpleChannel;
 import net.thewinnt.cutscenes.CutsceneManager;
-import net.thewinnt.cutscenes.networking.packets.*;
+import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
+import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
+import net.thewinnt.cutscenes.networking.packets.StopCutscenePacket;
+import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 
 public class CutsceneNetworkHandler {
-    public static final String PROTOCOL_VERSION = "1.2";
+    public static final int PROTOCOL_VERSION = 3;
     public static SimpleChannel INSTANCE;
     private static int id_counter = 0;
 
     public static void register() {
-        INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation("cutscenes:networking"),
-            () -> PROTOCOL_VERSION,
-            i -> i.equals(PROTOCOL_VERSION),
-            i -> i.equals(PROTOCOL_VERSION)
-        );
+        INSTANCE = ChannelBuilder.named(new ResourceLocation("cutscenes:networking"))
+            .networkProtocolVersion(3)
+            .acceptedVersions(VersionTest.exact(PROTOCOL_VERSION))
+            .clientAcceptedVersions(VersionTest.exact(PROTOCOL_VERSION))
+            .simpleChannel();
+        //     () -> PROTOCOL_VERSION,
+        //     i -> i.equals(PROTOCOL_VERSION),
+        //     i -> i.equals(PROTOCOL_VERSION)
+        // );
         INSTANCE.messageBuilder(StartCutscenePacket.class, id_counter++, NetworkDirection.PLAY_TO_CLIENT)
             .encoder(StartCutscenePacket::write)
             .decoder(StartCutscenePacket::read)

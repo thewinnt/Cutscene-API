@@ -1,11 +1,10 @@
 package net.thewinnt.cutscenes.networking.packets;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 
@@ -24,10 +23,10 @@ public class UpdateCutscenesPacket {
         buf.writeMap(registry, (b, id) -> b.writeResourceLocation(id), (b, cs) -> cs.toNetwork(b));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> supplier) {
-        supplier.get().enqueueWork(() -> {
+    public void handle(CustomPayloadEvent.Context context) {
+        context.enqueueWork(() -> {
            ClientCutsceneManager.updateRegistry(registry);
         });
-        supplier.get().setPacketHandled(true);
+        context.setPacketHandled(true);
     }
 }

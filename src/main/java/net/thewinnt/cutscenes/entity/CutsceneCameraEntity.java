@@ -6,9 +6,11 @@ import com.mojang.authlib.GameProfile;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffect;
@@ -16,6 +18,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.Vec3;
@@ -27,11 +30,16 @@ public class CutsceneCameraEntity extends LocalPlayer {
     private static final Minecraft MINECRAFT = Minecraft.getInstance();
     private static final ClientPacketListener NETWORK_HANDLER = new ClientPacketListener(
         MINECRAFT,
-        MINECRAFT.screen,
         MINECRAFT.getConnection().getConnection(),
-        MINECRAFT.getCurrentServer(),
-        new GameProfile(UUID.randomUUID(), "CutsceneAPI$Camera"),
-        MINECRAFT.getTelemetryManager().createWorldSessionManager(false, null, null)
+        new CommonListenerCookie(
+            new GameProfile(UUID.randomUUID(), "CutsceneAPI$Camera"),
+            MINECRAFT.getTelemetryManager().createWorldSessionManager(false, null, null),
+            RegistryAccess.Frozen.EMPTY,
+            FeatureFlagSet.of(),
+            null,
+            MINECRAFT.getCurrentServer(),
+            MINECRAFT.screen
+        )
     ) {
         public void send(Packet<?> pPacket) {}
     };
@@ -76,7 +84,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
 
     public void spawn() {
         if (clientLevel != null) {
-            clientLevel.putNonPlayerEntity(getId(), this);
+            clientLevel.addEntity(this);
         }
     }
 
