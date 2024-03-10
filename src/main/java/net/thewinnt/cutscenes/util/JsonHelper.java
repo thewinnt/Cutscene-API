@@ -15,6 +15,8 @@ import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 
+import javax.annotation.Nullable;
+
 public class JsonHelper {
     /**
      * Gets a Vec3 from a JSON object, if it's written in the form of [x, y, z]
@@ -119,5 +121,16 @@ public class JsonHelper {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Returns a JSON object from another object, or null if it's absent or null
+     */
+    public static @Nullable JsonObject getNullableObject(JsonObject json, String name) {
+        if (json == null) return null;
+        if (!json.has(name)) return null;
+        JsonElement element = json.get(name);
+        if (element.isJsonNull()) return null;
+        return element.getAsJsonObject();
     }
 }

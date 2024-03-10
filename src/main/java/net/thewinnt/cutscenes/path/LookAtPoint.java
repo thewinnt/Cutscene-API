@@ -14,6 +14,8 @@ import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import net.thewinnt.cutscenes.util.JsonHelper;
 
+import java.util.Objects;
+
 public class LookAtPoint implements PathLike {
     private final PointProvider point;
     private PathLike pathSupplier;
@@ -21,25 +23,25 @@ public class LookAtPoint implements PathLike {
 
     public LookAtPoint(PointProvider point, PathLike pathSupplier) {
         this.point = point;
-        this.pathSupplier = pathSupplier;
+        this.pathSupplier = Objects.requireNonNull(pathSupplier);
         this.weight = 1;
     }
     
     public LookAtPoint(PointProvider point, PathLike pathSupplier, int weight) {
         this.point = point;
-        this.pathSupplier = pathSupplier;
+        this.pathSupplier = Objects.requireNonNull(pathSupplier);
         this.weight = weight;
     }
 
     public LookAtPoint(Vec3 point, PathLike pathSupplier) {
         this.point = new StaticPointProvider(point);
-        this.pathSupplier = pathSupplier;
+        this.pathSupplier = Objects.requireNonNull(pathSupplier);
         this.weight = 1;
     }
     
     public LookAtPoint(Vec3 point, PathLike pathSupplier, int weight) {
         this.point = new StaticPointProvider(point);
-        this.pathSupplier = pathSupplier;
+        this.pathSupplier = Objects.requireNonNull(pathSupplier);
         this.weight = weight;
     }
 

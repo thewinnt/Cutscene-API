@@ -1,0 +1,21 @@
+{
+  "length": 200,
+  "start_transition": {
+    "type": "cutscenes:fade",
+    "length_a": 20,
+    "length_b": 20,
+    "color": [0, 0, 0],
+    "ease_in": "in_quad",
+    "ease_out": "in_quad",
+    "is_start": true
+  },
+  "end_transition": {
+    "type": "cutscenes:fade",
+    "length_a": 20,
+    "length_b": 20,
+    "color": [0, 0, 0],
+    "ease_in": "in_quad",
+    "ease_out": "in_quad",
+    "is_start": false
+  }
+}

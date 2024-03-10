@@ -1,5 +1,6 @@
 package net.thewinnt.cutscenes.mixin;
 
+import net.thewinnt.cutscenes.CutsceneType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,14 +15,18 @@ import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
 
 @Mixin(Entity.class)
 public class EntityMixin {
-    @Inject(method = "Lnet/minecraft/world/entity/Entity;getPosition(F)Lnet/minecraft/world/phys/Vec3;", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getPosition(F)Lnet/minecraft/world/phys/Vec3;", at = @At("HEAD"), cancellable = true)
     public void getPosition(float partialTick, CallbackInfoReturnable<Vec3> callback) {
+        CutsceneType cutscene = ClientCutsceneManager.runningCutscene;
+        if (cutscene == null) return;
         if (((Entity)(Object)this) instanceof CutsceneCameraEntity camera) {
-            callback.setReturnValue(camera.getProperPosition(partialTick));
+            Vec3 pos = camera.getProperPosition(partialTick);
+            if (pos == null) return;
+            callback.setReturnValue(pos);
         }
     }
 
-    @Inject(method = "Lnet/minecraft/world/entity/Entity;shouldRender(DDD)Z", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "shouldRender(DDD)Z", at = @At("HEAD"), cancellable = true)
     public void shouldRender(double x, double y, double z, CallbackInfoReturnable<Boolean> callback) {
         if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE && ((Entity)(Object)this).equals(Minecraft.getInstance().player)) {
             callback.setReturnValue(false);

@@ -43,6 +43,7 @@ public class PathPreviewRenderer {
         if (ClientCutsceneManager.previewedCutscene == null) return;
         CutsceneType type = ClientCutsceneManager.previewedCutscene;
         Path path = type.path;
+        if (path == null) return;
         float yRot = (float)Math.toRadians(ClientCutsceneManager.previewPathYaw);
         float zRot = (float)Math.toRadians(ClientCutsceneManager.previewPathPitch);
         float xRot = (float)Math.toRadians(ClientCutsceneManager.previewPathRoll);

@@ -2,6 +2,7 @@ package net.thewinnt.cutscenes.transition;
 
 import com.google.gson.JsonObject;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
@@ -9,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.client.FadeToColorOverlay;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.path.EasingFunction;
@@ -87,6 +89,8 @@ public class FadeToColorTransition implements Transition {
         if (isStart) {
             if (progress < progressLengthA) {
                 return initCamPos;
+            } else if (cutscene.path == null) {
+                return Minecraft.getInstance().player.getPosition((float) (progress * getLength() % 1));
             } else {
                 double cutsceneProgress = (progress - progressLengthA) / progressLengthA * lengthA / cutscene.length;
                 return cutscene.getPathPoint(cutsceneProgress, level, startPos).yRot((float)pathRot.y).zRot((float)pathRot.z).xRot((float)pathRot.x).add(startPos);
@@ -94,6 +98,8 @@ public class FadeToColorTransition implements Transition {
         } else {
             if (progress > progressLengthA) {
                 return initCamPos;
+            } else if (cutscene.path == null) {
+                return startPos;
             } else {
                 double cutsceneProgress = (cutscene.length - lengthA + lengthA * (progress / progressLengthA)) / cutscene.length;
                 return cutscene.getPathPoint(cutsceneProgress, level, startPos).yRot((float)pathRot.y).zRot((float)pathRot.z).xRot((float)pathRot.x).add(startPos);
@@ -106,6 +112,8 @@ public class FadeToColorTransition implements Transition {
         if (isStart) {
             if (progress < progressLengthA) {
                 return initCamRot;
+            } else if (cutscene.rotationProvider == null) {
+                return ClientCutsceneManager.camera.getPlayerCamRot();
             } else {
                 double cutsceneProgress = (progress - progressLengthA) / progressLengthA * lengthA / cutscene.length;
                 return cutscene.getRotationAt(cutsceneProgress, level, startPos).add(startRot);
@@ -113,6 +121,8 @@ public class FadeToColorTransition implements Transition {
         } else {
             if (progress > progressLengthA) {
                 return initCamRot;
+            } else if (cutscene.rotationProvider == null) {
+                return startRot;
             } else {
                 double cutsceneProgress = (cutscene.length - lengthA + lengthA * (progress / progressLengthA)) / cutscene.length;
                 return cutscene.getRotationAt(cutsceneProgress, level, startPos).add(startRot);
