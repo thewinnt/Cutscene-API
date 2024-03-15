@@ -108,7 +108,7 @@ public class CutsceneType {
         Transition start = Transition.fromJSON(JsonHelper.getNullableObject(json, "start_transition"), new SmoothEaseTransition(40, true, true));
         Transition end = Transition.fromJSON(JsonHelper.getNullableObject(json, "end_transition"), new SmoothEaseTransition(40, false, false));
         boolean blockMovement = GsonHelper.getAsBoolean(json, "block_movement", false) || path != null;
-        boolean blockRotation = GsonHelper.getAsBoolean(json, "block_rotation", false) || path != null;
+        boolean blockRotation = GsonHelper.getAsBoolean(json, "block_rotation", false) || rotation != null;
         return new CutsceneType(path, rotation, length, start, end, blockMovement, blockRotation);
     }
 }
