@@ -2,6 +2,19 @@ package net.thewinnt.cutscenes;
 
 import java.util.Map;
 
+import net.minecraft.core.registries.Registries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 
 import com.google.gson.GsonBuilder;
@@ -17,19 +30,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 
@@ -38,10 +38,10 @@ import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 public class CutsceneAPI {
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, "cutscenes");
-    public static final RegistryObject<EntityType<?>> WAYPOINT = ENTITIES.register("waypoint", () -> EntityType.Builder.of(WaypointEntity::new, MobCategory.MISC).sized(0.1f, 0.1f).clientTrackingRange(9999).setTrackingRange(9999).canSpawnFarFromPlayer().build("waypoint"));
+    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, "cutscenes");
+    public static final DeferredHolder<EntityType<?>, EntityType<WaypointEntity>> WAYPOINT = ENTITIES.register("waypoint", () -> EntityType.Builder.of(WaypointEntity::new, MobCategory.MISC).sized(0.1f, 0.1f).clientTrackingRange(9999).setTrackingRange(9999).canSpawnFarFromPlayer().build("waypoint"));
 
-    public CutsceneAPI() {
+    public CutsceneAPI(IEventBus modBus, Dist dist) {
         CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "line"), CutsceneManager.LINE);
         CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "bezier"), CutsceneManager.BEZIER);
         CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "catmull_rom"), CutsceneManager.CATMULL_ROM);
@@ -55,10 +55,8 @@ public class CutsceneAPI {
         CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "no_op"), CutsceneManager.NO_OP);
         CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "smooth_ease"), CutsceneManager.SMOOTH_EASE);
         CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "fade"), CutsceneManager.FADE);
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::commonSetup);
-        MinecraftForge.EVENT_BUS.register(CutsceneAPI.class);
-        ENTITIES.register(modEventBus);
+        NeoForge.EVENT_BUS.register(CutsceneAPI.class);
+        ENTITIES.register(modBus);
     }
 
     @SubscribeEvent
@@ -74,10 +72,6 @@ public class CutsceneAPI {
                 LOGGER.info("Loaded {} cutscenes", files.size());
             }
         });
-    }
-
-    public void commonSetup(final FMLCommonSetupEvent event) {
-        CutsceneNetworkHandler.register();
     }
 
     @Mod.EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)

@@ -18,10 +18,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
@@ -124,7 +124,7 @@ public class CutsceneCommand {
                 CommandSourceStack source = arg.getSource();
                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                 ((ServerPlayerExt)player).setCutsceneTicks(0);
-                CutsceneNetworkHandler.INSTANCE.send(new StopCutscenePacket(), PacketDistributor.PLAYER.with(player));
+                PacketDistributor.PLAYER.with(player).send(new StopCutscenePacket());
                 source.sendSuccess(() -> Component.translatable("commands.cutscene.stopped", player.getDisplayName()), true);
                 return 1;
             })))
@@ -187,7 +187,7 @@ public class CutsceneCommand {
             throw NO_CUTSCENE.create(id);
         }
         CutsceneType type = CutsceneManager.REGISTRY.get(id);
-        CutsceneNetworkHandler.INSTANCE.send(new StartCutscenePacket(id, pos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), PacketDistributor.PLAYER.with(player));
+        PacketDistributor.PLAYER.with(player).send(new StartCutscenePacket(id, pos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
         ((ServerPlayerExt)player).setCutsceneTicks(type.length);
         source.sendSuccess(() -> Component.translatable("commands.cutscene.showing", id, player.getDisplayName()), true);
         return 1;

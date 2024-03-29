@@ -3,10 +3,11 @@ package net.thewinnt.cutscenes.networking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.Channel.VersionTest;
-import net.minecraftforge.network.ChannelBuilder;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.SimpleChannel;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
+import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
@@ -14,44 +15,37 @@ import net.thewinnt.cutscenes.networking.packets.StopCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 
+@Mod.EventBusSubscriber(bus = Bus.MOD)
 public class CutsceneNetworkHandler {
     public static final int PROTOCOL_VERSION = 3;
-    public static SimpleChannel INSTANCE;
     private static int id_counter = 0;
 
-    public static void register() {
-        INSTANCE = ChannelBuilder.named(new ResourceLocation("cutscenes:networking"))
-            .networkProtocolVersion(3)
-            .acceptedVersions(VersionTest.exact(PROTOCOL_VERSION))
-            .clientAcceptedVersions(VersionTest.exact(PROTOCOL_VERSION))
-            .simpleChannel();
-        //     () -> PROTOCOL_VERSION,
-        //     i -> i.equals(PROTOCOL_VERSION),
-        //     i -> i.equals(PROTOCOL_VERSION)
-        // );
-        INSTANCE.messageBuilder(StartCutscenePacket.class, id_counter++, NetworkDirection.PLAY_TO_CLIENT)
-            .encoder(StartCutscenePacket::write)
-            .decoder(StartCutscenePacket::read)
-            .consumerMainThread(StartCutscenePacket::handle)
-            .add();
+    @SubscribeEvent
+    public static void register(final RegisterPayloadHandlerEvent event) {
+        final IPayloadRegistrar registrar = event.registrar("cutscenes").versioned("1.2.2");
+        registrar.play(
+            PreviewCutscenePacket.ID,
+            PreviewCutscenePacket::read,
+            handler -> handler.client(PreviewCutscenePacket::handle)
+        );
 
-        INSTANCE.messageBuilder(UpdateCutscenesPacket.class, id_counter++, NetworkDirection.PLAY_TO_CLIENT)
-            .encoder(UpdateCutscenesPacket::write)
-            .decoder(UpdateCutscenesPacket::read)
-            .consumerMainThread(UpdateCutscenesPacket::handle)
-            .add();
+        registrar.play(
+            StartCutscenePacket.ID,
+            StartCutscenePacket::read,
+            handler -> handler.client(StartCutscenePacket::handle)
+        );
 
-        INSTANCE.messageBuilder(PreviewCutscenePacket.class, id_counter++, NetworkDirection.PLAY_TO_CLIENT)
-            .encoder(PreviewCutscenePacket::write)
-            .decoder(PreviewCutscenePacket::read)
-            .consumerMainThread(PreviewCutscenePacket::handle)
-            .add();
+        registrar.play(
+            StopCutscenePacket.ID,
+            buf -> new StopCutscenePacket(),
+            handler -> handler.client(StopCutscenePacket::handle)
+        );
 
-        INSTANCE.messageBuilder(StopCutscenePacket.class, id_counter++, NetworkDirection.PLAY_TO_CLIENT)
-            .encoder((t, u) -> {})
-            .decoder(buf -> new StopCutscenePacket())
-            .consumerMainThread(StopCutscenePacket::handle)
-            .add();
+        registrar.play(
+            UpdateCutscenesPacket.ID,
+            UpdateCutscenesPacket::read,
+            handler -> handler.client(UpdateCutscenesPacket::handle)
+        );
     }
 
     public static Vec3 readVec3(FriendlyByteBuf buf) {

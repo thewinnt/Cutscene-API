@@ -1,10 +1,7 @@
 package net.thewinnt.cutscenes.client;
 
-import java.util.Map;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
@@ -12,18 +9,20 @@ import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
-import net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles;
-import net.minecraftforge.event.TickEvent.ClientTickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
+import net.neoforged.neoforge.client.event.ViewportEvent.ComputeCameraAngles;
+import net.neoforged.neoforge.event.TickEvent.ClientTickEvent;
+import net.neoforged.neoforge.event.TickEvent.Phase;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
+
+import java.util.Map;
 
 @SuppressWarnings("resource")
 @Mod.EventBusSubscriber(bus = Bus.FORGE, value = Dist.CLIENT)

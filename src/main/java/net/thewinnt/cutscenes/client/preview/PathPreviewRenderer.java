@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -15,9 +17,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.Mod;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.path.Path;
@@ -26,7 +25,6 @@ import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 
 @OnlyIn(Dist.CLIENT)
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class PathPreviewRenderer {
     private static final List<Vector3f> POINT_COLORS = List.of(
         new Vector3f(1, 0.5f, 1),

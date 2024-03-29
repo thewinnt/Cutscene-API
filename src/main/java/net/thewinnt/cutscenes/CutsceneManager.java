@@ -1,42 +1,32 @@
 package net.thewinnt.cutscenes;
 
-import javax.annotation.Nonnull;
-
-import org.joml.Vector3f;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.network.PacketDistributor;
-import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
-import net.thewinnt.cutscenes.path.BezierCurve;
-import net.thewinnt.cutscenes.path.CatmullRomSpline;
-import net.thewinnt.cutscenes.path.ConstantPoint;
-import net.thewinnt.cutscenes.path.EasingFunction;
-import net.thewinnt.cutscenes.path.LineSegment;
-import net.thewinnt.cutscenes.path.LookAtPoint;
-import net.thewinnt.cutscenes.path.Path;
+import net.thewinnt.cutscenes.path.*;
 import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
-import net.thewinnt.cutscenes.path.PathTransition;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
+import net.thewinnt.cutscenes.path.point.StaticPointProvider;
+import net.thewinnt.cutscenes.path.point.WaypointProvider;
+import net.thewinnt.cutscenes.path.point.WorldPointProvider;
 import net.thewinnt.cutscenes.transition.FadeToColorTransition;
 import net.thewinnt.cutscenes.transition.NoopTransition;
 import net.thewinnt.cutscenes.transition.SmoothEaseTransition;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
-import net.thewinnt.cutscenes.path.point.StaticPointProvider;
-import net.thewinnt.cutscenes.path.point.WaypointProvider;
-import net.thewinnt.cutscenes.path.point.WorldPointProvider;
 import net.thewinnt.cutscenes.util.ServerPlayerExt;
+import org.joml.Vector3f;
+
+import javax.annotation.Nonnull;
 
 @Mod.EventBusSubscriber(bus = Bus.FORGE)
 public class CutsceneManager {
@@ -241,7 +231,8 @@ public class CutsceneManager {
         previewPathYaw = pathYaw;
         previewPathPitch = pathPitch;
         previewPathRoll = pathRoll;
-        CutsceneNetworkHandler.INSTANCE.send(new PreviewCutscenePacket(REGISTRY.inverse().get(type), offset, pathYaw, pathPitch, pathRoll), PacketDistributor.ALL.noArg());
+        // TODO networking
+        PacketDistributor.ALL.noArg().send(new PreviewCutscenePacket(REGISTRY.inverse().get(type), offset, pathYaw, pathPitch, pathRoll));
     }
 
     // self-explanatory
@@ -262,9 +253,9 @@ public class CutsceneManager {
     @SubscribeEvent
     public static void sendRegistry(OnDatapackSyncEvent event) {
         if (event != null && event.getPlayer() != null) {
-            CutsceneNetworkHandler.INSTANCE.send(new UpdateCutscenesPacket(REGISTRY), PacketDistributor.PLAYER.with(event.getPlayer()));
+            PacketDistributor.PLAYER.with(event.getPlayer()).send(new UpdateCutscenesPacket(REGISTRY));
         } else {
-            CutsceneNetworkHandler.INSTANCE.send(new UpdateCutscenesPacket(REGISTRY), PacketDistributor.ALL.noArg());
+            PacketDistributor.ALL.noArg().send(new UpdateCutscenesPacket(REGISTRY));
         }
     }
 
@@ -279,6 +270,6 @@ public class CutsceneManager {
     public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
         ((ServerPlayerExt)player).setCutsceneTicks(REGISTRY.get(id).length);
         player.setCamera(null);
-        CutsceneNetworkHandler.INSTANCE.send(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), PacketDistributor.PLAYER.with(player));
+        PacketDistributor.PLAYER.with(player).send(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
     }
 }

@@ -1,13 +1,15 @@
 package net.thewinnt.cutscenes.networking.packets;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.network.CustomPayloadEvent;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 
-public class StartCutscenePacket {
+public class StartCutscenePacket implements CustomPacketPayload {
+    public static final ResourceLocation ID = new ResourceLocation("cutscenes:start_cutscene");
     public final ResourceLocation type;
     public final Vec3 startPos;
     public final float cameraYaw;
@@ -51,10 +53,14 @@ public class StartCutscenePacket {
         buf.writeFloat(pathRoll);
     }
 
-    public void handle(CustomPayloadEvent.Context context) {
-        context.enqueueWork(() -> {
+    public void handle(final PlayPayloadContext context) {
+        context.workHandler().submitAsync(() -> {
            ClientCutsceneManager.startCutscene(ClientCutsceneManager.CLIENT_REGISTRY.get(type), startPos, cameraYaw, cameraPitch, cameraRoll, pathYaw, pathPitch, pathRoll);
         });
-        context.setPacketHandled(true);
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
     }
 }
