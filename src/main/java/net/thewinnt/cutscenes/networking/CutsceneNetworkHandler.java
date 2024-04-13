@@ -17,12 +17,9 @@ import net.thewinnt.cutscenes.path.point.PointProvider;
 
 @Mod.EventBusSubscriber(bus = Bus.MOD)
 public class CutsceneNetworkHandler {
-    public static final int PROTOCOL_VERSION = 3;
-    private static int id_counter = 0;
-
     @SubscribeEvent
     public static void register(final RegisterPayloadHandlerEvent event) {
-        final IPayloadRegistrar registrar = event.registrar("cutscenes").versioned("1.2.2");
+        final IPayloadRegistrar registrar = event.registrar("cutscenes").versioned("1.3");
         registrar.play(
             PreviewCutscenePacket.ID,
             PreviewCutscenePacket::read,

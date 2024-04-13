@@ -23,6 +23,8 @@ import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
 import net.thewinnt.cutscenes.util.ActionToggles;
 
+import java.util.Map;
+
 @Mod.EventBusSubscriber(bus = Bus.FORGE, value = Dist.CLIENT)
 public class ClientCutsceneManager {
     public static final BiMap<ResourceLocation, CutsceneType> CLIENT_REGISTRY = HashBiMap.create();
