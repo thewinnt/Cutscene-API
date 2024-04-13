@@ -1,0 +1,10 @@
+{
+  "length": 200,
+  "disable_actions": false,
+  "start_transition": {
+    "type": "cutscenes:no_op"
+  },
+  "end_transition": {
+    "type": "cutscenes:no_op"
+  }
+}
