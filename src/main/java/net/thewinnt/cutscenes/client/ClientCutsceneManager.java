@@ -24,11 +24,12 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
+import net.thewinnt.cutscenes.util.ActionToggles;
 
-@SuppressWarnings("resource")
 @Mod.EventBusSubscriber(bus = Bus.FORGE, value = Dist.CLIENT)
-public class ClientCutsceneManager { 
+public class ClientCutsceneManager {
     public static final BiMap<ResourceLocation, CutsceneType> CLIENT_REGISTRY = HashBiMap.create();
+    public static final ActionToggles DEFAULT_ACTION_TOGGLES = new ActionToggles.Builder(false).build();
     public static CutsceneStatus cutsceneStatus = CutsceneStatus.NONE;
     public static CutsceneType runningCutscene;
     public static long startTime;
@@ -68,8 +69,12 @@ public class ClientCutsceneManager {
         // initialize minecraft
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.smartCull = false;
-        minecraft.gameRenderer.setRenderHand(false);
-        minecraft.gameRenderer.setRenderBlockOutline(false);
+        if (runningCutscene.hideHand) {
+            minecraft.gameRenderer.setRenderHand(false);
+        }
+        if (runningCutscene.hideBlockOutline) {
+            minecraft.gameRenderer.setRenderBlockOutline(false);
+        }
         prevF5state = minecraft.options.getCameraType();
         if (minecraft.gameRenderer.getMainCamera().isDetached()) {
             minecraft.options.setCameraType(CameraType.FIRST_PERSON);
@@ -144,7 +149,7 @@ public class ClientCutsceneManager {
                 return;
             }
             if (runningCutscene == null) {
-                CutsceneAPI.LOGGER.error("Attempted to run an invalid runningCutscene!");
+                CutsceneAPI.LOGGER.error("Attempted to run an invalid cutscene!");
                 stopCutsceneImmediate();
                 return;
             }
@@ -208,6 +213,11 @@ public class ClientCutsceneManager {
                 }
             }
         }
+    }
+
+    public static ActionToggles actionToggles() {
+        if (runningCutscene == null || cutsceneStatus == CutsceneStatus.NONE) return DEFAULT_ACTION_TOGGLES;
+        return runningCutscene.actionToggles;
     }
 
     public static enum CutsceneStatus {

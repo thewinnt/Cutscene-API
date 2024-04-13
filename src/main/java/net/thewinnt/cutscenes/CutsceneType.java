@@ -10,6 +10,8 @@ import net.thewinnt.cutscenes.path.Path;
 import net.thewinnt.cutscenes.path.PathLike;
 import net.thewinnt.cutscenes.transition.SmoothEaseTransition;
 import net.thewinnt.cutscenes.transition.Transition;
+import net.thewinnt.cutscenes.util.ActionToggles;
+import net.thewinnt.cutscenes.util.ActionToggles.Builder;
 import net.thewinnt.cutscenes.util.JsonHelper;
 
 import javax.annotation.Nullable;
@@ -22,8 +24,11 @@ public class CutsceneType {
     public final Transition endTransition;
     public final boolean blockMovement;
     public final boolean blockCameraRotation;
+    public final ActionToggles actionToggles;
+    public final boolean hideHand;
+    public final boolean hideBlockOutline;
 
-    public CutsceneType(PathLike path, Path rotationProvider, int length, Transition start, Transition end, boolean blockMovement, boolean blockCameraRotation) {
+    public CutsceneType(PathLike path, Path rotationProvider, int length, Transition start, Transition end, boolean blockMovement, boolean blockCameraRotation, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline) {
         if (path instanceof Path pth) {
             this.path = pth;
         } else if (path != null) {
@@ -37,6 +42,9 @@ public class CutsceneType {
         this.endTransition = end;
         this.blockMovement = path != null || blockMovement; // if there's a path, you can't block movement
         this.blockCameraRotation = rotationProvider != null || blockCameraRotation; // same for rotation
+        this.actionToggles = toggles;
+        this.hideHand = hideHand;
+        this.hideBlockOutline = hideBlockOutline;
     }
     
     public CutsceneType(PathLike path, Path rotationProvider, int length) {
@@ -53,6 +61,9 @@ public class CutsceneType {
         this.endTransition = new SmoothEaseTransition(40, false, false);
         this.blockMovement = true;
         this.blockCameraRotation = true;
+        this.actionToggles = new Builder(true).build();
+        this.hideHand = false;
+        this.hideBlockOutline = false;
     }
 
     @Nullable
@@ -79,6 +90,9 @@ public class CutsceneType {
         endTransition.toNetwork(buf);
         buf.writeBoolean(blockMovement);
         buf.writeBoolean(blockCameraRotation);
+        actionToggles.toNetwork(buf);
+        buf.writeBoolean(hideHand);
+        buf.writeBoolean(hideBlockOutline);
     }
 
     public static CutsceneType fromNetwork(FriendlyByteBuf buf) {
@@ -98,7 +112,10 @@ public class CutsceneType {
         Transition end = Transition.fromNetwork(buf);
         boolean blockMovement = buf.readBoolean();
         boolean blockCameraRotation = buf.readBoolean();
-        return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, blockCameraRotation);
+        ActionToggles actionToggles = ActionToggles.fromNetwork(buf);
+        boolean hideHand = buf.readBoolean();
+        boolean hideBlockOutline = buf.readBoolean();
+        return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, blockCameraRotation, actionToggles, hideHand, hideBlockOutline);
     }
 
     public static CutsceneType fromJSON(JsonObject json) {
@@ -109,6 +126,16 @@ public class CutsceneType {
         Transition end = Transition.fromJSON(JsonHelper.getNullableObject(json, "end_transition"), new SmoothEaseTransition(40, false, false));
         boolean blockMovement = GsonHelper.getAsBoolean(json, "block_movement", false) || path != null;
         boolean blockRotation = GsonHelper.getAsBoolean(json, "block_rotation", false) || rotation != null;
-        return new CutsceneType(path, rotation, length, start, end, blockMovement, blockRotation);
+        ActionToggles toggles;
+        if (json.has("disable_actions")) {
+            toggles = ActionToggles.fromJson(json.get("disable_actions"));
+        } else {
+            toggles = new ActionToggles.Builder(true).build();
+        }
+        boolean defaultHideBlockOutline = toggles.disableBreakingBlocks() && toggles.disableBlockInteractions() && toggles.disablePickingBlocks();
+        boolean defaultHideHand = defaultHideBlockOutline && toggles.disableAttacking() && toggles.disableUsingItems() && toggles.disableEntityInteractions();
+        boolean hideHand = GsonHelper.getAsBoolean(json, "hide_hand", defaultHideHand);
+        boolean hideBlockOutline = GsonHelper.getAsBoolean(json, "hide_block_outline", defaultHideBlockOutline);
+        return new CutsceneType(path, rotation, length, start, end, blockMovement, blockRotation, toggles, hideHand, hideBlockOutline);
     }
 }

@@ -22,7 +22,7 @@ public class MultiPlayerGameModeMixin {
     // don't interact with blocks
     @Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true)
     public void interactBlock(LocalPlayer player, InteractionHand hand, BlockHitResult result, CallbackInfoReturnable<InteractionResult> callback) {
-        if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE) {
+        if (ClientCutsceneManager.actionToggles().disableBlockInteractions()) {
             callback.setReturnValue(InteractionResult.PASS);
         }
     }
@@ -30,7 +30,7 @@ public class MultiPlayerGameModeMixin {
     // don't interact with entities
     @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
     public void interactEntity(Player player, Entity target, InteractionHand hand, CallbackInfoReturnable<InteractionResult> callback) {
-        if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE) {
+        if (ClientCutsceneManager.actionToggles().disableEntityInteractions()) {
             callback.setReturnValue(InteractionResult.PASS);
         }
     }
@@ -38,7 +38,7 @@ public class MultiPlayerGameModeMixin {
     // don't interact with entities
     @Inject(method = "interactAt", at = @At("HEAD"), cancellable = true)
     public void interactEntityAtLocation(Player player, Entity target, EntityHitResult ray, InteractionHand hand, CallbackInfoReturnable<InteractionResult> callback) {
-        if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE) {
+        if (ClientCutsceneManager.actionToggles().disableEntityInteractions()) {
             callback.setReturnValue(InteractionResult.PASS);
         }
     }
@@ -46,7 +46,7 @@ public class MultiPlayerGameModeMixin {
     // don't attack self
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
     public void attackEntity(Player player, Entity target, CallbackInfo callback) {
-        if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE) {
+        if (ClientCutsceneManager.actionToggles().disableAttacking() || target.equals(player)) {
             callback.cancel();
         }
     }
