@@ -63,7 +63,12 @@ public class SmoothEaseTransition implements Transition {
         } else {
             cutsceneProgress = isStart ? 0 : 1;
         }
-        Vec3 point = cutscene.getPathPoint(cutsceneProgress, level, startPos).yRot((float)pathRot.y).zRot((float)pathRot.z).xRot((float)pathRot.x).add(startPos);
+        Vec3 point = cutscene.getPathPoint(cutsceneProgress, level, startPos);
+        if (point == null) {
+            point = startPos;
+        } else {
+            point = point.yRot((float) pathRot.y).zRot((float) pathRot.z).xRot((float) pathRot.x).add(startPos);
+        }
         if (isStart) {
             return new Vec3(
                 Mth.lerp(easingX.apply(progress), initCamPos.x, point.x),
@@ -83,6 +88,9 @@ public class SmoothEaseTransition implements Transition {
     public Vec3 getRot(double progress, Level level, Vec3 startPos, Vec3 startRot, Vec3 initCamRot, CutsceneType cutscene) {
         double cutsceneProgress = progress * this.length / cutscene.length;
         Vec3 rotation = cutscene.getRotationAt(cutsceneProgress, level, startPos);
+        if (rotation == null) {
+            rotation = initCamRot;
+        }
         double targetYaw = rotation.x + startRot.x;
         double targetPitch = rotation.y + startRot.y;
         double targetRoll = rotation.z + startRot.z;
@@ -91,6 +99,9 @@ public class SmoothEaseTransition implements Transition {
         double z = initCamRot.z;
         if (countTowardsCutsceneTime && isStart) {
             Vec3 rot0 = cutscene.getRotationAt(0, level, startPos);
+            if (rot0 == null) {
+                rot0 = startRot;
+            }
             if (initCamRot.x != rot0.x + startRot.x) {
                 x = Mth.rotLerp((float)(easingRotX.apply(progress)), (float)initCamRot.x, (float)targetYaw);
             }
@@ -103,6 +114,9 @@ public class SmoothEaseTransition implements Transition {
             return new Vec3(x, y, z);
         } else if (countTowardsCutsceneTime && !isStart) {
             Vec3 rot1 = cutscene.getRotationAt(1, level, startPos);
+            if (rot1 == null) {
+                rot1 = startRot;
+            }
             if (initCamRot.x != rot1.x + startRot.x) {
                 x = Mth.rotLerp((float)(easingRotX.apply(progress)), (float)targetYaw, (float)initCamRot.x);
             }
@@ -115,6 +129,9 @@ public class SmoothEaseTransition implements Transition {
             return new Vec3(x, y, z);
         } else if (!countTowardsCutsceneTime && isStart) {
             Vec3 rot0 = cutscene.getRotationAt(0, level, startPos);
+            if (rot0 == null) {
+                rot0 = startRot;
+            }
             if (initCamRot.x != rot0.x + startRot.x) {
                 x = Mth.rotLerp((float)(easingRotX.apply(progress)), (float)initCamRot.x, (float)rot0.x);
             }
@@ -127,6 +144,9 @@ public class SmoothEaseTransition implements Transition {
             return new Vec3(x, y, z);
         } else {
             Vec3 rot1 = cutscene.getRotationAt(1, level, startPos);
+            if (rot1 == null) {
+                rot1 = startRot;
+            }
             if (initCamRot.x != rot1.x + startRot.x) {
                 x = Mth.rotLerp((float)(easingRotX.apply(progress)), (float)rot1.x, (float)initCamRot.x);
             }

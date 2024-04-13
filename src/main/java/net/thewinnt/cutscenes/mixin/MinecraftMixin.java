@@ -15,7 +15,7 @@ public class MinecraftMixin {
     // don't attack
     @Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)
     public void startAttack(CallbackInfoReturnable<Boolean> callback) {
-        if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE) {
+        if (ClientCutsceneManager.actionToggles().disableAttacking()) {
             callback.setReturnValue(false);
         }
     }
@@ -23,7 +23,7 @@ public class MinecraftMixin {
     // don't pick blocks
     @Inject(method = "pickBlock", at = @At("HEAD"), cancellable = true)
     public void pickBlock(CallbackInfo callback) {
-        if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE) {
+        if (ClientCutsceneManager.actionToggles().disablePickingBlocks()) {
             callback.cancel();
         }
     }
@@ -31,7 +31,7 @@ public class MinecraftMixin {
     // don't break blocks
     @Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true)
     public void continueAttack(CallbackInfo callback) {
-        if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE) {
+        if (ClientCutsceneManager.actionToggles().disableBreakingBlocks()) {
             callback.cancel();
         }
     }
@@ -39,7 +39,7 @@ public class MinecraftMixin {
     // don't use items
     @Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)
     public void startUseItem(CallbackInfo callback) {
-        if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE) {
+        if (ClientCutsceneManager.actionToggles().disableUsingItems()) {
             callback.cancel();
         }
     }

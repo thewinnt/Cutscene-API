@@ -48,6 +48,14 @@ public interface Transition {
         return serializer.fromJSON(json);
     }
 
+    /**
+     * Returns a Transition from json, or a fallback value if json is null
+     */
+    public static Transition fromJSON(JsonObject json, Transition defaultIfNull) {
+        if (json == null) return defaultIfNull;
+        return fromJSON(json);
+    }
+
     public static Transition fromNetwork(FriendlyByteBuf buf) {
         ResourceLocation type = buf.readResourceLocation();
         TransitionSerializer<?> serializer = CutsceneManager.getTransitionType(type);

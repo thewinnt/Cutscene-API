@@ -1,6 +1,12 @@
 package net.thewinnt.cutscenes.util;
 
+import net.thewinnt.cutscenes.CutsceneType;
+
+import javax.annotation.Nullable;
+
 public interface ServerPlayerExt {
-    int getCutsceneTicks();
-    void setCutsceneTicks(int value);
+    int csapi$getCutsceneTicks();
+    @Nullable CutsceneType csapi$getRunningCutscene();
+    void csapi$setCutsceneTicks(int value);
+    void csapi$setRunningCutscene(CutsceneType type);
 }

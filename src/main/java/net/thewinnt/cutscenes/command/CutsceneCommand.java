@@ -123,7 +123,7 @@ public class CutsceneCommand {
             .executes((arg) -> {
                 CommandSourceStack source = arg.getSource();
                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
-                ((ServerPlayerExt)player).setCutsceneTicks(0);
+                ((ServerPlayerExt)player).csapi$setCutsceneTicks(0);
                 PacketDistributor.PLAYER.with(player).send(new StopCutscenePacket());
                 source.sendSuccess(() -> Component.translatable("commands.cutscene.stopped", player.getDisplayName()), true);
                 return 1;
@@ -188,7 +188,8 @@ public class CutsceneCommand {
         }
         CutsceneType type = CutsceneManager.REGISTRY.get(id);
         PacketDistributor.PLAYER.with(player).send(new StartCutscenePacket(id, pos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
-        ((ServerPlayerExt)player).setCutsceneTicks(type.length);
+        ((ServerPlayerExt)player).csapi$setCutsceneTicks(type.length);
+        ((ServerPlayerExt)player).csapi$setRunningCutscene(type);
         source.sendSuccess(() -> Component.translatable("commands.cutscene.showing", id, player.getDisplayName()), true);
         return 1;
     }

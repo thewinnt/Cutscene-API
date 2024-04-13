@@ -181,6 +181,7 @@ public class Path implements PathLike {
     }
 
     public static Path fromJSON(JsonObject json, Path path) {
+        if (json == null) return null;
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         Path output = new Path(weight);
         JsonArray segments_j = json.getAsJsonArray("segments");

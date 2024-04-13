@@ -84,7 +84,7 @@ public class CutsceneManager {
         500
     );
 
-    /** A path that combines some Bezier curve configurations */
+    /** A path that combines some Bézier curve configurations */
     public static final CutsceneType MULTI_TYPE = new CutsceneType(
         new Path(new BezierCurve(new Vec3(0, 0, 0), new Vec3(10, 0, 0), new Vec3(0, 10, 0), new Vec3(10, 10, 0)))
                 .continueBezier(null, new Vec3(10, 10, 10)) // +/-
@@ -268,7 +268,8 @@ public class CutsceneManager {
      * @param player The player to play the cutscene to
      */
     public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
-        ((ServerPlayerExt)player).setCutsceneTicks(REGISTRY.get(id).length);
+        ((ServerPlayerExt)player).csapi$setCutsceneTicks(REGISTRY.get(id).length);
+        ((ServerPlayerExt)player).csapi$setRunningCutscene(REGISTRY.get(id));
         player.setCamera(null);
         PacketDistributor.PLAYER.with(player).send(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
     }

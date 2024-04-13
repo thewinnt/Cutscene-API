@@ -16,11 +16,13 @@ public class NoopTransition implements Transition {
 
     @Override
     public Vec3 getPos(double progress, Level level, Vec3 startPos, Vec3 pathRot, Vec3 initCamPos, CutsceneType cutscene) {
+        if (cutscene.path == null) return startPos;
         return cutscene.getPathPoint(0, level, startPos).yRot((float)pathRot.y).zRot((float)pathRot.z).xRot((float)pathRot.x).add(startPos);
     }
 
     @Override
     public Vec3 getRot(double progress, Level level, Vec3 startPos, Vec3 startRot, Vec3 initCamRot, CutsceneType cutscene) {
+        if (cutscene.rotationProvider == null) return startRot;
         return cutscene.getRotationAt(0, level, startPos);
     }
 
