@@ -231,7 +231,6 @@ public class CutsceneManager {
         previewPathYaw = pathYaw;
         previewPathPitch = pathPitch;
         previewPathRoll = pathRoll;
-        // TODO networking
         PacketDistributor.ALL.noArg().send(new PreviewCutscenePacket(REGISTRY.inverse().get(type), offset, pathYaw, pathPitch, pathRoll));
     }
 

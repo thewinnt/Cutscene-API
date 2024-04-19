@@ -45,6 +45,8 @@ public class CutsceneNetworkHandler {
         );
     }
 
+    /** @deprecated use {@link FriendlyByteBuf#readVec3()} instead */
+    @Deprecated(forRemoval = true)
     public static Vec3 readVec3(FriendlyByteBuf buf) {
         if (buf.readBoolean()) {
             double x = buf.readDouble();
@@ -65,6 +67,8 @@ public class CutsceneNetworkHandler {
         }
     }
 
+    /** @deprecated use {@link FriendlyByteBuf#writeVec3(Vec3)} instead */
+    @Deprecated(forRemoval = true)
     public static void writeVec3(FriendlyByteBuf buf, Vec3 vec) {
         if (vec == null) {
             buf.writeBoolean(false); // is present

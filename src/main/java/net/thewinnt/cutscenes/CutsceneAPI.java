@@ -1,6 +1,7 @@
 package net.thewinnt.cutscenes;
 
 import java.util.Map;
+import java.util.Random;
 
 import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
@@ -8,8 +9,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -37,6 +36,8 @@ import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 @Mod("cutscene_api")
 public class CutsceneAPI {
     public static final Logger LOGGER = LogUtils.getLogger();
+    public static final Random RANDOM = new Random();
+    private static long WAYPOINT_SALT = RANDOM.nextLong();
 
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, "cutscenes");
     public static final DeferredHolder<EntityType<?>, EntityType<WaypointEntity>> WAYPOINT = ENTITIES.register("waypoint", () -> EntityType.Builder.of(WaypointEntity::new, MobCategory.MISC).sized(0.1f, 0.1f).clientTrackingRange(9999).setTrackingRange(9999).canSpawnFarFromPlayer().build("waypoint"));
@@ -80,5 +81,19 @@ public class CutsceneAPI {
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(CutsceneAPI.WAYPOINT.get(), NoopRenderer::new);
         }
+    }
+
+    /**
+     * Updates the salt value used for waypoint sorting.
+     * Called whenever a cutscene is started or a preview is set up.
+     * <p>
+     * It is not recommended to run this when a cutscene is running.
+     */
+    public static void updateSalt() {
+        WAYPOINT_SALT = RANDOM.nextLong();
+    }
+
+    public static long getWaypointSalt() {
+        return WAYPOINT_SALT;
     }
 }

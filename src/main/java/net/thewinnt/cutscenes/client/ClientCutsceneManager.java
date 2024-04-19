@@ -29,7 +29,7 @@ import java.util.Map;
 public class ClientCutsceneManager {
     public static final BiMap<ResourceLocation, CutsceneType> CLIENT_REGISTRY = HashBiMap.create();
     public static final ActionToggles DEFAULT_ACTION_TOGGLES = new ActionToggles.Builder(false).build();
-    public static CutsceneStatus cutsceneStatus = CutsceneStatus.NONE;
+    private static boolean isCutsceneRunning = false;
     public static CutsceneType runningCutscene;
     public static long startTime;
     private static Vec3 startPosition;
@@ -40,7 +40,7 @@ public class ClientCutsceneManager {
     public static float startPathPitch;
     public static float startPathRoll;
 
-    public static CutsceneType previewedCutscene = null;
+    private static CutsceneType previewedCutscene = null;
     public static Vec3 previewOffset;
     public static float previewPathYaw;
     public static float previewPathPitch;
@@ -55,6 +55,7 @@ public class ClientCutsceneManager {
     
     @OnlyIn(Dist.CLIENT)
     public static void startCutscene(CutsceneType type, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll) {
+        CutsceneAPI.updateSalt();
         // if the specified rotation value is NaN, use the initial values
         startCameraYaw = Float.isNaN(cameraYaw) ? initCameraYaw : cameraYaw;
         startCameraPitch = Float.isNaN(cameraPitch) ? initCameraPitch : cameraPitch;
@@ -84,13 +85,14 @@ public class ClientCutsceneManager {
             minecraft.setCameraEntity(camera);
         }
 
-        cutsceneStatus = CutsceneStatus.RUNNING;
+        isCutsceneRunning = true;
         startPosition = startPos;
     }
 
     public static void updateRegistry(Map<ResourceLocation, CutsceneType> registry) {
         CLIENT_REGISTRY.clear();
         CLIENT_REGISTRY.putAll(registry);
+        if (isCutsceneRunning) CutsceneAPI.updateSalt();
     }
 
     public static void registerCutscene(ResourceLocation id, CutsceneType type) {
@@ -117,10 +119,12 @@ public class ClientCutsceneManager {
         if (minecraft.player != null) {
             minecraft.player.input = new KeyboardInput(minecraft.options);
         }
+        isCutsceneRunning = false;
         runningCutscene = null;
     }
 
     public static void setPreviewedCutscene(CutsceneType preview, Vec3 offset, float pathYaw, float pathPitch, float pathRoll) {
+        CutsceneAPI.updateSalt();
         previewedCutscene = preview;
         previewOffset = offset;
         previewPathYaw = pathYaw;
@@ -142,9 +146,10 @@ public class ClientCutsceneManager {
 
     @SubscribeEvent
     public static void setCameraPosition(ComputeCameraAngles event) {
-        if (cutsceneStatus == CutsceneStatus.RUNNING) {
+        if (isCutsceneRunning) {
             if (camera == null) {
-                cutsceneStatus = CutsceneStatus.NONE;
+                CutsceneAPI.LOGGER.warn("Found ourselves running a cutscene despite the camera being null. Is this normal?");
+                stopCutsceneImmediate();
                 return;
             }
             if (runningCutscene == null) {
@@ -186,7 +191,7 @@ public class ClientCutsceneManager {
             if (!runningCutscene.blockMovement) {
                 camera.getProperPosition(partialTick);
             }
-        } else if (cutsceneStatus == CutsceneStatus.NONE) {
+        } else {
             hidGuiBefore = event.getRenderer().getMinecraft().options.hideGui;
             initCameraYaw = event.getYaw();
             initCameraPitch = event.getPitch();
@@ -204,7 +209,7 @@ public class ClientCutsceneManager {
     public static void onClientTick(ClientTickEvent event) {
         if (event.phase == Phase.START) {
             Minecraft minecraft = Minecraft.getInstance();
-            if (cutsceneStatus != CutsceneStatus.NONE && runningCutscene != null && runningCutscene.blockMovement) {
+            if (isCutsceneRunning && runningCutscene.blockMovement) {
                 if (minecraft.player != null && minecraft.player.input instanceof KeyboardInput) {
                     Input input = new Input();
                     input.shiftKeyDown = minecraft.player.input.shiftKeyDown;
@@ -215,13 +220,11 @@ public class ClientCutsceneManager {
     }
 
     public static ActionToggles actionToggles() {
-        if (runningCutscene == null || cutsceneStatus == CutsceneStatus.NONE) return DEFAULT_ACTION_TOGGLES;
+        if (!isCutsceneRunning) return DEFAULT_ACTION_TOGGLES;
         return runningCutscene.actionToggles;
     }
 
-    public static enum CutsceneStatus {
-        NONE,
-        RUNNING,
-        STOPPING;
+    public static boolean isCutsceneRunning() {
+        return isCutsceneRunning;
     }
 }

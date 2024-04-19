@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.Minecraft;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
-import net.thewinnt.cutscenes.client.ClientCutsceneManager.CutsceneStatus;
 
 @Mixin(Minecraft.class)
 public class MinecraftMixin {

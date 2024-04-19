@@ -17,7 +17,7 @@ public record WorldPointProvider(Vec3 point) implements PointProvider {
 
     @Override
     public void toNetwork(FriendlyByteBuf buf) {
-        CutsceneNetworkHandler.writeVec3(buf, point);
+        buf.writeVec3(point);
     }
 
     @Override
@@ -26,7 +26,7 @@ public record WorldPointProvider(Vec3 point) implements PointProvider {
     }
 
     public static WorldPointProvider fromNetwork(FriendlyByteBuf buf) {
-        return new WorldPointProvider(CutsceneNetworkHandler.readVec3(buf));
+        return new WorldPointProvider(buf.readVec3());
     }
 
     public static WorldPointProvider fromJSON(JsonObject obj) {

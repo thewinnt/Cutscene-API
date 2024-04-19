@@ -38,8 +38,8 @@ public class PathPreviewRenderer {
 
     @SuppressWarnings("resource")
     public static void beforeDebugRender(PoseStack stack, VertexConsumer consumer) {
-        if (ClientCutsceneManager.previewedCutscene == null) return;
-        CutsceneType type = ClientCutsceneManager.previewedCutscene;
+        if (ClientCutsceneManager.getPreviewedCutscene() == null) return;
+        CutsceneType type = ClientCutsceneManager.getPreviewedCutscene();
         Path path = type.path;
         if (path == null) return;
         float yRot = (float)Math.toRadians(ClientCutsceneManager.previewPathYaw);
@@ -113,7 +113,7 @@ public class PathPreviewRenderer {
     }
 
     private static Vector3f getColorAtPoint(float point) {
-        point /= (ClientCutsceneManager.previewedCutscene.path.size()); // to get a value [0-1]
+        point /= (ClientCutsceneManager.getPreviewedCutscene().path.size()); // to get a value [0-1]
         float red, green, blue;
         if (point < 0.333f) {
             red = 1 - point * 3;
@@ -144,7 +144,7 @@ public class PathPreviewRenderer {
     }
 
     public static record Line(PointProvider start, @Nullable PointProvider end, int level) {
-        private boolean isPoint() {
+        public boolean isPoint() {
             return end == null;
         }
     };

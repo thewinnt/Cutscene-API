@@ -12,7 +12,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
 import net.neoforged.neoforge.client.event.RenderGuiOverlayEvent;
-import net.thewinnt.cutscenes.client.ClientCutsceneManager.CutsceneStatus;
 
 @Mod.EventBusSubscriber(bus = Bus.FORGE, value = Dist.CLIENT)
 public class FadeToColorOverlay {
@@ -30,11 +29,11 @@ public class FadeToColorOverlay {
 
         // alpha = (float)(Math.sin(System.currentTimeMillis() / 2000.0) + 1) / 2f;
 
-        if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE) {
+        if (ClientCutsceneManager.isCutsceneRunning()) {
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
             RenderSystem.enableBlend();
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+//            RenderSystem.setShader(GameRenderer::getPositionColorShader);
             RenderSystem.defaultBlendFunc();
             float[] shaderColor = RenderSystem.getShaderColor();
             RenderSystem.setShaderColor(1, 1, 1, 1);

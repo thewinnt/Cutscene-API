@@ -15,7 +15,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
-import net.thewinnt.cutscenes.client.ClientCutsceneManager.CutsceneStatus;
 
 @Mixin(MultiPlayerGameMode.class)
 public class MultiPlayerGameModeMixin {

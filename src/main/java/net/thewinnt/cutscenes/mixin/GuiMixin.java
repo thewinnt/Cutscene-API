@@ -9,14 +9,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.world.entity.player.Player;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
-import net.thewinnt.cutscenes.client.ClientCutsceneManager.CutsceneStatus;
 
 @Mixin(Gui.class)
 public class GuiMixin {
     // show the real player's hud
     @Inject(method = "getCameraPlayer", at = @At("HEAD"), cancellable = true)
     private void getCameraPlayer(CallbackInfoReturnable<Player> cir) {
-        if (ClientCutsceneManager.cutsceneStatus != CutsceneStatus.NONE) {
+        if (ClientCutsceneManager.isCutsceneRunning()) {
             Minecraft minecraft = Minecraft.getInstance(); // prevent warning
             cir.setReturnValue(minecraft.player);
         }

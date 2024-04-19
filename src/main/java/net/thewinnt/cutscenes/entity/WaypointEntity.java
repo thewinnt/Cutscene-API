@@ -38,4 +38,14 @@ public class WaypointEntity extends Entity {
     public String getWaypointName() {
         return this.entityData.get(NAME);
     }
+
+    @Override
+    public boolean shouldRender(double pX, double pY, double pZ) {
+        return true;
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double pDistance) {
+        return true;
+    }
 }

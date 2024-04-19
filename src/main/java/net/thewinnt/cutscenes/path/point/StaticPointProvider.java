@@ -17,7 +17,7 @@ public record StaticPointProvider(Vec3 point) implements PointProvider {
 
     @Override
     public void toNetwork(FriendlyByteBuf buf) {
-        CutsceneNetworkHandler.writeVec3(buf, point);
+        buf.writeVec3(point);
     }
 
     @Override
@@ -26,7 +26,7 @@ public record StaticPointProvider(Vec3 point) implements PointProvider {
     }
 
     public static StaticPointProvider fromNetwork(FriendlyByteBuf buf) {
-        return new StaticPointProvider(CutsceneNetworkHandler.readVec3(buf));
+        return new StaticPointProvider(buf.readVec3());
     }
 
     public static StaticPointProvider fromJSON(JsonObject obj) {

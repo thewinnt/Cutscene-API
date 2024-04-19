@@ -1,0 +1,50 @@
+{
+  "length": 100,
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:catmull_rom",
+        "points": [
+          [-10, -10, -10],
+          {
+            "type": "cutscenes:waypoint",
+            "search_radius": 4,
+            "name": "type1",
+            "sort_type": "random"
+          },
+          {
+            "type": "cutscenes:waypoint",
+            "search_radius": 16,
+            "name": "type2",
+            "sort_type": "random",
+            "offset": [0, 5, 0],
+            "fallback": {
+              "type": "cutscenes:waypoint",
+              "search_radius": 64,
+              "name": "type1",
+              "sort_type": "random",
+              "offset": [0, -5, 0],
+              "fallback": [10, 10, 10]
+            }
+          },
+          {
+            "type": "cutscenes:world",
+            "point": [44.5, 76.5, -31.5]
+          },
+          [10, 10, 10]
+        ]
+      }
+    ]
+  },
+  "rotation": {
+    "segments": [
+      {
+        "type": "cutscenes:constant",
+        "point": {
+          "type": "cutscenes:static",
+          "point": [0, 0, 0]
+        }
+      }
+    ]
+  }
+}

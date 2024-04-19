@@ -32,7 +32,7 @@ public class StartCutscenePacket implements CustomPacketPayload {
 
     public static StartCutscenePacket read(FriendlyByteBuf buf) {
         ResourceLocation type = buf.readNullable(FriendlyByteBuf::readResourceLocation);
-        Vec3 startPos = CutsceneNetworkHandler.readVec3(buf);
+        Vec3 startPos = buf.readVec3();
         float cameraYaw = buf.readFloat();
         float cameraPitch = buf.readFloat();
         float cameraRoll = buf.readFloat();
@@ -44,7 +44,7 @@ public class StartCutscenePacket implements CustomPacketPayload {
 
     public void write(FriendlyByteBuf buf) {
         buf.writeNullable(type, FriendlyByteBuf::writeResourceLocation);
-        CutsceneNetworkHandler.writeVec3(buf, startPos);
+        buf.writeVec3(startPos);
         buf.writeFloat(cameraYaw);
         buf.writeFloat(cameraPitch);
         buf.writeFloat(cameraRoll);
