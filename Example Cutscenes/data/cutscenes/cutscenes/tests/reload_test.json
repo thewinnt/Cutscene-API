@@ -7,9 +7,15 @@
         "start": [0, 0, 0],
         "end": [10, 10, 10],
         "is_rotation": false,
-        "easing_x": "linear",
-        "easing_y": "in_out_expo",
-        "easing_z": "in_out_elastic"
+        "easing_x": {
+          "type": "cutscenes:linear"
+        },
+        "easing_y": {
+          "type": "cutscenes:in_out_expo"
+        },
+        "easing_z": {
+          "type": "cutscenes:in_out_elastic"
+        }
       },
       {
         "type": "cutscenes:catmull_rom",
@@ -42,9 +48,15 @@
         "start": [-45, -45, -20],
         "end": [45, 45, 20],
         "is_rotation": true,
-        "easing_x": "linear",
-        "easing_y": "in_out_expo",
-        "easing_z": "in_out_bounce"
+        "easing_x": {
+          "type": "cutscenes:linear"
+        },
+        "easing_y": {
+          "type": "cutscenes:in_out_expo"
+        },
+        "easing_z": {
+          "type": "cutscenes:in_out_bounce"
+        }
       }
     ]
   }

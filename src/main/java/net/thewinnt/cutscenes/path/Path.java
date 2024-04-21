@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.client.preview.PathPreviewRenderer.Line;
+import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import oshi.util.tuples.Pair;
@@ -122,12 +123,12 @@ public class Path implements PathLike {
         return addBezier(control_a, control_b, end, 1);
     }
 
-    public Path addLinear(Vec3 end, EasingFunction easingX, EasingFunction easingY, EasingFunction easingZ, boolean isRotation, int weight) {
+    public Path addLinear(Vec3 end, Easing easingX, Easing easingY, Easing easingZ, boolean isRotation, int weight) {
         this.segments.add(new LineSegment(this.last().getEnd(null, null), s(end), easingX, easingY, easingZ, weight, isRotation));
         return this;
     }
 
-    public Path addLinear(Vec3 end, EasingFunction easingX, EasingFunction easingY, EasingFunction easingZ, boolean isRotation) {
+    public Path addLinear(Vec3 end, Easing easingX, Easing easingY, Easing easingZ, boolean isRotation) {
         return this.addLinear(end, easingX, easingY, easingZ, isRotation, 1);
     }
 

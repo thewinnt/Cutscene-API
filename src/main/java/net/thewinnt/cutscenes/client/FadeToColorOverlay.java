@@ -1,21 +1,20 @@
 package net.thewinnt.cutscenes.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat.Mode;
-
-import net.minecraft.client.renderer.GameRenderer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
 import net.neoforged.neoforge.client.event.RenderGuiOverlayEvent;
+import org.joml.Matrix4f;
 
 @Mod.EventBusSubscriber(bus = Bus.FORGE, value = Dist.CLIENT)
 public class FadeToColorOverlay {
-    // private static final Minecraft MINECRAFT = Minecraft.getInstance();
+    private static final Minecraft MINECRAFT = Minecraft.getInstance();
     private static float[] colorBottomLeft = new float[]{1, 0, 0, 1};
     private static float[] colorTopLeft = new float[]{0, 1, 0, 1};
     private static float[] colorTopRight = new float[]{0, 0, 1, 1};
@@ -26,37 +25,24 @@ public class FadeToColorOverlay {
     public static void renderOverlay(RenderGuiOverlayEvent.Pre event) {
         int width = event.getWindow().getGuiScaledWidth();
         int height = event.getWindow().getGuiScaledHeight();
+        GuiGraphics graphics = event.getGuiGraphics();
 
         // alpha = (float)(Math.sin(System.currentTimeMillis() / 2000.0) + 1) / 2f;
 
         if (ClientCutsceneManager.isCutsceneRunning()) {
-            RenderSystem.disableDepthTest();
-            RenderSystem.depthMask(false);
-            RenderSystem.enableBlend();
-//            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            RenderSystem.defaultBlendFunc();
-            float[] shaderColor = RenderSystem.getShaderColor();
-            RenderSystem.setShaderColor(1, 1, 1, 1);
+            Matrix4f matrix4f = graphics.pose().last().pose();
+            VertexConsumer builder = graphics.bufferSource().getBuffer(RenderType.gui());
+            builder.vertex(matrix4f, 0, height, -90).color(colorBottomLeft[0], colorBottomLeft[1], colorBottomLeft[2], colorBottomLeft[3] * alpha).endVertex();
+            builder.vertex(matrix4f, width, height, -90).color(colorBottomRight[0], colorBottomRight[1], colorBottomRight[2], colorBottomRight[3] * alpha).endVertex();
+            builder.vertex(matrix4f, width, 0, -90).color(colorTopRight[0], colorTopRight[1], colorTopRight[2], colorTopRight[3] * alpha).endVertex();
+            builder.vertex(matrix4f, 0, 0, -90).color(colorTopLeft[0], colorTopLeft[1], colorTopLeft[2], colorTopLeft[3] * alpha).endVertex();
 
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder builder = tesselator.getBuilder();
-            builder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            builder.vertex(0, height, -90).color(colorBottomLeft[0], colorBottomLeft[1], colorBottomLeft[2], colorBottomLeft[3] * alpha).endVertex();
-            builder.vertex(width, height, -90).color(colorBottomRight[0], colorBottomRight[1], colorBottomRight[2], colorBottomRight[3] * alpha).endVertex();
-            builder.vertex(width, 0, -90).color(colorTopRight[0], colorTopRight[1], colorTopRight[2], colorTopRight[3] * alpha).endVertex();
-            builder.vertex(0, 0, -90).color(colorTopLeft[0], colorTopLeft[1], colorTopLeft[2], colorTopLeft[3] * alpha).endVertex();
-            tesselator.end();
-
-            // event.getGuiGraphics().drawString(MINECRAFT.font, Component.literal("alpha " + alpha), 0, 0, 16777215);
-            // event.getGuiGraphics().drawString(MINECRAFT.font, Component.literal("alpha_bl " + alpha * colorBottomLeft[3]), 0, 9, 16777215);
-            // event.getGuiGraphics().drawString(MINECRAFT.font, Component.literal("alpha_tl " + alpha * colorTopLeft[3]), 0, 18, 16777215);
-            // event.getGuiGraphics().drawString(MINECRAFT.font, Component.literal("alpha_tr " + alpha * colorTopRight[3]), 0, 27, 16777215);
-            // event.getGuiGraphics().drawString(MINECRAFT.font, Component.literal("alpha_br " + alpha * colorBottomRight[3]), 0, 36, 16777215);
-            // event.getGuiGraphics().drawString(MINECRAFT.font, Component.literal("time " + System.currentTimeMillis() / 2000.0), 0, 18, 16777215);
-
-            RenderSystem.depthMask(true);
-            RenderSystem.enableDepthTest();
-            RenderSystem.setShaderColor(shaderColor[0], shaderColor[1], shaderColor[2], shaderColor[3]);
+            graphics.drawString(MINECRAFT.font, Component.literal("alpha " + alpha), 0, 0, 16777215);
+            graphics.drawString(MINECRAFT.font, Component.literal("alpha_bl " + alpha * colorBottomLeft[3]), 0, 9, 16777215);
+            graphics.drawString(MINECRAFT.font, Component.literal("alpha_tl " + alpha * colorTopLeft[3]), 0, 18, 16777215);
+            graphics.drawString(MINECRAFT.font, Component.literal("alpha_tr " + alpha * colorTopRight[3]), 0, 27, 16777215);
+            graphics.drawString(MINECRAFT.font, Component.literal("alpha_br " + alpha * colorBottomRight[3]), 0, 36, 16777215);
+//            graphics.drawString(MINECRAFT.font, Component.literal("time " + System.currentTimeMillis() / 2000.0), 0, 18, 16777215);
         }
     }
 

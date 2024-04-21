@@ -2,6 +2,7 @@ package net.thewinnt.cutscenes.path;
 
 import java.util.function.Function;
 
+@Deprecated(forRemoval = true, since = "2.0")
 public enum EasingFunction {
     // source: https://easings.net
     LINEAR(t -> t),

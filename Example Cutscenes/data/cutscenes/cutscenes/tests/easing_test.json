@@ -1,0 +1,29 @@
+{
+  "length": 200,
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:line",
+        "start": [-6, -1, -1],
+        "end": [6, 1, 1],
+        "easing_x": {
+          "type": "cutscenes:in_out_quint"
+        },
+        "easing_y": {
+          "type": "cutscenes:out_bounce"
+        },
+        "easing_z": {
+          "type": "cutscenes:in_out_back"
+        }
+      }
+    ]
+  },
+  "rotation": {
+    "segments": [
+      {
+        "type": "cutscenes:constant",
+        "point": [0, 0, 0]
+      }
+    ]
+  }
+}

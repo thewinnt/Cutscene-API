@@ -10,6 +10,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
@@ -80,7 +81,7 @@ public class CutsceneManager {
                 .continueBezier(new Vec3(-50, 1, 0), new Vec3(-50, 10, 25)) // adds a new Bezier curve with arguments: (see below)
                 .continueBezier(new Vec3(-25, 50, 0), new Vec3(-25, 30, 10), 10) // start = prev.end; control_a = prev.control_b.lerp(prev.end, 2); control_b and end are specified by user
                 .continueBezier(new Vec3(-25, 0, 10), new Vec3(0, 0, 0)), // if previous is not Bezier or doesn't have control_b, args are: start = prev.end; control_b; null; end
-        new Path(new LineSegment(new Vec3(-30, 30, 0), new Vec3(20, -20, 0), EasingFunction.LINEAR, EasingFunction.IN_CUBIC, EasingFunction.LINEAR, true)),
+        new Path(new LineSegment(new Vec3(-30, 30, 0), new Vec3(20, -20, 0), SimpleEasing.LINEAR, SimpleEasing.IN_CUBIC, SimpleEasing.LINEAR, true)),
         500
     );
 
