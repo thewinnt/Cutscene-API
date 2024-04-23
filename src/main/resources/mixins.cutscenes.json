@@ -7,13 +7,14 @@
     "ServerPlayerMixin"
   ],
   "client": [
-    "MultiPlayerGameModeMixin",
-    "MinecraftMixin",
     "CameraMixin",
-    "OptionsMixin",
-    "GuiMixin",
     "DebugRendererMixin",
-    "EntityMixin"
+    "EntityMixin",
+    "GameRendererMixin",
+    "GuiMixin",
+    "MinecraftMixin",
+    "MultiPlayerGameModeMixin",
+    "OptionsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

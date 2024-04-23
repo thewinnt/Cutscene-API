@@ -1,11 +1,17 @@
 package net.thewinnt.cutscenes.easing;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneAPI;
+import net.thewinnt.cutscenes.easing.serializers.CompoundEasingSerializer;
+import net.thewinnt.cutscenes.easing.serializers.ConstantEasingSerializer;
 import net.thewinnt.cutscenes.easing.serializers.SimpleEasingSerializer;
+import net.thewinnt.cutscenes.easing.types.CompoundEasing;
+import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 
 import java.util.HashMap;
@@ -45,24 +51,23 @@ public interface EasingSerializer<T extends Easing> {
     EasingSerializer<SimpleEasing> OUT_BOUNCE = registerSimple(new ResourceLocation("cutscenes:out_bounce"), SimpleEasing.OUT_BOUNCE);
     EasingSerializer<SimpleEasing> IN_BOUNCE = registerSimple(new ResourceLocation("cutscenes:in_bounce"), SimpleEasing.IN_BOUNCE);
     EasingSerializer<SimpleEasing> IN_OUT_BOUNCE = registerSimple(new ResourceLocation("cutscenes:in_out_bounce"), SimpleEasing.IN_OUT_BOUNCE);
+    EasingSerializer<ConstantEasing> CONSTANT = register(new ResourceLocation("cutscenes:constant"), ConstantEasingSerializer.INSTANCE);
+    EasingSerializer<CompoundEasing> COMPOUND = register(new ResourceLocation("cutscenes:compound"), CompoundEasingSerializer.INSTANCE);
 
-    Codec<T> codec();
-    void toNetwork(FriendlyByteBuf buf, Easing easing);
     T fromNetwork(FriendlyByteBuf buf);
+    T fromJSON(JsonObject json);
 
     static <T extends Easing> EasingSerializer<T> register(ResourceLocation id, EasingSerializer<T> serializer) {
         return Registry.register(CutsceneAPI.EASING_SERIALIZERS, id, serializer);
     }
 
-    static <T extends Easing> SimpleEasingSerializer registerSimple(ResourceLocation id, SimpleEasing easing) {
+    static SimpleEasingSerializer registerSimple(ResourceLocation id, SimpleEasing easing) {
         SimpleEasingSerializer serializer = new SimpleEasingSerializer(easing);
-        LEGACY_COMPAT.put(id.getPath(), serializer.easing);
+        LEGACY_COMPAT.put(id.getPath(), serializer.easing());
         SIMPLE_EASINGS.put(id.getPath(), serializer);
         return Registry.register(CutsceneAPI.EASING_SERIALIZERS, id, serializer);
     }
 
     /** We need this for the class to load */
-    static void init() {
-        CutsceneAPI.LOGGER.info("Registering easing serializers");
-    }
+    static void init() {}
 }

@@ -85,9 +85,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
     }
 
     public void spawn() {
-        if (clientLevel != null) {
-            clientLevel.addEntity(this);
-        }
+        clientLevel.addEntity(this);
     }
 
     public void despawn() {

@@ -138,11 +138,11 @@ public class LineSegment implements PathLike {
         CutsceneNetworkHandler.writePointProvider(buf, a);
         CutsceneNetworkHandler.writePointProvider(buf, b);
         buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(easingX.getSerializer()));
-        easingX.getSerializer().toNetwork(buf, easingX);
+        easingX.toNetwork(buf);
         buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(easingY.getSerializer()));
-        easingY.getSerializer().toNetwork(buf, easingY);
+        easingY.toNetwork(buf);
         buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(easingZ.getSerializer()));
-        easingZ.getSerializer().toNetwork(buf, easingZ);
+        easingZ.toNetwork(buf);
         buf.writeBoolean(isRotation);
         buf.writeInt(weight);
     }
@@ -155,9 +155,9 @@ public class LineSegment implements PathLike {
     public static LineSegment fromJSON(JsonObject json, Path path) {
         PointProvider start = JsonHelper.pointFromJson(json, "start");
         PointProvider end = JsonHelper.pointFromJson(json, "end");
-        Easing easingX = Easing.NO_LEGACY_CODEC.orElse(SimpleEasing.LINEAR).parse(JsonOps.INSTANCE, json.get("easing_x")).get().orThrow();
-        Easing easingY = Easing.NO_LEGACY_CODEC.orElse(SimpleEasing.LINEAR).parse(JsonOps.INSTANCE, json.get("easing_y")).get().orThrow();
-        Easing easingZ = Easing.NO_LEGACY_CODEC.orElse(SimpleEasing.LINEAR).parse(JsonOps.INSTANCE, json.get("easing_z")).get().orThrow();
+        Easing easingX = Easing.fromJSON(json.get("easing_x"), SimpleEasing.LINEAR);
+        Easing easingY = Easing.fromJSON(json.get("easing_y"), SimpleEasing.LINEAR);
+        Easing easingZ = Easing.fromJSON(json.get("easing_z"), SimpleEasing.LINEAR);
         // TODO find out why this doesn't work
         // TODO try not using legacy compat
         int weight = GsonHelper.getAsInt(json, "weight", 1);

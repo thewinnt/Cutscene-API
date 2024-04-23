@@ -1,5 +1,6 @@
 package net.thewinnt.cutscenes.easing.types;
 
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.Easing;
@@ -68,4 +69,7 @@ public class SimpleEasing implements Easing {
     public EasingSerializer<SimpleEasing> getSerializer() {
         return EasingSerializer.SIMPLE_EASINGS.get(serializer);
     }
+
+    @Override
+    public void toNetwork(FriendlyByteBuf buf) {}
 }

@@ -1,30 +1,19 @@
 package net.thewinnt.cutscenes.easing.serializers;
 
-import com.mojang.serialization.Codec;
+import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
-import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 
-public class SimpleEasingSerializer implements EasingSerializer<SimpleEasing> {
-    public final SimpleEasing easing;
-    public final Codec<SimpleEasing> codec;
-
-    public SimpleEasingSerializer(SimpleEasing easing) {
-        this.easing = easing;
-        this.codec = Codec.unit(easing);
-    }
-
-    @Override
-    public Codec<SimpleEasing> codec() {
-        return codec;
-    }
-
-    @Override
-    public void toNetwork(FriendlyByteBuf buf, Easing easing) {}
+public record SimpleEasingSerializer(SimpleEasing easing) implements EasingSerializer<SimpleEasing> {
 
     @Override
     public SimpleEasing fromNetwork(FriendlyByteBuf buf) {
+        return easing;
+    }
+
+    @Override
+    public SimpleEasing fromJSON(JsonObject json) {
         return easing;
     }
 }
