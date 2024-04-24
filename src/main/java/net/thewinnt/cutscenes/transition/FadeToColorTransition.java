@@ -11,7 +11,9 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
-import net.thewinnt.cutscenes.client.FadeToColorOverlay;
+import net.thewinnt.cutscenes.client.CutsceneOverlayManager;
+import net.thewinnt.cutscenes.client.overlay.FadeToColorOverlay;
+import net.thewinnt.cutscenes.client.overlay.FadeToColorOverlayConfiguration;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
@@ -36,6 +38,7 @@ public class FadeToColorTransition implements Transition {
     private final Easing easeOut;
     private final Easing colorEase;
     private final boolean isStart;
+    private FadeToColorOverlayConfiguration config;
 
     public FadeToColorTransition(float[] startColorBottomLeft, float[] startColorTopLeft, float[] startColorTopRight, float[] startColorBottomRight, float[] endColorBottomLeft, float[] endColorTopLeft, float[] endColorTopRight, float[] endColorBottomRight, int lengthA, int lengthB, int gradientTimeA, int gradientTimeB, Easing easeIn, Easing easeOut, Easing colorEase, boolean isStart) {
         this.startColorBottomLeft = startColorBottomLeft;
@@ -133,35 +136,36 @@ public class FadeToColorTransition implements Transition {
 
     @Override
     public void onStart(CutsceneType cutscene) {
-        FadeToColorOverlay.setAlpha(0);
-        FadeToColorOverlay.setColors(startColorBottomLeft, startColorTopLeft, startColorTopRight, startColorBottomRight);
+        this.config = new FadeToColorOverlayConfiguration(startColorBottomLeft, startColorTopLeft, startColorTopRight, startColorBottomRight, 0);
+        CutsceneOverlayManager.setCurrentOverlay(FadeToColorOverlay.INSTANCE);
+        CutsceneOverlayManager.setOverlayConfig(this.config);
     }
 
     @Override
     public void onFrame(double progress, CutsceneType cutscene) {
         if (progress < progressLengthA) {
-            FadeToColorOverlay.setAlpha((float)easeIn.get(progress / progressLengthA));
+            this.config.setAlpha((float)easeIn.get(progress / progressLengthA));
         } else {
-            FadeToColorOverlay.setAlpha((float)easeOut.get((1 - progress + progressLengthA) / progressLengthB));
+            this.config.setAlpha((float)easeOut.get((1 - progress + progressLengthA) / progressLengthB));
         }
         double colorLerpStartProgress = (double)gradientTimeA / (lengthA + lengthB);
         double colorLerpEndProgress = (double)gradientTimeB / (lengthA + lengthB);
         if (progress < colorLerpStartProgress) {
-            FadeToColorOverlay.setColors(startColorBottomLeft, startColorTopLeft, startColorTopRight, startColorBottomRight);
+            this.config.setColors(startColorBottomLeft, startColorTopLeft, startColorTopRight, startColorBottomRight);
         } else if (progress > colorLerpEndProgress) {
-            FadeToColorOverlay.setColors(endColorBottomLeft, endColorTopLeft, endColorTopRight, endColorBottomRight);
+            this.config.setColors(endColorBottomLeft, endColorTopLeft, endColorTopRight, endColorBottomRight);
         } else {
             float lerpProgress = (float)colorEase.get((progress - colorLerpStartProgress) / (colorLerpEndProgress - colorLerpStartProgress));
-            FadeToColorOverlay.setColorBottomLeft(lerpColor(startColorBottomLeft, endColorBottomLeft, lerpProgress));
-            FadeToColorOverlay.setColorTopLeft(lerpColor(startColorTopLeft, endColorTopLeft, lerpProgress));
-            FadeToColorOverlay.setColorTopRight(lerpColor(startColorTopRight, endColorTopRight, lerpProgress));
-            FadeToColorOverlay.setColorBottomRight(lerpColor(startColorBottomRight, endColorBottomRight, lerpProgress));
+            this.config.setColorBottomLeft(lerpColor(startColorBottomLeft, endColorBottomLeft, lerpProgress));
+            this.config.setColorTopLeft(lerpColor(startColorTopLeft, endColorTopLeft, lerpProgress));
+            this.config.setColorTopRight(lerpColor(startColorTopRight, endColorTopRight, lerpProgress));
+            this.config.setColorBottomRight(lerpColor(startColorBottomRight, endColorBottomRight, lerpProgress));
         }
     }
 
     @Override
     public void onEnd(CutsceneType cutscene) {
-        FadeToColorOverlay.setAlpha(0);
+        this.config.setAlpha(0);
     }
 
     @Override
