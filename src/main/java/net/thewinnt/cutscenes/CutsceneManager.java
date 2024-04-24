@@ -141,6 +141,7 @@ public class CutsceneManager {
     public static final SegmentSerializer<ConstantPoint> CONSTANT = SegmentSerializer.of(ConstantPoint::fromNetwork, ConstantPoint::fromJSON);
     public static final SegmentSerializer<LookAtPoint> LOOK_AT_POINT = SegmentSerializer.of(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
     public static final SegmentSerializer<PathTransition> PATH_TRANSITION = SegmentSerializer.of(PathTransition::fromNetwork, PathTransition::fromJSON);
+    public static final SegmentSerializer<CalculatedPoint> CALCULATED_POINT = SegmentSerializer.of(CalculatedPoint::fromNetwork, CalculatedPoint::fromJSON);
 
     // POINT TYPES //
     // Point serializers are used to identify and read point types. A point type gets a Level in and returns

@@ -12,6 +12,7 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.serializers.SimpleEasingSerializer;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,6 +63,9 @@ public interface Easing {
 
     static Easing fromJSONPrimitive(JsonPrimitive json) {
         String value = json.getAsString();
+        if ("t".equals(value)) return SimpleEasing.LINEAR;
+        if ("pi".equals(value)) return ConstantEasing.PI;
+        if ("e".equals(value)) return ConstantEasing.E;
         if (EasingSerializer.LEGACY_COMPAT.containsKey(value)) {
             return EasingSerializer.LEGACY_COMPAT.get(value);
         }

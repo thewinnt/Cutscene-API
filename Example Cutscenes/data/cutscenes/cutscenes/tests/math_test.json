@@ -1,0 +1,94 @@
+{
+  "length": 200,
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:calculated",
+        "x": {
+          "type": "cutscenes:mul",
+          "arg1": {
+            "type": "cutscenes:add",
+            "arg1": "t",
+            "arg2": -0.5
+          },
+          "arg2": 12
+        },
+        "y": {
+          "type": "cutscenes:clamp",
+          "input": {
+            "type": "cutscenes:chain",
+            "argument": {
+              "type": "cutscenes:add",
+              "arg1": {
+                "type": "cutscenes:mul",
+                "arg1": "t",
+                "arg2": 3
+              },
+              "arg2": 6.333
+            },
+            "easing": {
+              "type": "cutscenes:div",
+              "arg1": {
+                "type": "cutscenes:tan",
+                "arg": {
+                  "type": "cutscenes:pow",
+                  "arg1": {
+                    "type": "cutscenes:sin",
+                    "arg": "t"
+                  },
+                  "arg2": "t"
+                }
+              },
+              "arg2": {
+                "type": "cutscenes:cos",
+                "arg": {
+                  "type": "cutscenes:square",
+                  "arg": "t"
+                }
+              }
+            }
+          },
+          "min": -3,
+          "max": 3
+        },
+        "z": {
+          "type": "cutscenes:sin",
+          "arg": {
+            "type": "cutscenes:mul",
+            "arg1": "t",
+            "arg2": {
+              "type": "cutscenes:mul",
+              "arg1": "pi",
+              "arg2": 4
+            }
+          }
+        }
+      }
+    ]
+  },
+  "rotation": {
+    "segments": [
+      {
+        "type": "cutscenes:calculated",
+        "x": 0,
+        "y": 0,
+        "z": {
+          "type": "cutscenes:mul",
+          "arg1": {
+            "type": "cutscenes:sin",
+            "arg": {
+              "type": "cutscenes:mul",
+              "arg1": "t",
+              "arg2": {
+                "type": "cutscenes:mul",
+                "arg1": "pi",
+                "arg2": 16
+              }
+            }
+          },
+          "arg2": 10
+        }
+      }
+    ]
+  }
+}
