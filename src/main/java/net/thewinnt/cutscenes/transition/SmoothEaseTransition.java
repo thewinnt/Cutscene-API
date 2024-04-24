@@ -7,28 +7,30 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
-import net.thewinnt.cutscenes.path.EasingFunction;
+import net.thewinnt.cutscenes.easing.Easing;
+import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 
 public class SmoothEaseTransition implements Transition {
     private final int length;
     private final boolean countTowardsCutsceneTime;
     private final boolean isStart;
-    private final EasingFunction easingX;
-    private final EasingFunction easingY;
-    private final EasingFunction easingZ;
-    private final EasingFunction easingRotX;
-    private final EasingFunction easingRotY;
-    private final EasingFunction easingRotZ;
+    private final Easing easingX;
+    private final Easing easingY;
+    private final Easing easingZ;
+    private final Easing easingRotX;
+    private final Easing easingRotY;
+    private final Easing easingRotZ;
 
     public SmoothEaseTransition(int length, boolean countTowardsCutsceneTime, boolean isStart) {
-        this(length, countTowardsCutsceneTime, isStart, EasingFunction.OUT_QUINT, EasingFunction.OUT_QUINT, EasingFunction.OUT_QUINT, EasingFunction.OUT_QUINT, EasingFunction.OUT_QUINT, EasingFunction.OUT_QUINT);
+        this(length, countTowardsCutsceneTime, isStart, SimpleEasing.OUT_QUINT, SimpleEasing.OUT_QUINT, SimpleEasing.OUT_QUINT, SimpleEasing.OUT_QUINT, SimpleEasing.OUT_QUINT, SimpleEasing.OUT_QUINT);
     }
 
-    public SmoothEaseTransition(int length, boolean countTowardsCutsceneTime, boolean isStart, EasingFunction easingX,
-            EasingFunction easingY, EasingFunction easingZ, EasingFunction easingRotX, EasingFunction easingRotY,
-            EasingFunction easingRotZ) {
+    public SmoothEaseTransition(int length, boolean countTowardsCutsceneTime, boolean isStart, Easing easingX,
+            Easing easingY, Easing easingZ, Easing easingRotX, Easing easingRotY,
+            Easing easingRotZ) {
         this.length = length;
         this.countTowardsCutsceneTime = countTowardsCutsceneTime;
         this.isStart = isStart;
@@ -71,15 +73,15 @@ public class SmoothEaseTransition implements Transition {
         }
         if (isStart) {
             return new Vec3(
-                Mth.lerp(easingX.apply(progress), initCamPos.x, point.x),
-                Mth.lerp(easingY.apply(progress), initCamPos.y, point.y),
-                Mth.lerp(easingZ.apply(progress), initCamPos.z, point.z)
+                Mth.lerp(easingX.get(progress), initCamPos.x, point.x),
+                Mth.lerp(easingY.get(progress), initCamPos.y, point.y),
+                Mth.lerp(easingZ.get(progress), initCamPos.z, point.z)
             );
         } else {
             return new Vec3(
-                Mth.lerp(easingX.apply(progress), point.x, initCamPos.x),
-                Mth.lerp(easingY.apply(progress), point.y, initCamPos.y),
-                Mth.lerp(easingZ.apply(progress), point.z, initCamPos.z)
+                Mth.lerp(easingX.get(progress), point.x, initCamPos.x),
+                Mth.lerp(easingY.get(progress), point.y, initCamPos.y),
+                Mth.lerp(easingZ.get(progress), point.z, initCamPos.z)
             );
         }
     }
@@ -103,13 +105,13 @@ public class SmoothEaseTransition implements Transition {
                 rot0 = startRot;
             }
             if (initCamRot.x != rot0.x + startRot.x) {
-                x = Mth.rotLerp((float)(easingRotX.apply(progress)), (float)initCamRot.x, (float)targetYaw);
+                x = Mth.rotLerp((float)(easingRotX.get(progress)), (float)initCamRot.x, (float)targetYaw);
             }
             if (initCamRot.y != rot0.y + startRot.y) {
-                y = Mth.lerp((float)(easingRotY.apply(progress)), initCamRot.y, (float)targetPitch);
+                y = Mth.lerp((float)(easingRotY.get(progress)), initCamRot.y, (float)targetPitch);
             }
             if (initCamRot.z != rot0.z + startRot.z) {
-                z = Mth.lerp((float)(easingRotZ.apply(progress)), initCamRot.z, (float)targetRoll);
+                z = Mth.lerp((float)(easingRotZ.get(progress)), initCamRot.z, (float)targetRoll);
             }
             return new Vec3(x, y, z);
         } else if (countTowardsCutsceneTime && !isStart) {
@@ -118,13 +120,13 @@ public class SmoothEaseTransition implements Transition {
                 rot1 = startRot;
             }
             if (initCamRot.x != rot1.x + startRot.x) {
-                x = Mth.rotLerp((float)(easingRotX.apply(progress)), (float)targetYaw, (float)initCamRot.x);
+                x = Mth.rotLerp((float)(easingRotX.get(progress)), (float)targetYaw, (float)initCamRot.x);
             }
             if (initCamRot.y != rot1.y + startRot.y) {
-                y = Mth.lerp((float)(easingRotY.apply(progress)), (float)targetPitch, initCamRot.y);
+                y = Mth.lerp((float)(easingRotY.get(progress)), (float)targetPitch, initCamRot.y);
             }
             if (initCamRot.z != rot1.z + startRot.z) {
-                z = Mth.lerp((float)(easingRotZ.apply(progress)), (float)targetRoll, initCamRot.z);
+                z = Mth.lerp((float)(easingRotZ.get(progress)), (float)targetRoll, initCamRot.z);
             }
             return new Vec3(x, y, z);
         } else if (!countTowardsCutsceneTime && isStart) {
@@ -133,13 +135,13 @@ public class SmoothEaseTransition implements Transition {
                 rot0 = startRot;
             }
             if (initCamRot.x != rot0.x + startRot.x) {
-                x = Mth.rotLerp((float)(easingRotX.apply(progress)), (float)initCamRot.x, (float)rot0.x);
+                x = Mth.rotLerp((float)(easingRotX.get(progress)), (float)initCamRot.x, (float)rot0.x);
             }
             if (initCamRot.y != rot0.y + startRot.y) {
-                y = Mth.lerp((float)(easingRotY.apply(progress)), initCamRot.y, (float)rot0.y);
+                y = Mth.lerp((float)(easingRotY.get(progress)), initCamRot.y, (float)rot0.y);
             }
             if (initCamRot.z != rot0.z + startRot.z) {
-                z = Mth.lerp((float)(easingRotZ.apply(progress)), initCamRot.z, (float)rot0.z);
+                z = Mth.lerp((float)(easingRotZ.get(progress)), initCamRot.z, (float)rot0.z);
             }
             return new Vec3(x, y, z);
         } else {
@@ -148,13 +150,13 @@ public class SmoothEaseTransition implements Transition {
                 rot1 = startRot;
             }
             if (initCamRot.x != rot1.x + startRot.x) {
-                x = Mth.rotLerp((float)(easingRotX.apply(progress)), (float)rot1.x, (float)initCamRot.x);
+                x = Mth.rotLerp((float)(easingRotX.get(progress)), (float)rot1.x, (float)initCamRot.x);
             }
             if (initCamRot.y != rot1.y + startRot.y) {
-                y = Mth.lerp((float)(easingRotY.apply(progress)), (float)rot1.y, initCamRot.y);
+                y = Mth.lerp((float)(easingRotY.get(progress)), (float)rot1.y, initCamRot.y);
             }
             if (initCamRot.z != rot1.z + startRot.z) {
-                z = Mth.lerp((float)(easingRotZ.apply(progress)), (float)rot1.z, initCamRot.z);
+                z = Mth.lerp((float)(easingRotZ.get(progress)), (float)rot1.z, initCamRot.z);
             }
             return new Vec3(x, y, z);
         }
@@ -165,12 +167,12 @@ public class SmoothEaseTransition implements Transition {
         buf.writeInt(length);
         buf.writeBoolean(countTowardsCutsceneTime);
         buf.writeBoolean(isStart);
-        buf.writeEnum(easingX);
-        buf.writeEnum(easingY);
-        buf.writeEnum(easingZ);
-        buf.writeEnum(easingRotX);
-        buf.writeEnum(easingRotY);
-        buf.writeEnum(easingRotZ);
+        Easing.toNetwork(easingX, buf);
+        Easing.toNetwork(easingY, buf);
+        Easing.toNetwork(easingZ, buf);
+        Easing.toNetwork(easingRotX, buf);
+        Easing.toNetwork(easingRotY, buf);
+        Easing.toNetwork(easingRotZ, buf);
     }
 
     @Override
@@ -182,12 +184,12 @@ public class SmoothEaseTransition implements Transition {
         int length = buf.readInt();
         boolean countTowardsCutsceneTime = buf.readBoolean();
         boolean easeIn = buf.readBoolean();
-        EasingFunction easingX = buf.readEnum(EasingFunction.class);
-        EasingFunction easingY = buf.readEnum(EasingFunction.class);
-        EasingFunction easingZ = buf.readEnum(EasingFunction.class);
-        EasingFunction easingRotX = buf.readEnum(EasingFunction.class);
-        EasingFunction easingRotY = buf.readEnum(EasingFunction.class);
-        EasingFunction easingRotZ = buf.readEnum(EasingFunction.class);
+        Easing easingX = CutsceneAPI.EASING_SERIALIZERS.byId(buf.readInt()).fromNetwork(buf);
+        Easing easingY = CutsceneAPI.EASING_SERIALIZERS.byId(buf.readInt()).fromNetwork(buf);
+        Easing easingZ = CutsceneAPI.EASING_SERIALIZERS.byId(buf.readInt()).fromNetwork(buf);
+        Easing easingRotX = CutsceneAPI.EASING_SERIALIZERS.byId(buf.readInt()).fromNetwork(buf);
+        Easing easingRotY = CutsceneAPI.EASING_SERIALIZERS.byId(buf.readInt()).fromNetwork(buf);
+        Easing easingRotZ = CutsceneAPI.EASING_SERIALIZERS.byId(buf.readInt()).fromNetwork(buf);
         return new SmoothEaseTransition(length, countTowardsCutsceneTime, easeIn, easingX, easingY, easingZ, easingRotX, easingRotY, easingRotZ);
     }
 
@@ -195,12 +197,12 @@ public class SmoothEaseTransition implements Transition {
         int length = GsonHelper.getAsInt(json, "length", 40);
         boolean isStart = GsonHelper.getAsBoolean(json, "is_start");
         boolean countTowardsCutsceneTime = GsonHelper.getAsBoolean(json, "count_towards_cutscene_time", isStart);
-        EasingFunction easingX = EasingFunction.valueOf(GsonHelper.getAsString(json, "easing_x", "out_quint").toUpperCase());
-        EasingFunction easingY = EasingFunction.valueOf(GsonHelper.getAsString(json, "easing_y", "out_quint").toUpperCase());
-        EasingFunction easingZ = EasingFunction.valueOf(GsonHelper.getAsString(json, "easing_z", "out_quint").toUpperCase());
-        EasingFunction easingRotX = EasingFunction.valueOf(GsonHelper.getAsString(json, "easing_rot_x", "out_quint").toUpperCase());
-        EasingFunction easingRotY = EasingFunction.valueOf(GsonHelper.getAsString(json, "easing_rot_y", "out_quint").toUpperCase());
-        EasingFunction easingRotZ = EasingFunction.valueOf(GsonHelper.getAsString(json, "easing_rot_z", "out_quint").toUpperCase());
+        Easing easingX = Easing.fromJSON(json.get("easing_x"), SimpleEasing.OUT_QUINT);
+        Easing easingY = Easing.fromJSON(json.get("easing_y"), SimpleEasing.OUT_QUINT);
+        Easing easingZ = Easing.fromJSON(json.get("easing_z"), SimpleEasing.OUT_QUINT);
+        Easing easingRotX = Easing.fromJSON(json.get("easing_rot_x"), SimpleEasing.OUT_QUINT);
+        Easing easingRotY = Easing.fromJSON(json.get("easing_rot_y"), SimpleEasing.OUT_QUINT);
+        Easing easingRotZ = Easing.fromJSON(json.get("easing_rot_z"), SimpleEasing.OUT_QUINT);
         return new SmoothEaseTransition(length, countTowardsCutsceneTime, isStart, easingX, easingY, easingZ, easingRotX, easingRotY, easingRotZ);
     }
 }

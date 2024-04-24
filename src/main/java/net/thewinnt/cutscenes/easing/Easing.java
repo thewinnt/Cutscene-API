@@ -27,7 +27,16 @@ public interface Easing {
 
     EasingSerializer<?> getSerializer();
 
+    /**
+     * @deprecated use {@link Easing#toNetwork(Easing, FriendlyByteBuf)} instead
+     */
+    @Deprecated
     void toNetwork(FriendlyByteBuf buf);
+
+    static void toNetwork(Easing easing, FriendlyByteBuf buf) {
+        buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(easing.getSerializer()));
+        easing.toNetwork(buf);
+    }
 
     static Easing fromJSON(@Nonnull JsonElement json) {
         if (json.isJsonPrimitive()) {

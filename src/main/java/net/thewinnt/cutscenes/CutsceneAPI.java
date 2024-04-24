@@ -2,6 +2,7 @@ package net.thewinnt.cutscenes;
 
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -89,16 +90,18 @@ public class CutsceneAPI {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 CutsceneManager.REGISTRY.clear();
+                AtomicInteger loaded = new AtomicInteger();
                 files.forEach((id, element) -> {
                     try {
                         JsonObject json = GsonHelper.convertToJsonObject(element, "cutscene");
                         CutsceneManager.registerCutscene(id, CutsceneType.fromJSON(json));
+                        loaded.getAndIncrement();
                     } catch (RuntimeException e) {
                         LOGGER.error("Exception loading cutscene {}", id);
                         LOGGER.error("Caused by:", e);
                     }
                 });
-                LOGGER.info("Loaded {} cutscenes", files.size());
+                LOGGER.info("Loaded {} cutscenes", loaded.get());
             }
         });
     }

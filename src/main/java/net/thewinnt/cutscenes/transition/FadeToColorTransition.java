@@ -182,12 +182,9 @@ public class FadeToColorTransition implements Transition {
         buf.writeInt(lengthB);
         buf.writeInt(gradientTimeA);
         buf.writeInt(gradientTimeB);
-        buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(easeIn.getSerializer()));
-        easeIn.toNetwork(buf);
-        buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(easeOut.getSerializer()));
-        easeOut.toNetwork(buf);
-        buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(colorEase.getSerializer()));
-        colorEase.toNetwork(buf);
+        Easing.toNetwork(easeIn, buf);
+        Easing.toNetwork(easeOut, buf);
+        Easing.toNetwork(colorEase, buf);
         buf.writeBoolean(isStart);
     }
 

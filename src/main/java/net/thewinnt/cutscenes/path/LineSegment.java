@@ -137,12 +137,9 @@ public class LineSegment implements PathLike {
     public void toNetwork(FriendlyByteBuf buf) {
         CutsceneNetworkHandler.writePointProvider(buf, a);
         CutsceneNetworkHandler.writePointProvider(buf, b);
-        buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(easingX.getSerializer()));
-        easingX.toNetwork(buf);
-        buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(easingY.getSerializer()));
-        easingY.toNetwork(buf);
-        buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(easingZ.getSerializer()));
-        easingZ.toNetwork(buf);
+        Easing.toNetwork(easingX, buf);
+        Easing.toNetwork(easingY, buf);
+        Easing.toNetwork(easingZ, buf);
         buf.writeBoolean(isRotation);
         buf.writeInt(weight);
     }
@@ -158,8 +155,6 @@ public class LineSegment implements PathLike {
         Easing easingX = Easing.fromJSON(json.get("easing_x"), SimpleEasing.LINEAR);
         Easing easingY = Easing.fromJSON(json.get("easing_y"), SimpleEasing.LINEAR);
         Easing easingZ = Easing.fromJSON(json.get("easing_z"), SimpleEasing.LINEAR);
-        // TODO find out why this doesn't work
-        // TODO try not using legacy compat
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         boolean isRotation = GsonHelper.getAsBoolean(json, "is_rotation", false);
         return new LineSegment(start, end, easingX, easingY, easingZ, weight, isRotation);

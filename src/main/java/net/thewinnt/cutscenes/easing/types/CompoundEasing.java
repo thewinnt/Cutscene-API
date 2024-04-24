@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
-import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import org.jetbrains.annotations.NotNull;
@@ -54,8 +53,7 @@ public class CompoundEasing implements Easing {
             buf.writeDouble(i.time());
             buf.writeDouble(i.easing().minValue());
             buf.writeDouble(i.easing().maxValue());
-            buf.writeInt(CutsceneAPI.EASING_SERIALIZERS.getId(i.easing().easing().getSerializer()));
-            i.easing().easing().toNetwork(buf);
+            Easing.toNetwork(i.easing().easing(), buf);
         }
     }
 
@@ -68,7 +66,7 @@ public class CompoundEasing implements Easing {
         public void toNetwork(FriendlyByteBuf buf) {
             buf.writeDouble(minValue);
             buf.writeDouble(maxValue);
-            easing.toNetwork(buf);
+            Easing.toNetwork(easing, buf);
         }
 
         public static RangeAppliedEasing fromNetwork(FriendlyByteBuf buf) {
