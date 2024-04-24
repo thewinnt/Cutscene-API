@@ -137,8 +137,7 @@ public class FadeToColorTransition implements Transition {
     @Override
     public void onStart(CutsceneType cutscene) {
         this.config = new FadeToColorOverlayConfiguration(startColorBottomLeft, startColorTopLeft, startColorTopRight, startColorBottomRight, 0);
-        CutsceneOverlayManager.setCurrentOverlay(FadeToColorOverlay.INSTANCE);
-        CutsceneOverlayManager.setOverlayConfig(this.config);
+        CutsceneOverlayManager.addOverlay(FadeToColorOverlay.INSTANCE, this.config);
     }
 
     @Override
@@ -165,6 +164,7 @@ public class FadeToColorTransition implements Transition {
 
     @Override
     public void onEnd(CutsceneType cutscene) {
+        CutsceneOverlayManager.removeOverlay(FadeToColorOverlay.INSTANCE, this.config);
         this.config.setAlpha(0);
     }
 

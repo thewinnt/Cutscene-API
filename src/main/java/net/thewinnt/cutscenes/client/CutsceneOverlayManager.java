@@ -3,27 +3,42 @@ package net.thewinnt.cutscenes.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class CutsceneOverlayManager {
-    private static Overlay currentOverlay;
-    private static Object overlayConfig;
+    private static List<Overlay> overlays = new ArrayList<>();
+    private static List<Object> configs = new ArrayList<>();
 
-    public static void setCurrentOverlay(Overlay currentOverlay) {
-        CutsceneOverlayManager.currentOverlay = currentOverlay;
+    public static void addOverlay(Overlay overlay, Object config) {
+        overlays.add(overlay);
+        configs.add(config);
     }
 
-    public static void setOverlayConfig(Object overlayConfig) {
-        CutsceneOverlayManager.overlayConfig = overlayConfig;
+    public static void addAtIndex(Overlay overlay, Object config, int index) {
+        overlays.add(index, overlay);
+        configs.add(index, config);
     }
 
-    public static Overlay getCurrentOverlay() {
-        return currentOverlay;
+    /** Returns an immutable view of all active overlays */
+    public static List<Overlay> getOverlays() {
+        return Collections.unmodifiableList(overlays);
     }
 
-    public static Object getOverlayConfig() {
-        return overlayConfig;
+    public static void removeOverlay(Overlay overlay, Object config) {
+        overlays.remove(overlay);
+        configs.remove(config);
+    }
+
+    public static void clearOverlays() {
+        overlays.clear();
+        configs.clear();
     }
 
     public static void render(Minecraft minecraft, GuiGraphics graphics, int width, int height) {
-        currentOverlay.render(minecraft, graphics, width, height, overlayConfig);
+        for (int i = 0; i < overlays.size(); i++) {
+            overlays.get(i).render(minecraft, graphics, width, height, configs.get(i));
+        }
     }
 }

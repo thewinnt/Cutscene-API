@@ -23,6 +23,8 @@ public abstract class GameRendererMixin {
         this.minecraft.getProfiler().push("cutscene_overlay");
         if (ClientCutsceneManager.isCutsceneRunning()) {
             CutsceneOverlayManager.render(minecraft, guigraphics, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
+        } else {
+            CutsceneOverlayManager.clearOverlays();
         }
         this.minecraft.getProfiler().pop();
     }
