@@ -53,7 +53,8 @@ public interface Easing {
         }
         try {
             return fromJSON(json);
-        } catch (IllegalArgumentException ignored) {
+        } catch (RuntimeException e) {
+            CutsceneAPI.LOGGER.warn("Exception loading easing, returning fallback: ", e);
             return fallback;
         }
     }
