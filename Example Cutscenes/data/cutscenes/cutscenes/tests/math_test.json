@@ -71,20 +71,19 @@
       {
         "type": "cutscenes:calculated",
         "x": 0,
-        "y": 0,
+        "y": {
+          "type": "cutscenes:mul",
+          "arg1": {
+            "type": "cutscenes:cos",
+            "arg": "cutscenes:16_pi_t"
+          },
+          "arg2": 5
+        },
         "z": {
           "type": "cutscenes:mul",
           "arg1": {
             "type": "cutscenes:sin",
-            "arg": {
-              "type": "cutscenes:mul",
-              "arg1": "t",
-              "arg2": {
-                "type": "cutscenes:mul",
-                "arg1": "pi",
-                "arg2": 16
-              }
-            }
+            "arg": "cutscenes:16_pi_t"
           },
           "arg2": 10
         }

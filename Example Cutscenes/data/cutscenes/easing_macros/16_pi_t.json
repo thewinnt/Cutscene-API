@@ -1,0 +1,9 @@
+{
+  "type": "cutscenes:mul",
+  "arg1": "t",
+  "arg2": {
+    "type": "cutscenes:mul",
+    "arg1": "pi",
+    "arg2": 16
+  }
+}

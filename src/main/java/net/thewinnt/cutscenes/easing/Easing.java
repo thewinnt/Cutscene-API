@@ -3,22 +3,19 @@ package net.thewinnt.cutscenes.easing;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneAPI;
-import net.thewinnt.cutscenes.easing.serializers.SimpleEasingSerializer;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
-import org.checkerframework.checker.units.qual.C;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 public interface Easing {
+    Map<ResourceLocation, Easing> EASING_MACROS = new HashMap<>();
     /**
      * Returns the eased value from given t
      * @param t the initial progress (linear)
@@ -68,6 +65,10 @@ public interface Easing {
         if ("e".equals(value)) return ConstantEasing.E;
         if (EasingSerializer.LEGACY_COMPAT.containsKey(value)) {
             return EasingSerializer.LEGACY_COMPAT.get(value);
+        }
+        ResourceLocation test = new ResourceLocation(value);
+        if (EASING_MACROS.containsKey(test)) {
+            return EASING_MACROS.get(test);
         }
         return new ConstantEasing(json.getAsDouble());
     }

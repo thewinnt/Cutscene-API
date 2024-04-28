@@ -1,8 +1,6 @@
 package net.thewinnt.cutscenes.easing.types;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 

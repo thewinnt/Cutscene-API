@@ -1,8 +1,6 @@
 package net.thewinnt.cutscenes.easing.serializers;
 
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
@@ -14,7 +12,6 @@ import net.thewinnt.cutscenes.easing.types.CompoundEasing.TimedEasingEntry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class CompoundEasingSerializer implements EasingSerializer<CompoundEasing> {
     public static final CompoundEasingSerializer INSTANCE = new CompoundEasingSerializer();

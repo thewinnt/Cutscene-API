@@ -2,7 +2,6 @@ package net.thewinnt.cutscenes.path;
 
 import com.google.gson.JsonObject;
 
-import com.mojang.serialization.JsonOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
@@ -11,14 +10,11 @@ import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.easing.Easing;
-import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import net.thewinnt.cutscenes.util.JsonHelper;
-
-import java.util.function.Function;
 
 public class LineSegment implements PathLike {
     private final PointProvider a;

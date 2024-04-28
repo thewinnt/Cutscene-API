@@ -1,12 +1,10 @@
 package net.thewinnt.cutscenes.easing.types;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 
 import java.util.function.DoubleBinaryOperator;
-import java.util.function.DoubleUnaryOperator;
 
 public class DoubleArgumentEasing implements Easing {
     protected final Easing arg1;

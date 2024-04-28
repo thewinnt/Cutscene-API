@@ -16,6 +16,7 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.RegistryBuilder;
+import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import org.slf4j.Logger;
 
@@ -87,6 +88,24 @@ public class CutsceneAPI {
 
     @SubscribeEvent
     public static void addReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(new SimpleJsonResourceReloadListener(new GsonBuilder().create(), "easing_macros") {
+            @Override
+            protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
+                Easing.EASING_MACROS.clear();
+                AtomicInteger loaded = new AtomicInteger();
+                files.forEach((id, element) -> {
+                    try {
+                        JsonObject json = GsonHelper.convertToJsonObject(element, "easing_macro");
+                        Easing.EASING_MACROS.put(id, Easing.fromJSON(json));
+                        loaded.getAndIncrement();
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Exception loading easing macro: {}", id);
+                        LOGGER.error("Caused by: ", e);
+                    }
+                });
+                LOGGER.info("Loaded {} easing macros", loaded.get());
+            }
+        });
         event.addListener(new SimpleJsonResourceReloadListener(new GsonBuilder().create(), "cutscenes") {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {

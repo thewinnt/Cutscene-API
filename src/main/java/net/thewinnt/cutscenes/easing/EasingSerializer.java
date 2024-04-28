@@ -1,8 +1,6 @@
 package net.thewinnt.cutscenes.easing;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -74,7 +72,7 @@ public interface EasingSerializer<T extends Easing> {
     EasingSerializer<DoubleArgumentEasing> POW = registerDoubleArg(new ResourceLocation("cutscenes:pow"), Math::pow);
     EasingSerializer<DoubleArgumentEasing> MIN = registerDoubleArg(new ResourceLocation("cutscenes:min"), Math::min);
     EasingSerializer<DoubleArgumentEasing> MAX = registerDoubleArg(new ResourceLocation("cutscenes:max"), Math::max);
-    EasingSerializer<DoubleArgumentEasing> ATAN2 = registerDoubleArg(new ResourceLocation("cutscenes:max"), Math::atan2);
+    EasingSerializer<DoubleArgumentEasing> ATAN2 = registerDoubleArg(new ResourceLocation("cutscenes:atan2"), Math::atan2);
     EasingSerializer<ClampEasing> CLAMP = register(new ResourceLocation("cutscenes:clamp"), ClampEasingSerializer.INSTANCE);
 
     T fromNetwork(FriendlyByteBuf buf);
