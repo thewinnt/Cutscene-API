@@ -19,6 +19,7 @@ import net.neoforged.neoforge.client.event.ViewportEvent.ComputeCameraAngles;
 import net.neoforged.neoforge.event.TickEvent.ClientTickEvent;
 import net.neoforged.neoforge.event.TickEvent.Phase;
 import net.thewinnt.cutscenes.CutsceneAPI;
+import net.thewinnt.cutscenes.CutsceneInstance;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
 import net.thewinnt.cutscenes.util.ActionToggles;
@@ -30,8 +31,7 @@ public class ClientCutsceneManager {
     public static final BiMap<ResourceLocation, CutsceneType> CLIENT_REGISTRY = HashBiMap.create();
     public static final ActionToggles DEFAULT_ACTION_TOGGLES = new ActionToggles.Builder(false).build();
     private static boolean isCutsceneRunning = false;
-    public static CutsceneType runningCutscene;
-    public static long startTime;
+    public static CutsceneInstance runningCutscene;
     private static Vec3 startPosition;
     public static float startCameraYaw; // x
     public static float startCameraPitch; // y
@@ -56,6 +56,7 @@ public class ClientCutsceneManager {
     @OnlyIn(Dist.CLIENT)
     public static void startCutscene(CutsceneType type, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll) {
         CutsceneAPI.updateSalt();
+        stopCutscene();
         // if the specified rotation value is NaN, use the initial values
         startCameraYaw = Float.isNaN(cameraYaw) ? initCameraYaw : cameraYaw;
         startCameraPitch = Float.isNaN(cameraPitch) ? initCameraPitch : cameraPitch;
@@ -63,24 +64,23 @@ public class ClientCutsceneManager {
         startPathYaw = pathYaw;
         startPathPitch = pathPitch;
         startPathRoll = pathRoll;
-        runningCutscene = type;
-        startTime = Minecraft.getInstance().level.getGameTime();
+        runningCutscene = new CutsceneInstance(type);
 
         // initialize minecraft
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.smartCull = false;
-        if (runningCutscene.hideHand) {
+        if (runningCutscene.cutscene.hideHand) {
             minecraft.gameRenderer.setRenderHand(false);
         }
-        if (runningCutscene.hideBlockOutline) {
+        if (runningCutscene.cutscene.hideBlockOutline) {
             minecraft.gameRenderer.setRenderBlockOutline(false);
         }
         prevF5state = minecraft.options.getCameraType();
         if (minecraft.gameRenderer.getMainCamera().isDetached()) {
             minecraft.options.setCameraType(CameraType.FIRST_PERSON);
         }
-        camera = new CutsceneCameraEntity(-69420, type, startPos, startCameraYaw, startCameraPitch, pathYaw, pathPitch, pathRoll);
-        if (runningCutscene.blockMovement) { // special case: keep the player if we want them to move
+        camera = new CutsceneCameraEntity(-69420, runningCutscene, startPos, startCameraYaw, startCameraPitch, pathYaw, pathPitch, pathRoll);
+        if (runningCutscene.cutscene.blockMovement) { // special case: keep the player if we want them to move
             camera.spawn();
             minecraft.setCameraEntity(camera);
         }
@@ -99,7 +99,7 @@ public class ClientCutsceneManager {
         CLIENT_REGISTRY.put(id, type);
     }
 
-    public static void stopCutsceneImmediate() {
+    public static void stopCutscene() {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.options.hideGui = hidGuiBefore;
         minecraft.smartCull = true;
@@ -108,11 +108,11 @@ public class ClientCutsceneManager {
         minecraft.gameRenderer.setRenderBlockOutline(true);
         if (camera != null) {
             camera.despawn();
-            if (camera.isTimeForStart(minecraft.getPartialTick())) {
-                runningCutscene.startTransition.onEnd(runningCutscene);
+            if (!runningCutscene.endedStartTransition() && runningCutscene.isTimeForStart()) {
+                runningCutscene.cutscene.startTransition.onEnd(runningCutscene.cutscene);
             }
-            if (camera.isTimeForEnd(minecraft.getPartialTick())) {
-                runningCutscene.endTransition.onEnd(runningCutscene);
+            if (!runningCutscene.endedEndTransition() && runningCutscene.isTimeForEnd()) {
+                runningCutscene.cutscene.endTransition.onEnd(runningCutscene.cutscene);
             }
         }
         camera = null;
@@ -121,6 +121,7 @@ public class ClientCutsceneManager {
         }
         isCutsceneRunning = false;
         runningCutscene = null;
+        CutsceneOverlayManager.clearOverlays();
     }
 
     public static void setPreviewedCutscene(CutsceneType preview, Vec3 offset, float pathYaw, float pathPitch, float pathRoll) {
@@ -149,48 +150,45 @@ public class ClientCutsceneManager {
         if (isCutsceneRunning) {
             if (camera == null) {
                 CutsceneAPI.LOGGER.warn("Found ourselves running a cutscene despite the camera being null. Is this normal?");
-                stopCutsceneImmediate();
+                stopCutscene();
                 return;
             }
             if (runningCutscene == null) {
                 CutsceneAPI.LOGGER.error("Attempted to run an invalid cutscene!");
-                stopCutsceneImmediate();
+                stopCutscene();
                 return;
             }
             long currentTime = Minecraft.getInstance().level.getGameTime();
-            Level level = Minecraft.getInstance().level;
             float partialTick = (float)event.getPartialTick();
+            Level level = Minecraft.getInstance().level;
             Vec3 startRot = new Vec3(startCameraYaw, startCameraPitch, startCameraRoll);
             Vec3 initCamRot = new Vec3(initCameraYaw, initCameraPitch, initCameraRoll);
 
-            if (camera.isTimeForStart(partialTick)) {
-                double progress = (currentTime + partialTick - startTime) / (double)runningCutscene.startTransition.getLength();
-                event.setRoll((float)runningCutscene.startTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene).z);
-                if (!runningCutscene.blockMovement && runningCutscene.blockCameraRotation) {
+            if (runningCutscene.isTimeForStart()) {
+                double progress = runningCutscene.getTime() / (double)runningCutscene.cutscene.startTransition.getLength();
+                event.setRoll((float)runningCutscene.cutscene.startTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene.cutscene).z);
+                if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
                     // if the player can move but can't rotate, the camera won't update their rotation,
                     // so we do it here
                     event.setPitch(camera.getViewXRot(partialTick));
                     event.setYaw(camera.getViewYRot(partialTick));
                 }
-            } else if (camera.isTimeForEnd(partialTick)) {
-                double progress = camera.getEndProress(partialTick);
-                event.setRoll((float)runningCutscene.endTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene).z);
-                if (!runningCutscene.blockMovement && runningCutscene.blockCameraRotation) {
+            } else if (runningCutscene.isTimeForEnd()) {
+                double progress = runningCutscene.getEndProress();
+                event.setRoll((float)runningCutscene.cutscene.endTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene.cutscene).z);
+                if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
                     event.setPitch(camera.getViewXRot(partialTick));
                     event.setYaw(camera.getViewYRot(partialTick));
                 }
-            } else if (runningCutscene.rotationProvider != null) {
-                double progress = (currentTime - startTime + partialTick) / (double)runningCutscene.length;
-                event.setRoll((float)runningCutscene.getRotationAt(progress, level, startPosition).z + startCameraRoll);
-                if (!runningCutscene.blockMovement && runningCutscene.blockCameraRotation) {
+            } else if (runningCutscene.cutscene.rotationProvider != null) {
+                double progress = runningCutscene.getTime() / runningCutscene.cutscene.length;
+                event.setRoll((float)runningCutscene.cutscene.getRotationAt(progress, level, startPosition).z + startCameraRoll);
+                if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
                     event.setPitch(camera.getViewXRot(partialTick));
                     event.setYaw(camera.getViewYRot(partialTick));
                 }
             }
-
-            if (!runningCutscene.blockMovement) {
-                camera.getProperPosition(partialTick);
-            }
+            runningCutscene.tick(currentTime + partialTick);
         } else {
             hidGuiBefore = event.getRenderer().getMinecraft().options.hideGui;
             initCameraYaw = event.getYaw();
@@ -201,7 +199,7 @@ public class ClientCutsceneManager {
 
     @SubscribeEvent
     public static void onLogout(LoggingOut event) {
-        stopCutsceneImmediate();
+        stopCutscene();
         previewedCutscene = null;
     }
 
@@ -209,7 +207,7 @@ public class ClientCutsceneManager {
     public static void onClientTick(ClientTickEvent event) {
         if (event.phase == Phase.START) {
             Minecraft minecraft = Minecraft.getInstance();
-            if (isCutsceneRunning && runningCutscene.blockMovement) {
+            if (isCutsceneRunning && runningCutscene.cutscene.blockMovement) {
                 if (minecraft.player != null && minecraft.player.input instanceof KeyboardInput) {
                     Input input = new Input();
                     input.shiftKeyDown = minecraft.player.input.shiftKeyDown;
@@ -221,7 +219,7 @@ public class ClientCutsceneManager {
 
     public static ActionToggles actionToggles() {
         if (!isCutsceneRunning) return DEFAULT_ACTION_TOGGLES;
-        return runningCutscene.actionToggles;
+        return runningCutscene.cutscene.actionToggles;
     }
 
     public static boolean isCutsceneRunning() {

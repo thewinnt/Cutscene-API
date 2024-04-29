@@ -11,7 +11,7 @@ public class StopCutscenePacket implements CustomPacketPayload {
 
     public void handle(PlayPayloadContext context) {
         context.workHandler().submitAsync(() -> {
-            ClientCutsceneManager.stopCutsceneImmediate();
+            ClientCutsceneManager.stopCutscene();
         });
     }
 

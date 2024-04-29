@@ -16,8 +16,7 @@ import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
 public class EntityMixin {
     @Inject(method = "getPosition(F)Lnet/minecraft/world/phys/Vec3;", at = @At("HEAD"), cancellable = true)
     public void getPosition(float partialTick, CallbackInfoReturnable<Vec3> callback) {
-        CutsceneType cutscene = ClientCutsceneManager.runningCutscene;
-        if (cutscene == null) return;
+        if (!ClientCutsceneManager.isCutsceneRunning()) return;
         if (((Entity)(Object)this) instanceof CutsceneCameraEntity camera) {
             Vec3 pos = camera.getProperPosition(partialTick);
             if (pos == null) return;

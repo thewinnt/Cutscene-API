@@ -18,6 +18,11 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.RegistryBuilder;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
+import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
+import net.thewinnt.cutscenes.init.CutsceneAPIEntities;
+import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
+import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
+import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
 import org.slf4j.Logger;
 
 import com.google.gson.GsonBuilder;
@@ -43,6 +48,10 @@ public class CutsceneAPI {
 
     // registry keys
     public static final ResourceKey<Registry<EasingSerializer<?>>> EASING_SERIALIZER_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:easing_types"));
+    public static final ResourceKey<Registry<CutsceneEffectSerializer<?>>> CUTSCENE_EFFECT_SERIALIZER_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:effect_serializers"));
+    public static final ResourceKey<Registry<SegmentSerializer<?>>> SEGMENT_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:segment_types"));
+    public static final ResourceKey<Registry<PointSerializer<?>>> POINT_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:point_providers"));
+    public static final ResourceKey<Registry<TransitionSerializer<?>>> TRANSITION_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:transition_types"));
 
     // registries
     public static final Registry<EasingSerializer<?>> EASING_SERIALIZERS = new RegistryBuilder<>(EASING_SERIALIZER_KEY)
@@ -50,26 +59,26 @@ public class CutsceneAPI {
         .defaultKey(new ResourceLocation("cutscenes:linear"))
         .create();
 
-    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, "cutscenes");
-    public static final DeferredHolder<EntityType<?>, EntityType<WaypointEntity>> WAYPOINT = ENTITIES.register("waypoint", () -> EntityType.Builder.of(WaypointEntity::new, MobCategory.MISC).sized(0.1f, 0.1f).clientTrackingRange(9999).setTrackingRange(9999).canSpawnFarFromPlayer().build("waypoint"));
+    public static final Registry<CutsceneEffectSerializer<?>> CUTSCENE_EFFECT_SERIALIZERS = new RegistryBuilder<>(CUTSCENE_EFFECT_SERIALIZER_KEY)
+        .sync(true)
+        .create();
+
+    public static final Registry<SegmentSerializer<?>> SEGMENT_TYPES = new RegistryBuilder<>(SEGMENT_TYPE_KEY)
+        .sync(true)
+        .create();
+
+    public static final Registry<PointSerializer<?>> POINT_TYPES = new RegistryBuilder<>(POINT_TYPE_KEY)
+        .sync(true)
+        .create();
+
+    public static final Registry<TransitionSerializer<?>> TRANSITION_TYPES = new RegistryBuilder<>(TRANSITION_TYPE_KEY)
+        .sync(true)
+        .defaultKey(new ResourceLocation("cutscenes:no_op"))
+        .create();
 
     public CutsceneAPI(IEventBus modBus, Dist dist) {
-        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "line"), CutsceneManager.LINE);
-        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "bezier"), CutsceneManager.BEZIER);
-        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "catmull_rom"), CutsceneManager.CATMULL_ROM);
-        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "path"), CutsceneManager.PATH);
-        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "constant"), CutsceneManager.CONSTANT);
-        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "look_at_point"), CutsceneManager.LOOK_AT_POINT);
-        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "transition"), CutsceneManager.PATH_TRANSITION);
-        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "calculated"), CutsceneManager.CALCULATED_POINT);
-        CutsceneManager.registerPointType(new ResourceLocation("cutscenes", "static"), CutsceneManager.STATIC);
-        CutsceneManager.registerPointType(new ResourceLocation("cutscenes", "waypoint"), CutsceneManager.WAYPOINT);
-        CutsceneManager.registerPointType(new ResourceLocation("cutscenes", "world"), CutsceneManager.WORLD);
-        CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "no_op"), CutsceneManager.NO_OP);
-        CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "smooth_ease"), CutsceneManager.SMOOTH_EASE);
-        CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "fade"), CutsceneManager.FADE);
         NeoForge.EVENT_BUS.register(CutsceneAPI.class);
-        ENTITIES.register(modBus);
+        CutsceneAPIEntities.ENTITIES.register(modBus);
     }
 
     /**

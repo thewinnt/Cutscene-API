@@ -19,7 +19,7 @@ import net.thewinnt.cutscenes.path.point.PointProvider;
 public class CutsceneNetworkHandler {
     @SubscribeEvent
     public static void register(final RegisterPayloadHandlerEvent event) {
-        final IPayloadRegistrar registrar = event.registrar("cutscenes").versioned("1.4");
+        final IPayloadRegistrar registrar = event.registrar("cutscenes").versioned("1.5-alpha");
         registrar.play(
             PreviewCutscenePacket.ID,
             PreviewCutscenePacket::read,

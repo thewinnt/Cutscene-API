@@ -1,11 +1,14 @@
 package net.thewinnt.cutscenes;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.thewinnt.cutscenes.effect.CutsceneEffect;
 import net.thewinnt.cutscenes.path.Path;
 import net.thewinnt.cutscenes.path.PathLike;
 import net.thewinnt.cutscenes.transition.SmoothEaseTransition;
@@ -15,6 +18,8 @@ import net.thewinnt.cutscenes.util.ActionToggles.Builder;
 import net.thewinnt.cutscenes.util.JsonHelper;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CutsceneType {
     public final int length;
@@ -27,8 +32,9 @@ public class CutsceneType {
     public final ActionToggles actionToggles;
     public final boolean hideHand;
     public final boolean hideBlockOutline;
+    public final List<CutsceneEffect<?>> effects;
 
-    public CutsceneType(PathLike path, Path rotationProvider, int length, Transition start, Transition end, boolean blockMovement, boolean blockCameraRotation, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline) {
+    public CutsceneType(PathLike path, Path rotationProvider, int length, Transition start, Transition end, boolean blockMovement, boolean blockCameraRotation, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects) {
         if (path instanceof Path pth) {
             this.path = pth;
         } else if (path != null) {
@@ -45,6 +51,7 @@ public class CutsceneType {
         this.actionToggles = toggles;
         this.hideHand = hideHand;
         this.hideBlockOutline = hideBlockOutline;
+        this.effects = effects;
     }
     
     public CutsceneType(PathLike path, Path rotationProvider, int length) {
@@ -64,6 +71,7 @@ public class CutsceneType {
         this.actionToggles = new Builder(true).build();
         this.hideHand = false;
         this.hideBlockOutline = false;
+        this.effects = List.of();
     }
 
     @Nullable
@@ -93,6 +101,7 @@ public class CutsceneType {
         actionToggles.toNetwork(buf);
         buf.writeBoolean(hideHand);
         buf.writeBoolean(hideBlockOutline);
+        buf.writeCollection(effects, (buf1, effect) -> effect.toNetwork(buf1));
     }
 
     public static CutsceneType fromNetwork(FriendlyByteBuf buf) {
@@ -115,7 +124,8 @@ public class CutsceneType {
         ActionToggles actionToggles = ActionToggles.fromNetwork(buf);
         boolean hideHand = buf.readBoolean();
         boolean hideBlockOutline = buf.readBoolean();
-        return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, blockCameraRotation, actionToggles, hideHand, hideBlockOutline);
+        List<CutsceneEffect<?>> effects = buf.readList(CutsceneEffect::fromNetwork);
+        return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, blockCameraRotation, actionToggles, hideHand, hideBlockOutline, effects);
     }
 
     public static CutsceneType fromJSON(JsonObject json) {
@@ -136,6 +146,11 @@ public class CutsceneType {
         boolean defaultHideHand = defaultHideBlockOutline && toggles.disableAttacking() && toggles.disableUsingItems() && toggles.disableEntityInteractions();
         boolean hideHand = GsonHelper.getAsBoolean(json, "hide_hand", defaultHideHand);
         boolean hideBlockOutline = GsonHelper.getAsBoolean(json, "hide_block_outline", defaultHideBlockOutline);
-        return new CutsceneType(path, rotation, length, start, end, blockMovement, blockRotation, toggles, hideHand, hideBlockOutline);
+        JsonArray effectsJson = GsonHelper.getAsJsonArray(json, "effects", new JsonArray());
+        ArrayList<CutsceneEffect<?>> effects = new ArrayList<>();
+        for (JsonElement i : effectsJson) {
+            effects.add(CutsceneEffect.fromJSON(GsonHelper.convertToJsonObject(i, "effect")));
+        }
+        return new CutsceneType(path, rotation, length, start, end, blockMovement, blockRotation, toggles, hideHand, hideBlockOutline, effects);
     }
 }

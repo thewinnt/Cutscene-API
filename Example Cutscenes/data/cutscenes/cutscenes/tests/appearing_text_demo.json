@@ -1,0 +1,22 @@
+{
+  "length": 100,
+  "disable_actions": false,
+  "start_transition": {
+    "type": "cutscenes:no_op"
+  },
+  "end_transition": {
+    "type": "cutscenes:no_op"
+  },
+  "effects": [
+    {
+      "type": "cutscenes:appearing_text",
+      "start": 20,
+      "end": 480,
+      "text": {
+        "text": "This is some example text...^\nwith multiline support!^\nUse \\^ for ^e^x^t^r^a ^d^e^l^a^y^^\n\nExpect more in the future!"
+      },
+      "x": 0.025,
+      "y": 0.025
+    }
+  ]
+}

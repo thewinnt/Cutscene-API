@@ -2,6 +2,7 @@ package net.thewinnt.cutscenes;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -33,15 +34,6 @@ import javax.annotation.Nonnull;
 public class CutsceneManager {
     /** The cutscene registry, where all cutscenes are stored. Only read from this, please */
     public static final BiMap<ResourceLocation, CutsceneType> REGISTRY = HashBiMap.create();
-
-    /** The segment type registry, where the segment types are stored */
-    private static final BiMap<ResourceLocation, SegmentSerializer<?>> SEGMENT_TYPE_REGISTRY = HashBiMap.create();
-
-    /** The point type registry, where the point types are stored */
-    private static final BiMap<ResourceLocation, PointSerializer<?>> POINT_TYPE_REGISTRY = HashBiMap.create();
-
-    /** The transition type registry, where the transition types are stored */
-    private static final BiMap<ResourceLocation, TransitionSerializer<?>> TRANSITION_TYPE_REGISTRY = HashBiMap.create();
 
     /** The currently previewed cutscene */
     private static CutsceneType previewedCutscene;
@@ -175,7 +167,7 @@ public class CutsceneManager {
      * @param type The serializer to register
      */
     public static void registerSegmentType(ResourceLocation id, SegmentSerializer<?> type) {
-        SEGMENT_TYPE_REGISTRY.put(id, type);
+        Registry.register(CutsceneAPI.SEGMENT_TYPES, id, type);
     }
 
     /**
@@ -184,7 +176,7 @@ public class CutsceneManager {
      * @param type The serializer to register
      */
     public static void registerPointType(ResourceLocation id, PointSerializer<?> type) {
-        POINT_TYPE_REGISTRY.put(id, type);
+        Registry.register(CutsceneAPI.POINT_TYPES, id, type);
     }
 
     /**
@@ -193,37 +185,37 @@ public class CutsceneManager {
      * @param type The serializer to register
      */
     public static void registerTransitionType(ResourceLocation id, TransitionSerializer<?> type) {
-        TRANSITION_TYPE_REGISTRY.put(id, type);
+        Registry.register(CutsceneAPI.TRANSITION_TYPES, id, type);
     }
 
     /** Returns the ID of the specified serializer, or {@code null} if it's not registered */
     public static ResourceLocation getSegmentTypeId(SegmentSerializer<?> type) {
-        return SEGMENT_TYPE_REGISTRY.inverse().get(type);
+        return CutsceneAPI.SEGMENT_TYPES.getKey(type);
     }
 
     /** Returns the segment serializer with this ID, or {@code null} if it doesn't exist */
     public static SegmentSerializer<?> getSegmentType(ResourceLocation id) {
-        return SEGMENT_TYPE_REGISTRY.get(id);
+        return CutsceneAPI.SEGMENT_TYPES.get(id);
     }
 
     /** Returns the ID of the specified point type, or {@code null} if it's not registered */
     public static ResourceLocation getPointTypeId(PointSerializer<?> type) {
-        return POINT_TYPE_REGISTRY.inverse().get(type);
+        return CutsceneAPI.POINT_TYPES.getKey(type);
     }
 
     /** Returns the point serializer with this ID, or {@code null} if it doesn't exist */
     public static PointSerializer<?> getPointType(ResourceLocation id) {
-        return POINT_TYPE_REGISTRY.get(id);
+        return CutsceneAPI.POINT_TYPES.get(id);
     }
 
     /** Returns the ID of the specified transition type, or {@code null} if it's not registered */
     public static ResourceLocation getTransitionTypeId(TransitionSerializer<?> type) {
-        return TRANSITION_TYPE_REGISTRY.inverse().get(type);
+        return CutsceneAPI.TRANSITION_TYPES.getKey(type);
     }
 
     /** Returns the transition serializer with this ID, or {@code null} if it doesn't exist */
     public static TransitionSerializer<?> getTransitionType(ResourceLocation id) {
-        return TRANSITION_TYPE_REGISTRY.get(id);
+        return CutsceneAPI.TRANSITION_TYPES.get(id);
     }
 
     /** Sets the currently previewed cutscene and tells the clients */
