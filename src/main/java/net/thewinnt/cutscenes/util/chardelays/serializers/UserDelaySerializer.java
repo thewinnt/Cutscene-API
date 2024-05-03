@@ -19,22 +19,32 @@ public class UserDelaySerializer implements DelayProviderSerializer<UserDefinedD
     @Override
     public UserDefinedDelays fromNetwork(FriendlyByteBuf buf) {
         char activation = buf.readChar();
-        Map<Integer, Double> delays = buf.readMap(FriendlyByteBuf::readInt, FriendlyByteBuf::readDouble);
-        double defaultDelay = buf.readDouble();
-        return new UserDefinedDelays(activation, delays, defaultDelay);
+        Map<Integer, Double> delaysSpecial = buf.readMap(FriendlyByteBuf::readInt, FriendlyByteBuf::readDouble);
+        double fallbackSpecial = buf.readDouble();
+        Map<Integer, Double> delaysNormal = buf.readMap(FriendlyByteBuf::readInt, FriendlyByteBuf::readDouble);
+        double fallbackNormal = buf.readDouble();
+        return new UserDefinedDelays(activation, delaysSpecial, fallbackSpecial, delaysNormal, fallbackNormal);
     }
 
     @Override
     public UserDefinedDelays fromJSON(JsonObject json) {
         char activation = GsonHelper.getAsCharacter(json, "activation_character");
-        JsonObject map = GsonHelper.getAsJsonObject(json, "delays");
-        Map<Integer, Double> delays = new Int2DoubleOpenHashMap();
-        for (Entry<String, JsonElement> i : map.entrySet()) {
-            if (delays.put(i.getKey().codePointAt(0), GsonHelper.convertToDouble(i.getValue(), "delay")) != null) {
+        JsonObject mapSpecial = GsonHelper.getAsJsonObject(json, "delays_active");
+        Map<Integer, Double> delaysSpecial = new Int2DoubleOpenHashMap();
+        for (Entry<String, JsonElement> i : mapSpecial.entrySet()) {
+            if (delaysSpecial.put(i.getKey().codePointAt(0), GsonHelper.convertToDouble(i.getValue(), "delay")) != null) {
                 throw new IllegalArgumentException("Duplicate key for " + i.getKey().charAt(0));
             }
         }
-        double defaultDelay = GsonHelper.getAsDouble(json, "default", 1);
-        return new UserDefinedDelays(activation, delays, defaultDelay);
+        double fallbackSpecial = GsonHelper.getAsDouble(mapSpecial, "default", 0);
+        JsonObject mapNormal = GsonHelper.getAsJsonObject(json, "delays_global", new JsonObject());
+        Map<Integer, Double> delaysNormal = new Int2DoubleOpenHashMap();
+        for (Entry<String, JsonElement> i : mapNormal.entrySet()) {
+            if (delaysNormal.put(i.getKey().codePointAt(0), GsonHelper.convertToDouble(i.getValue(), "delay")) != null) {
+                throw new IllegalArgumentException("Duplicate key for " + i.getKey().charAt(0));
+            }
+        }
+        double fallbackNormal = GsonHelper.getAsDouble(mapNormal, "default", 1);
+        return new UserDefinedDelays(activation, delaysSpecial, fallbackSpecial, delaysNormal, fallbackNormal);
     }
 }

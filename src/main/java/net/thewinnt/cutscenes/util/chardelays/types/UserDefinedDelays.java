@@ -7,7 +7,14 @@ import net.thewinnt.cutscenes.util.chardelays.serializers.UserDelaySerializer;
 
 import java.util.Map;
 
-public record UserDefinedDelays(char activation, Map<Integer, Double> delays, double defaultDelay) implements DelayProvider {
+public record UserDefinedDelays(
+    char activation,
+    Map<Integer, Double> delaysSpecial,
+    double fallbackSpecial,
+    Map<Integer, Double> delaysDefault,
+    double fallbackNormal
+) implements DelayProvider {
+
     @Override
     public char activationSymbol() {
         return activation;
@@ -15,19 +22,21 @@ public record UserDefinedDelays(char activation, Map<Integer, Double> delays, do
 
     @Override
     public double delay(int input) {
-        return delays.get(input);
+        return delaysSpecial.getOrDefault(input, fallbackSpecial);
     }
 
     @Override
     public void toNetwork(FriendlyByteBuf buf) {
         buf.writeChar(activation);
-        buf.writeMap(delays, FriendlyByteBuf::writeInt, FriendlyByteBuf::writeDouble);
-        buf.writeDouble(defaultDelay);
+        buf.writeMap(delaysSpecial, FriendlyByteBuf::writeInt, FriendlyByteBuf::writeDouble);
+        buf.writeDouble(fallbackSpecial);
+        buf.writeMap(delaysDefault, FriendlyByteBuf::writeInt, FriendlyByteBuf::writeDouble);
+        buf.writeDouble(fallbackNormal);
     }
 
     @Override
     public double defaultDelay(int codepoint) {
-        return defaultDelay;
+        return delaysDefault.getOrDefault(codepoint, fallbackNormal);
     }
 
     @Override

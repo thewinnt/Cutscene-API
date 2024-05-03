@@ -1,5 +1,5 @@
 {
-  "length": 500,
+  "length": 1000,
   "disable_actions": false,
   "start_transition": {
     "type": "cutscenes:no_op"
@@ -11,7 +11,7 @@
     {
       "type": "cutscenes:appearing_text",
       "start": 20,
-      "end": 480,
+      "end": 1000,
       "text": [
         {
           "text": "This is some example text!\n"
@@ -31,9 +31,32 @@
           "color": "red"
         },
         {
-          "text": "^4e^4x^4t^4r^4a ^1d^2e^4l^9a^1y^3\n\n",
+          "text": "^1e^1x^1t^1r^1a ^1d^2e^4l^9a^1y^3\n\n",
           "italic": true,
           "color": "green"
+        },
+        {
+          "text": "You can use custom soundbites and delay configurations! ^1 ",
+          "color": "#0885bf"
+        },
+        {
+          "translate": "block.minecraft.waxed_cut_copper_stairs",
+          "color": "gold",
+          "underlined": true
+        },
+        {
+          "text": "^1<- that text is translated, by the way. And if the line gets too long, it will be wrapped around.",
+          "color": "#0885bf"
+        },
+        {
+          "text": "(I think that's enough length already, isn't it? ",
+          "color": "gray",
+          "italic": true
+        },
+        {
+          "text": "It'd be really cool to skip; some...;;; characters right there with custom delays)\n\n",
+          "color": "gray",
+          "italic": true
         },
         {
           "text": "Expect more in the future!\n",
@@ -55,12 +78,25 @@
       "soundbite": {
         "sound_id": "minecraft:block.note_block.flute"
       },
-      "delays": "cutscenes:undertale",
+      "delays": {
+        "type": "cutscenes:custom",
+        "activation": "^",
+        "delays_active": {
+          "1": 6.66,
+          "2": 13.33,
+          "4": 26.66,
+          "9": 60,
+          "default": 0
+        },
+        "delays_global": {
+          ";": -4
+        }
+      },
       "pitch": {
         "type": "uniform",
         "value": {
-          "min_inclusive": 0.5,
-          "max_exclusive": 1.5
+          "min_inclusive": 0.75,
+          "max_exclusive": 1.25
         }
       }
     }
