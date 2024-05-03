@@ -17,7 +17,7 @@
           "text": "This is some example text!\n"
         },
         {
-          "text": "...^with multiline support!^\nUse ",
+          "text": "...^1with multiline support!^1\nUse ",
           "bold": true,
           "color": "red"
         },
@@ -26,12 +26,12 @@
           "color": "gold"
         },
         {
-          "text": " for ",
+          "text": " followed by a digit for ",
           "bold": true,
           "color": "red"
         },
         {
-          "text": "^e^x^t^r^a ^d^e^l^a^y^^\n\n",
+          "text": "^4e^4x^4t^4r^4a ^1d^2e^4l^9a^1y^3\n\n",
           "italic": true,
           "color": "green"
         },
@@ -50,7 +50,19 @@
       ],
       "x": 0.025,
       "y": 0.025,
-      "line_width": 0.95
+      "line_width": 0.95,
+      "drop_shadow": false,
+      "soundbite": {
+        "sound_id": "minecraft:block.note_block.flute"
+      },
+      "delays": "cutscenes:undertale",
+      "pitch": {
+        "type": "uniform",
+        "value": {
+          "min_inclusive": 0.5,
+          "max_exclusive": 1.5
+        }
+      }
     }
   ]
 }

@@ -23,6 +23,7 @@ import net.thewinnt.cutscenes.init.CutsceneAPIEntities;
 import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
+import net.thewinnt.cutscenes.util.chardelays.DelayProviderSerializer;
 import org.slf4j.Logger;
 
 import com.google.gson.GsonBuilder;
@@ -52,6 +53,7 @@ public class CutsceneAPI {
     public static final ResourceKey<Registry<SegmentSerializer<?>>> SEGMENT_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:segment_types"));
     public static final ResourceKey<Registry<PointSerializer<?>>> POINT_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:point_providers"));
     public static final ResourceKey<Registry<TransitionSerializer<?>>> TRANSITION_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:transition_types"));
+    public static final ResourceKey<Registry<DelayProviderSerializer<?>>> DELAY_PROVIDER_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:delay_providers"));
 
     // registries
     public static final Registry<EasingSerializer<?>> EASING_SERIALIZERS = new RegistryBuilder<>(EASING_SERIALIZER_KEY)
@@ -74,6 +76,11 @@ public class CutsceneAPI {
     public static final Registry<TransitionSerializer<?>> TRANSITION_TYPES = new RegistryBuilder<>(TRANSITION_TYPE_KEY)
         .sync(true)
         .defaultKey(new ResourceLocation("cutscenes:no_op"))
+        .create();
+
+    public static final Registry<DelayProviderSerializer<?>> DELAY_PROVIDERS = new RegistryBuilder<>(DELAY_PROVIDER_KEY)
+        .sync(true)
+        .defaultKey(new ResourceLocation("cutscenes:undertale"))
         .create();
 
     public CutsceneAPI(IEventBus modBus, Dist dist) {

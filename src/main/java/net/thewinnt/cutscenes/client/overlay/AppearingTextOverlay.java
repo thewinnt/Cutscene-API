@@ -3,18 +3,15 @@ package net.thewinnt.cutscenes.client.overlay;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
-import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
 import net.thewinnt.cutscenes.effect.type.AppearingTextEffect.TimeProvider;
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
+import net.thewinnt.cutscenes.util.chardelays.DelayProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,13 +31,8 @@ public class AppearingTextOverlay implements Overlay {
         // list 1: each component split into formatted strings
         List<Pair<String, Style>> styles = new ArrayList<>();
         double currentTime = time.getTime();
-        var state = new Object() {
-            double t = 0;
-            boolean didJustEscape = false;
-            boolean didJustAdd = false;
-            Style style;
-            StringBuilder currentString;
-        };
+        final var state = new DrawingState();
+        final DelayProvider delays = this.config.delays();
         text.getVisualOrderText().accept((index, nextStyle, codepoint) -> {
             if (state.t >= currentTime) return false;
             if (!nextStyle.equals(state.style)) {
@@ -53,14 +45,19 @@ public class AppearingTextOverlay implements Overlay {
             } else {
                 state.didJustAdd = false;
             }
-            if (codepoint == '^' && !state.didJustEscape) {
-                state.t += 6.66;
+            if (state.gettingDelay) {
+                state.t += delays.delay(codepoint);
+                state.gettingDelay = false;
+                return true;
+            }
+            if (codepoint == delays.activationSymbol() && !state.didJustEscape) {
+                state.gettingDelay = true;
             } else if (codepoint == '\\' && !state.didJustEscape) {
                 state.didJustEscape = true;
             } else {
                 state.currentString.appendCodePoint(codepoint);
                 if (codepoint != '\n' && !Character.isWhitespace(codepoint)) {
-                    state.t += 1.33;
+                    state.t += delays.defaultDelay(codepoint);
                 }
                 state.didJustEscape = false;
             }
@@ -75,39 +72,26 @@ public class AppearingTextOverlay implements Overlay {
             result.add(FormattedText.of(i.getFirst(), i.getSecond()));
         }
         if (lastT != state.t) {
-            CutsceneAPI.LOGGER.debug("would've played a sound here");
-            // TODO play sound
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(this.config.soundbite(), this.config.pitch().sample(minecraft.player.getRandom()), 1));
         }
         lastT = state.t;
-        int x = (int)(this.config.rx().get(time.getProgress()) * width);
-        int y = (int)(this.config.ry().get(time.getProgress()) * height);
-        int lineWidth = (int)(this.config.width().get(time.getProgress()) * width);
+        int x = this.config.rx().get(time.getProgress(), width);
+        int y = this.config.ry().get(time.getProgress(), height);
+        int lineWidth = this.config.width().get(time.getProgress(), width);
         // i could've used drawWordWrap() here, but it doesn't do a shadow
         // the code below is copied from GuiGraphics#drawWordWrap
         for (FormattedCharSequence j : minecraft.font.split(FormattedText.composite(result), lineWidth)) {
-            graphics.drawString(minecraft.font, j, x, y, 0xffffff, true);
+            graphics.drawString(minecraft.font, j, x, y, 0xffffff, this.config.dropShadow());
             y += minecraft.font.lineHeight;
         }
     }
 
-    private @NotNull String createStringForFrame(String text, double currentTime) {
-        StringBuilder toRender = new StringBuilder();
-        double t = 0;
-        for (int i = 0; i < text.length(); i++) {
-            if (t >= currentTime) break;
-            char c = text.charAt(i);
-            if (c == '^') {
-                t += 6.66;
-            } else if (c == '\\' && text.charAt(i + 1) == '^') {
-                t += 1.33;
-                toRender.append('^');
-            } else {
-                if (c != ' ' && c != '\n') {
-                    t += 1.33;
-                }
-                toRender.append(c);
-            }
-        }
-        return toRender.toString();
+    private static class DrawingState {
+        double t;
+        boolean didJustEscape;
+        boolean didJustAdd;
+        boolean gettingDelay;
+        Style style;
+        StringBuilder currentString;
     }
 }
