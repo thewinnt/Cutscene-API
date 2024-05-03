@@ -1,12 +1,18 @@
 package net.thewinnt.cutscenes.effect.serializer;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.easing.Easing;
+import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
 import net.thewinnt.cutscenes.effect.type.AppearingTextEffect;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AppearingTextSerializer implements CutsceneEffectSerializer<AppearingTextConfiguration> {
     public static final AppearingTextSerializer INSTANCE = new AppearingTextSerializer();
@@ -18,7 +24,8 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         Component text = buf.readComponent();
         Easing rx = Easing.fromNetwork(buf);
         Easing ry = Easing.fromNetwork(buf);
-        return new AppearingTextConfiguration(text, rx, ry);
+        Easing lineWidth = Easing.fromNetwork(buf);
+        return new AppearingTextConfiguration(text, rx, ry, lineWidth);
     }
 
     @Override
@@ -26,7 +33,8 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         Component text = Component.Serializer.fromJson(json.get("text"));
         Easing rx = Easing.fromJSON(json.get("x"));
         Easing ry = Easing.fromJSON(json.get("y"));
-        return new AppearingTextConfiguration(text, rx, ry);
+        Easing lineWidth = Easing.fromJSON(json.get("line_width"), ConstantEasing.ONE);
+        return new AppearingTextConfiguration(text, rx, ry, lineWidth);
     }
 
     @Override
@@ -34,6 +42,7 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         buf.writeComponent(config.text());
         Easing.toNetwork(config.rx(), buf);
         Easing.toNetwork(config.ry(), buf);
+        Easing.toNetwork(config.width(), buf);
     }
 
     @Override

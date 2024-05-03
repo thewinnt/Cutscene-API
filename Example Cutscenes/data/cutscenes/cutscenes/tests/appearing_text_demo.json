@@ -1,5 +1,5 @@
 {
-  "length": 100,
+  "length": 500,
   "disable_actions": false,
   "start_transition": {
     "type": "cutscenes:no_op"
@@ -12,11 +12,45 @@
       "type": "cutscenes:appearing_text",
       "start": 20,
       "end": 480,
-      "text": {
-        "text": "This is some example text...^\nwith multiline support!^\nUse \\^ for ^e^x^t^r^a ^d^e^l^a^y^^\n\nExpect more in the future!"
-      },
+      "text": [
+        {
+          "text": "This is some example text!\n"
+        },
+        {
+          "text": "...^with multiline support!^\nUse ",
+          "bold": true,
+          "color": "red"
+        },
+        {
+          "text": "\\^",
+          "color": "gold"
+        },
+        {
+          "text": " for ",
+          "bold": true,
+          "color": "red"
+        },
+        {
+          "text": "^e^x^t^r^a ^d^e^l^a^y^^\n\n",
+          "italic": true,
+          "color": "green"
+        },
+        {
+          "text": "Expect more in the future!\n",
+          "underlined": true,
+          "color": "blue"
+        },
+        {
+          "text": "It's gonna be VERY VERY INTERESTING",
+          "strikethrough": true,
+          "obfuscated": true,
+          "color": "#aa8020",
+          "font": "minecraft:alt"
+        }
+      ],
       "x": 0.025,
-      "y": 0.025
+      "y": 0.025,
+      "line_width": 0.95
     }
   ]
 }
