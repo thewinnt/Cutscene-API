@@ -18,6 +18,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.RegistryBuilder;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
+import net.thewinnt.cutscenes.util.LoadResolver;
 import org.slf4j.Logger;
 
 import com.google.gson.GsonBuilder;
@@ -92,18 +93,9 @@ public class CutsceneAPI {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 Easing.EASING_MACROS.clear();
-                AtomicInteger loaded = new AtomicInteger();
-                files.forEach((id, element) -> {
-                    try {
-                        JsonObject json = GsonHelper.convertToJsonObject(element, "easing_macro");
-                        Easing.EASING_MACROS.put(id, Easing.fromJSON(json));
-                        loaded.getAndIncrement();
-                    } catch (RuntimeException e) {
-                        LOGGER.error("Exception loading easing macro: {}", id);
-                        LOGGER.error("Caused by: ", e);
-                    }
-                });
-                LOGGER.info("Loaded {} easing macros", loaded.get());
+                LoadResolver<Easing> macroLoader = new LoadResolver<>(Easing::fromJSON, files, true);
+                Easing.EASING_MACROS.putAll(macroLoader.load());
+                LOGGER.info("Loaded {} easing macros", Easing.EASING_MACROS.size());
             }
         });
         event.addListener(new SimpleJsonResourceReloadListener(new GsonBuilder().create(), "cutscenes") {
@@ -117,8 +109,7 @@ public class CutsceneAPI {
                         CutsceneManager.registerCutscene(id, CutsceneType.fromJSON(json));
                         loaded.getAndIncrement();
                     } catch (RuntimeException e) {
-                        LOGGER.error("Exception loading cutscene {}", id);
-                        LOGGER.error("Caused by:", e);
+                        LOGGER.error("Exception loading cutscene {}: {}", id, e);
                     }
                 });
                 LOGGER.info("Loaded {} cutscenes", loaded.get());
