@@ -14,8 +14,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
 
+/**
+ * An easing smoothly transitions from value 0 to value 1. At least, in places it's meant to be an easing.
+ * In other cases, it can be treated as a math function that takes in an argument in range [0, 1] and returns something
+ * else from it. To get an idea what an easing (in its intended usage) is, as well as the visual representations of
+ * {@link SimpleEasing simple (or legacy) easings}, check out <a href="https://easings.net">easings.net</a>
+ * @see SimpleEasing
+ */
 public interface Easing {
     Map<ResourceLocation, Easing> EASING_MACROS = new HashMap<>();
     /**

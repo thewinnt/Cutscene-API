@@ -17,6 +17,7 @@ import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 
 import javax.annotation.Nullable;
 
+/** A class containing some helpful functions for JSON parsing. */
 public class JsonHelper {
     /**
      * Gets a Vec3 from a JSON object, if it's written in the form of [x, y, z]

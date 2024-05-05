@@ -16,6 +16,12 @@ import net.thewinnt.cutscenes.util.JsonHelper;
 
 import javax.annotation.Nullable;
 
+/**
+ * A cutscene type consists of a camera path, rotation, transitions and some parameters. A cutscene has a fixed length,
+ * and it can choose to let the player move their body and/or camera and hide their hand and block outlines.
+ * When a cutscene is run, it's given a starting position and a starting camera rotation. The cutscene's path can be
+ * rotated by some amount.
+ */
 public class CutsceneType {
     public final int length;
     public final @Nullable Path path;
@@ -28,6 +34,7 @@ public class CutsceneType {
     public final boolean hideHand;
     public final boolean hideBlockOutline;
 
+    /** Constructs a cutscene type with all parameters specified. */
     public CutsceneType(PathLike path, Path rotationProvider, int length, Transition start, Transition end, boolean blockMovement, boolean blockCameraRotation, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline) {
         if (path instanceof Path pth) {
             this.path = pth;
@@ -46,7 +53,8 @@ public class CutsceneType {
         this.hideHand = hideHand;
         this.hideBlockOutline = hideBlockOutline;
     }
-    
+
+    /** Constructs a simple cutscene type with default parameters for most settings. */
     public CutsceneType(PathLike path, Path rotationProvider, int length) {
         if (path instanceof Path pth) {
             this.path = pth;
@@ -66,18 +74,35 @@ public class CutsceneType {
         this.hideBlockOutline = false;
     }
 
+    /**
+     * Returns a point for this cutscene's camera path at the specified progress value, if there is a path.
+     * @param point the progress of this cutscene, in range [0, 1].
+     * @param level the level where the cutscene is run
+     * @param cutsceneStart the cutscene's starting position
+     * @return a point for the given progress, or {@code null} if there's no path
+     */
     @Nullable
     public Vec3 getPathPoint(double point, Level level, Vec3 cutsceneStart) {
         if (path == null) return null;
         return path.getPoint(point, level, cutsceneStart);
     }
 
+    /**
+     * Returns a point for this cutscene's camera rotation at the specified progress value, if there is any rotation.
+     * @param point the progress of this cutscene, in range [0, 1].
+     * @param level the level where the cutscene is run
+     * @param cutsceneStart the cutscene's starting position
+     * @return a point for the given progress, or {@code null} if there's no path. The returned point's coordinates
+     * are [yaw, pitch, roll], matching Minecraft's [y, x, z] coordinates respectively. By the way, the values on
+     * the F3 screen are [y / x] too.
+     */
     @Nullable
     public Vec3 getRotationAt(double point, Level level, Vec3 cutsceneStart) {
         if (rotationProvider == null) return null;
         return rotationProvider.getPoint(point, level, cutsceneStart);
     }
 
+    /** Serializes this cutscene type to network, to fully reconstruct it later on the client side. */
     public void toNetwork(FriendlyByteBuf buf) {
         buf.writeInt(length);
         buf.writeBoolean(path == null);
@@ -95,6 +120,7 @@ public class CutsceneType {
         buf.writeBoolean(hideBlockOutline);
     }
 
+    /** Reads a cutscene type from network. */
     public static CutsceneType fromNetwork(FriendlyByteBuf buf) {
         int length = buf.readInt();
         Path path, rotationProvider;
@@ -118,6 +144,7 @@ public class CutsceneType {
         return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, blockCameraRotation, actionToggles, hideHand, hideBlockOutline);
     }
 
+    /** Reads a cutscene type from JSON. */
     public static CutsceneType fromJSON(JsonObject json) {
         int length = json.get("length").getAsInt();
         Path path = Path.fromJSON(JsonHelper.getNullableObject(json, "path"), null);

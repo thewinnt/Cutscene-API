@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -40,6 +42,10 @@ import net.thewinnt.cutscenes.entity.WaypointEntity;
 public class CutsceneAPI {
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final Random RANDOM = new Random();
+    /** 
+     * A salt value, updated each time a cutscene is started. Used for randomizing waypoint locations.
+     * @see net.thewinnt.cutscenes.path.point.WaypointProvider#getPoint(Level, Vec3)
+     */
     private static long WAYPOINT_SALT = RANDOM.nextLong();
 
     // registry keys

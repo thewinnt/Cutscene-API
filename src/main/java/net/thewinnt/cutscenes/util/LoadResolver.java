@@ -33,9 +33,9 @@ public class LoadResolver<T> {
 
     /**
      * Resolves a single object from its ID, also resolving and objects it depends on.
-     * If {@code allowExceptions} is {@code true} and an exception occurs when loading, returns {@code null}.
+     * If an exception occurs when loading, returns {@code null} if {@code allowExceptions} is {@code true},
+     * and throws the exception otherwise.
      * @throws LoopingReferenceException in case of an infinite loop
-     * @throws Exception if {@code allowExceptions} is {@code false} and an exception occurs when loading
      */
     public @Nullable T resolve(ResourceLocation id) {
         if (resolved.containsKey(id)) {
@@ -74,6 +74,13 @@ public class LoadResolver<T> {
         return resolved;
     }
 
+    /**
+     * An Exception representing a loop in loading objects.
+     * <p>
+     * For example, an object named {@code cutscenes:a} references an object named {@code cutscenes:b}.
+     * That object, in return, referenced {@code cutscenes:a}. When trying to load either of these objects,
+     * this exception will be thrown.
+     */
     public static class LoopingReferenceException extends RuntimeException {
         private final ResourceLocation cause;
 
