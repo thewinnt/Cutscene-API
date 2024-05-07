@@ -10,6 +10,7 @@
     "CameraMixin",
     "DebugRendererMixin",
     "EntityMixin",
+    "ExtendedGuiMixin",
     "GameRendererMixin",
     "GuiMixin",
     "MinecraftMixin",

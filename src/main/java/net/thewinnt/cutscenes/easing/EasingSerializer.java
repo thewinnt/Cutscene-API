@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.serializers.*;
 import net.thewinnt.cutscenes.easing.types.*;
+import net.thewinnt.cutscenes.util.LoadResolver;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,6 +78,7 @@ public interface EasingSerializer<T extends Easing> {
 
     T fromNetwork(FriendlyByteBuf buf);
     T fromJSON(JsonObject json);
+    T fromJSON(JsonObject json, LoadResolver<Easing> context);
 
     static <T extends Easing> EasingSerializer<T> register(ResourceLocation id, EasingSerializer<T> serializer) {
         return Registry.register(CutsceneAPI.EASING_SERIALIZERS, id, serializer);

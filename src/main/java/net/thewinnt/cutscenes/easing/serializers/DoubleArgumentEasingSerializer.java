@@ -5,6 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.DoubleArgumentEasing;
+import net.thewinnt.cutscenes.util.LoadResolver;
 
 import java.util.function.DoubleBinaryOperator;
 
@@ -20,6 +21,13 @@ public record DoubleArgumentEasingSerializer(DoubleBinaryOperator operation) imp
     public DoubleArgumentEasing fromJSON(JsonObject json) {
         Easing arg1 = Easing.fromJSON(json.get("arg1"));
         Easing arg2 = Easing.fromJSON(json.get("arg2"));
+        return new DoubleArgumentEasing(arg1, arg2, operation);
+    }
+
+    @Override
+    public DoubleArgumentEasing fromJSON(JsonObject json, LoadResolver<Easing> context) {
+        Easing arg1 = Easing.fromJSON(json.get("arg1"), context);
+        Easing arg2 = Easing.fromJSON(json.get("arg2"), context);
         return new DoubleArgumentEasing(arg1, arg2, operation);
     }
 }

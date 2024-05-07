@@ -67,7 +67,7 @@ public class CutsceneManager {
         100
     );
 
-    /** A cool path made of continuous Bezier curves, also features rotation changes */
+    /** A cool path made of continuous Bézier curves, also features rotation changes */
     public static final CutsceneType COOL_PATH = new CutsceneType(
         new Path(new BezierCurve(new Vec3(0, 0, 0), null, null, new Vec3(0, 10, 0)))
                 .continueBezier(new Vec3(-50, 1, 0), new Vec3(-50, 10, 25)) // adds a new Bezier curve with arguments: (see below)
@@ -126,35 +126,49 @@ public class CutsceneManager {
     // Segment serializers are used to identify and read segment types. The writing is performed on instances of
     // segments obtained from these serializers.
 
+    /** A line, consisting of 2 point, interpolated between each other with some easings. */
     public static final SegmentSerializer<LineSegment> LINE = SegmentSerializer.of(LineSegment::fromNetwork, LineSegment::fromJSON);
+    /** A cubic or quadratic Bézier curve, depending on the points supplied. */
     public static final SegmentSerializer<BezierCurve> BEZIER = SegmentSerializer.of(BezierCurve::fromNetwork, BezierCurve::fromJSON);
+    /** A Catmull-Rom spline, made of 2 or more points. */
     public static final SegmentSerializer<CatmullRomSpline> CATMULL_ROM = SegmentSerializer.of(CatmullRomSpline::fromNetwork, CatmullRomSpline::fromJSON);
+    /** A segment made of other segments. */
     public static final SegmentSerializer<Path> PATH = SegmentSerializer.of(Path::fromNetwork, Path::fromJSON);
+    /** A segment always returning a single point. */
     public static final SegmentSerializer<ConstantPoint> CONSTANT = SegmentSerializer.of(ConstantPoint::fromNetwork, ConstantPoint::fromJSON);
+    /** A segment returning a look direction so that the player is looking at the specified point. */
     public static final SegmentSerializer<LookAtPoint> LOOK_AT_POINT = SegmentSerializer.of(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
+    /** A transition between two segments - the one before and the one after this. */
     public static final SegmentSerializer<PathTransition> PATH_TRANSITION = SegmentSerializer.of(PathTransition::fromNetwork, PathTransition::fromJSON);
+    /** A segment getting its coordinates from easings. */
     public static final SegmentSerializer<CalculatedPoint> CALCULATED_POINT = SegmentSerializer.of(CalculatedPoint::fromNetwork, CalculatedPoint::fromJSON);
 
     // POINT TYPES //
     // Point serializers are used to identify and read point types. A point type gets a Level in and returns
     // a point based on that.
 
+    /** A simple point. Can be inlined as an array of 3 points. */
     public static final PointSerializer<StaticPointProvider> STATIC = PointSerializer.of(StaticPointProvider::fromNetwork, StaticPointProvider::fromJSON);
+    /** A point that finds a waypoint entity with a specified name, and returns its position (maybe offset too). */
     public static final PointSerializer<WaypointProvider> WAYPOINT = PointSerializer.of(WaypointProvider::fromNetwork, WaypointProvider::fromJSON);
+    /** A point type that is specified in world coordinates */
     public static final PointSerializer<WorldPointProvider> WORLD = PointSerializer.of(WorldPointProvider::fromNetwork, WorldPointProvider::fromJSON);
 
     // TRANSITION TYPES //
     // Transitions make you enter and leave a cutscene with beauty, instead of simply snapping into it.
 
+    /** Does nothing. */
     public static final TransitionSerializer<NoopTransition> NO_OP = TransitionSerializer.of(NoopTransition::fromNetwork, NoopTransition::fromJSON);
+    /** Smoothly transitions your camera from the starting point to the current point you should be at. */
     public static final TransitionSerializer<SmoothEaseTransition> SMOOTH_EASE = TransitionSerializer.of(SmoothEaseTransition::fromNetwork, SmoothEaseTransition::fromJSON);
+    /** Fades the screen to a color (or several colors that may change too) */
     public static final TransitionSerializer<FadeToColorTransition> FADE = TransitionSerializer.of(FadeToColorTransition::fromNetwork, FadeToColorTransition::fromJSON);
 
     /** 
-     * Registers a cutscene
-     * @param id The ID of the cutscene that will be used in commands
+     * Registers a cutscene type
+     * @param id The ID of the cutscene type that will be used in commands
      * @param type The actual cutscene type you want to register
-     * @return Your cutscene for storing
+     * @return Your cutscene type for storing
      */
     public static CutsceneType registerCutscene(ResourceLocation id, @Nonnull CutsceneType type) {
         REGISTRY.put(id, type);
@@ -228,7 +242,7 @@ public class CutsceneManager {
         PacketDistributor.ALL.noArg().send(new PreviewCutscenePacket(REGISTRY.inverse().get(type), offset, pathYaw, pathPitch, pathRoll));
     }
 
-    // self-explanatory
+    /** Self-explanatory */
     public static CutsceneType getPreviewedCutscene() {
         return previewedCutscene;
     }

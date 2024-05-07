@@ -9,6 +9,7 @@ import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.CompoundEasing;
 import net.thewinnt.cutscenes.easing.types.CompoundEasing.RangeAppliedEasing;
 import net.thewinnt.cutscenes.easing.types.CompoundEasing.TimedEasingEntry;
+import net.thewinnt.cutscenes.util.LoadResolver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,18 @@ public class CompoundEasingSerializer implements EasingSerializer<CompoundEasing
         for (var i : obj.asMap().entrySet()) {
             double time = Double.parseDouble(i.getKey());
             RangeAppliedEasing easing = RangeAppliedEasing.fromJSON(i.getValue());
+            entries.add(new TimedEasingEntry(time, easing));
+        }
+        return new CompoundEasing(entries);
+    }
+
+    @Override
+    public CompoundEasing fromJSON(JsonObject json, LoadResolver<Easing> context) {
+        JsonObject obj = GsonHelper.getAsJsonObject(json, "entries");
+        List<TimedEasingEntry> entries = new ArrayList<>();
+        for (var i : obj.asMap().entrySet()) {
+            double time = Double.parseDouble(i.getKey());
+            RangeAppliedEasing easing = RangeAppliedEasing.fromJSON(i.getValue(), context);
             entries.add(new TimedEasingEntry(time, easing));
         }
         return new CompoundEasing(entries);

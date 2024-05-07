@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -24,6 +26,7 @@ import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
 import net.thewinnt.cutscenes.util.chardelays.DelayProviderSerializer;
+import net.thewinnt.cutscenes.util.LoadResolver;
 import org.slf4j.Logger;
 
 import com.google.gson.GsonBuilder;
@@ -45,6 +48,10 @@ import net.thewinnt.cutscenes.entity.WaypointEntity;
 public class CutsceneAPI {
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final Random RANDOM = new Random();
+    /** 
+     * A salt value, updated each time a cutscene is started. Used for randomizing waypoint locations.
+     * @see net.thewinnt.cutscenes.path.point.WaypointProvider#getPoint(Level, Vec3)
+     */
     private static long WAYPOINT_SALT = RANDOM.nextLong();
 
     // registry keys
@@ -108,18 +115,9 @@ public class CutsceneAPI {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 Easing.EASING_MACROS.clear();
-                AtomicInteger loaded = new AtomicInteger();
-                files.forEach((id, element) -> {
-                    try {
-                        JsonObject json = GsonHelper.convertToJsonObject(element, "easing_macro");
-                        Easing.EASING_MACROS.put(id, Easing.fromJSON(json));
-                        loaded.getAndIncrement();
-                    } catch (RuntimeException e) {
-                        LOGGER.error("Exception loading easing macro: {}", id);
-                        LOGGER.error("Caused by: ", e);
-                    }
-                });
-                LOGGER.info("Loaded {} easing macros", loaded.get());
+                LoadResolver<Easing> macroLoader = new LoadResolver<>(Easing::fromJSON, files, true);
+                Easing.EASING_MACROS.putAll(macroLoader.load());
+                LOGGER.info("Loaded {} easing macros", Easing.EASING_MACROS.size());
             }
         });
         event.addListener(new SimpleJsonResourceReloadListener(new GsonBuilder().create(), "cutscenes") {
@@ -133,8 +131,7 @@ public class CutsceneAPI {
                         CutsceneManager.registerCutscene(id, CutsceneType.fromJSON(json));
                         loaded.getAndIncrement();
                     } catch (RuntimeException e) {
-                        LOGGER.error("Exception loading cutscene {}", id);
-                        LOGGER.error("Caused by:", e);
+                        LOGGER.error("Exception loading cutscene {}: {}", id, e);
                     }
                 });
                 LOGGER.info("Loaded {} cutscenes", loaded.get());

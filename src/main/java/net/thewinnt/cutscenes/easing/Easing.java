@@ -8,12 +8,20 @@ import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
+import net.thewinnt.cutscenes.util.LoadResolver;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * An easing smoothly transitions from value 0 to value 1. At least, in places it's meant to be an easing.
+ * In other cases, it can be treated as a math function that takes in an argument in range [0, 1] and returns something
+ * else from it. To get an idea what an easing (in its intended usage) is, as well as the visual representations of
+ * {@link SimpleEasing simple (or legacy) easings}, check out <a href="https://easings.net">easings.net</a>
+ * @see SimpleEasing
+ */
 public interface Easing {
     Map<ResourceLocation, Easing> EASING_MACROS = new HashMap<>();
     /**
@@ -47,6 +55,18 @@ public interface Easing {
         throw new IllegalArgumentException("Cannot get Easing from JSON: " + json);
     }
 
+    static Easing fromJSON(@Nonnull JsonElement json, LoadResolver<Easing> context) {
+        if (json.isJsonPrimitive()) {
+            return fromJSONPrimitive(json.getAsJsonPrimitive(), context);
+        } else if (json.isJsonObject()) {
+            JsonObject obj = json.getAsJsonObject();
+            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.get(new ResourceLocation(obj.get("type").getAsString()));
+            return serializer.fromJSON(obj, context);
+        }
+        throw new IllegalArgumentException("Cannot get Easing from JSON: " + json);
+    }
+
+
     static Easing fromJSON(@Nullable JsonElement json, Easing fallback) {
         if (json == null) {
             return fallback;
@@ -60,18 +80,52 @@ public interface Easing {
     }
 
     static Easing fromJSONPrimitive(JsonPrimitive json) {
+        // if it's a number, return that first
+        try {
+            return new ConstantEasing(json.getAsDouble());
+        } catch (NumberFormatException ignored) {}
+
+        // if it's a string, try returning a constant first
         String value = json.getAsString();
         if ("t".equals(value)) return SimpleEasing.LINEAR;
         if ("pi".equals(value)) return ConstantEasing.PI;
         if ("e".equals(value)) return ConstantEasing.E;
+
+        // then, a legacy easing
         if (EasingSerializer.LEGACY_COMPAT.containsKey(value)) {
             return EasingSerializer.LEGACY_COMPAT.get(value);
         }
+
+        // then, a macro
         ResourceLocation test = new ResourceLocation(value);
         if (EASING_MACROS.containsKey(test)) {
             return EASING_MACROS.get(test);
+        } else {
+            // if nothing is found, throw an exception
+            throw new IllegalArgumentException("Invalid or unknown easing: " + json);
         }
-        return new ConstantEasing(json.getAsDouble());
+    }
+
+    static Easing fromJSONPrimitive(JsonPrimitive json, LoadResolver<Easing> context) {
+        // if it's a number, return that first
+        try {
+            return new ConstantEasing(json.getAsDouble());
+        } catch (NumberFormatException ignored) {}
+
+        // if it's a string, try returning a constant first
+        String value = json.getAsString();
+        if ("t".equals(value)) return SimpleEasing.LINEAR;
+        if ("pi".equals(value)) return ConstantEasing.PI;
+        if ("e".equals(value)) return ConstantEasing.E;
+
+        // then, a legacy easing
+        if (EasingSerializer.LEGACY_COMPAT.containsKey(value)) {
+            return EasingSerializer.LEGACY_COMPAT.get(value);
+        }
+
+        // then, a macro
+        ResourceLocation test = new ResourceLocation(value);
+        return context.resolve(test);
     }
 
     static Easing fromNetwork(FriendlyByteBuf buf) {

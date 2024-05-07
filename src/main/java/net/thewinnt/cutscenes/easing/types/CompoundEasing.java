@@ -6,6 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
+import net.thewinnt.cutscenes.util.LoadResolver;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -85,6 +86,18 @@ public class CompoundEasing implements Easing {
             double minValue = GsonHelper.getAsDouble(obj, "from", 0);
             double maxValue = GsonHelper.getAsDouble(obj, "to", 1);
             Easing easing = Easing.fromJSON(obj.get("easing"));
+            return new RangeAppliedEasing(minValue, maxValue, easing);
+        }
+
+        public static RangeAppliedEasing fromJSON(JsonElement json, LoadResolver<Easing> context) {
+            if (json.isJsonPrimitive()) {
+                Easing easing = Easing.fromJSONPrimitive(json.getAsJsonPrimitive(), context);
+                return new RangeAppliedEasing(0, 1, easing);
+            }
+            JsonObject obj = json.getAsJsonObject();
+            double minValue = GsonHelper.getAsDouble(obj, "from", 0);
+            double maxValue = GsonHelper.getAsDouble(obj, "to", 1);
+            Easing easing = Easing.fromJSON(obj.get("easing"), context);
             return new RangeAppliedEasing(minValue, maxValue, easing);
         }
     }
