@@ -115,7 +115,8 @@ public class CutsceneAPI {
                         CutsceneManager.registerCutscene(id, CutsceneType.fromJSON(json));
                         loaded.getAndIncrement();
                     } catch (RuntimeException e) {
-                        LOGGER.error("Exception loading cutscene {}: {}", id, e);
+                        LOGGER.error("Exception loading cutscene {}", id);
+                        LOGGER.error("Caused by:", e);
                     }
                 });
                 LOGGER.info("Loaded {} cutscenes", loaded.get());

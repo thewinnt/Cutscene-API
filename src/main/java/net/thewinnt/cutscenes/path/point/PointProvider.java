@@ -50,6 +50,7 @@ public interface PointProvider {
          * @param json the JSON object representing this segment. It may not contain all the properties this segment
          *             has.
          * @return a point created from the given JSON object.
+         * @throws IllegalArgumentException if there's not enough data to create a point, or it is invalid
          * @see net.thewinnt.cutscenes.path.PathLike.SegmentSerializer#fromNetwork(FriendlyByteBuf, Path)
          */
         T fromJSON(JsonObject json);

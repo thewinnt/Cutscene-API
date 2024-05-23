@@ -3,12 +3,15 @@ package net.thewinnt.cutscenes.easing;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.mojang.logging.LogUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -23,6 +26,7 @@ import java.util.Map;
  * @see SimpleEasing
  */
 public interface Easing {
+    Logger LOGGER = LogUtils.getLogger();
     Map<ResourceLocation, Easing> EASING_MACROS = new HashMap<>();
     /**
      * Returns the eased value from given t
@@ -31,6 +35,9 @@ public interface Easing {
      */
     double get(double t);
 
+    /**
+     * @return a serializer that creates easings of this type
+     */
     EasingSerializer<?> getSerializer();
 
     /**
@@ -49,7 +56,10 @@ public interface Easing {
             return fromJSONPrimitive(json.getAsJsonPrimitive());
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.get(new ResourceLocation(obj.get("type").getAsString()));
+            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.get(new ResourceLocation(GsonHelper.getAsString(obj, "type")));
+            if (serializer == null) {
+                throw new IllegalArgumentException("Unknown easing type: " + GsonHelper.getAsString(obj, "type"));
+            }
             return serializer.fromJSON(obj);
         }
         throw new IllegalArgumentException("Cannot get Easing from JSON: " + json);
@@ -61,6 +71,9 @@ public interface Easing {
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
             EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.get(new ResourceLocation(obj.get("type").getAsString()));
+            if (serializer == null) {
+                throw new IllegalArgumentException("Unknown easing type: " + GsonHelper.getAsString(obj, "type"));
+            }
             return serializer.fromJSON(obj, context);
         }
         throw new IllegalArgumentException("Cannot get Easing from JSON: " + json);
@@ -74,7 +87,7 @@ public interface Easing {
         try {
             return fromJSON(json);
         } catch (RuntimeException e) {
-            CutsceneAPI.LOGGER.warn("Exception loading easing, returning fallback: ", e);
+            LOGGER.warn("Exception loading easing, returning fallback: ", e);
             return fallback;
         }
     }

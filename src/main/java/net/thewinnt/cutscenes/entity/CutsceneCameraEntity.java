@@ -159,6 +159,15 @@ public class CutsceneCameraEntity extends LocalPlayer {
         } else if (isTimeForEnd(partialTick)) {
             Transition transition = cutscene.endTransition;
             double progress = getEndProress(partialTick);
+            // this is here in case the else branch never executes (e.g. the time between transitions is zero)
+            if (cutscenePhase == 0) {
+                cutscene.startTransition.onStart(cutscene); // hold our promise!
+                cutscenePhase++;
+            }
+            if (cutscenePhase == 1) {
+                cutscene.startTransition.onEnd(cutscene);
+                cutscenePhase++;
+            }
             if (cutscenePhase == 2) {
                 cutscenePhase++;
                 transition.onStart(cutscene);
@@ -169,6 +178,16 @@ public class CutsceneCameraEntity extends LocalPlayer {
                 cutscene.endTransition.onEnd(cutscene);
             }
             return transition.getPos(progress, clientLevel, startPos, pathRot, minecraft.player.getEyePosition(partialTick), cutscene);
+        } else {
+            // if the starting transition was too quick, we may end up never ticking it. no_op usually does it.
+            if (cutscenePhase == 0) {
+                cutscene.startTransition.onStart(cutscene); // hold our promise!
+                cutscenePhase++;
+            }
+            if (cutscenePhase == 1) {
+                cutscene.startTransition.onEnd(cutscene);
+                cutscenePhase++;
+            }
         }
         if (cutscenePhase == 1) {
             cutscenePhase++;

@@ -2,6 +2,7 @@ package net.thewinnt.cutscenes.client;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.mojang.logging.LogUtils;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
@@ -22,11 +23,13 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
 import net.thewinnt.cutscenes.util.ActionToggles;
+import org.slf4j.Logger;
 
 import java.util.Map;
 
 @Mod.EventBusSubscriber(bus = Bus.FORGE, value = Dist.CLIENT)
 public class ClientCutsceneManager {
+    public static final Logger LOGGER = LogUtils.getLogger();
     public static final BiMap<ResourceLocation, CutsceneType> CLIENT_REGISTRY = HashBiMap.create();
     public static final ActionToggles DEFAULT_ACTION_TOGGLES = new ActionToggles.Builder(false).build();
     private static boolean isCutsceneRunning = false;
@@ -148,12 +151,12 @@ public class ClientCutsceneManager {
     public static void setCameraPosition(ComputeCameraAngles event) {
         if (isCutsceneRunning) {
             if (camera == null) {
-                CutsceneAPI.LOGGER.warn("Found ourselves running a cutscene despite the camera being null. Is this normal?");
+                LOGGER.warn("Found ourselves running a cutscene despite the camera being null. Is this normal?");
                 stopCutsceneImmediate();
                 return;
             }
             if (runningCutscene == null) {
-                CutsceneAPI.LOGGER.error("Attempted to run an invalid cutscene!");
+                LOGGER.error("Attempted to run an invalid cutscene!");
                 stopCutsceneImmediate();
                 return;
             }

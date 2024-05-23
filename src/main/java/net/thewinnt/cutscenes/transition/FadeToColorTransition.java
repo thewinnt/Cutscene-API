@@ -19,6 +19,8 @@ import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.util.JsonHelper;
 
+import java.util.Objects;
+
 public class FadeToColorTransition implements Transition {
     private final float[] startColorBottomLeft;
     private final float[] startColorTopLeft;
@@ -224,21 +226,21 @@ public class FadeToColorTransition implements Transition {
         boolean isStart = GsonHelper.getAsBoolean(json, "is_start");
         String colorType = GsonHelper.getAsString(json, "color_definition", "single_color");
         if ("four_angles".equals(colorType)) {
-            float[] startColorBottomLeft = JsonHelper.getColor(json, "start_color_bottom_left", 1);
-            float[] startColorTopLeft = JsonHelper.getColor(json, "start_color_top_left", 1);
-            float[] startColorTopRight = JsonHelper.getColor(json, "start_color_top_right", 1);
-            float[] startColorBottomRight = JsonHelper.getColor(json, "start_color_bottom_right", 1);
-            float[] endColorBottomLeft = JsonHelper.getColor(json, "end_color_bottom_left", 1);
-            float[] endColorTopLeft = JsonHelper.getColor(json, "end_color_top_left", 1);
-            float[] endColorTopRight = JsonHelper.getColor(json, "end_color_top_right", 1);
-            float[] endColorBottomRight = JsonHelper.getColor(json, "end_color_bottom_right", 1);
+            float[] startColorBottomLeft = Objects.requireNonNull(JsonHelper.getColor(json, "start_color_bottom_left", 1), "There must be a color as start_color_bottom_left");
+            float[] startColorTopLeft = Objects.requireNonNull(JsonHelper.getColor(json, "start_color_top_left", 1), "There must be a color as start_color_top_left");
+            float[] startColorTopRight = Objects.requireNonNull(JsonHelper.getColor(json, "start_color_top_right", 1), "There must be a color as start_color_top_right");
+            float[] startColorBottomRight = Objects.requireNonNull(JsonHelper.getColor(json, "start_color_bottom_right", 1), "There must be a color as start_color_bottom_right");
+            float[] endColorBottomLeft = Objects.requireNonNull(JsonHelper.getColor(json, "end_color_bottom_left", 1), "There must be a color as end_color_bottom_left");
+            float[] endColorTopLeft = Objects.requireNonNull(JsonHelper.getColor(json, "end_color_top_left", 1), "There must be a color as end_color_top_left");
+            float[] endColorTopRight = Objects.requireNonNull(JsonHelper.getColor(json, "end_color_top_right", 1), "There must be a color as end_color_top_right");
+            float[] endColorBottomRight = Objects.requireNonNull(JsonHelper.getColor(json, "end_color_bottom_right", 1), "There must be a color as end_color_bottom_right");
             return new FadeToColorTransition(startColorBottomLeft, startColorTopLeft, startColorTopRight, startColorBottomRight, endColorBottomLeft, endColorTopLeft, endColorTopRight, endColorBottomRight, lengthA, lengthB, gradientTimeA, gradientTimeB, easeIn, easeOut, colorEase, isStart);
         } else if ("two_colors".equals(colorType)) {
-            float[] color1 = JsonHelper.getColor(json, "color1", 1);
-            float[] color2 = JsonHelper.getColor(json, "color1", 1);
+            float[] color1 = Objects.requireNonNull(JsonHelper.getColor(json, "color1", 1), "There must be a color as color1");
+            float[] color2 = Objects.requireNonNull(JsonHelper.getColor(json, "color2", 1), "There must be a color as color2");
             return new FadeToColorTransition(color1, color2, lengthA, lengthB, gradientTimeA, gradientTimeB, easeIn, easeOut, colorEase, isStart);
         } else {
-            float[] color = JsonHelper.getColor(json, "color", 1);
+            float[] color = Objects.requireNonNull(JsonHelper.getColor(json, "color", 1), "There must be a color as color");
             return new FadeToColorTransition(color, lengthA, lengthB, easeIn, easeOut, isStart);
         }
     }
