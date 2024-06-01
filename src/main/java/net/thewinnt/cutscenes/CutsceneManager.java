@@ -10,10 +10,12 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
+import net.thewinnt.cutscenes.networking.packets.StopCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
 import net.thewinnt.cutscenes.path.*;
 import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
@@ -266,6 +268,13 @@ public class CutsceneManager {
         }
     }
 
+    @SubscribeEvent
+    public static void sendPreviewToNewPlayers(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            PacketDistributor.PLAYER.with(player).send(new PreviewCutscenePacket(REGISTRY.inverse().get(previewedCutscene), previewOffset, previewPathYaw, previewPathPitch, previewPathRoll));
+        }
+    }
+
     /** 
      * Starts a cutscene for a player
      * @param id The ID of the cutscene to start
@@ -279,5 +288,11 @@ public class CutsceneManager {
         ((ServerPlayerExt)player).csapi$setRunningCutscene(REGISTRY.get(id));
         player.setCamera(null);
         PacketDistributor.PLAYER.with(player).send(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
+    }
+
+    public static void stopCutscene(ServerPlayer player) {
+        ((ServerPlayerExt)player).csapi$setCutsceneTicks(0);
+        ((ServerPlayerExt)player).csapi$setRunningCutscene(null);
+        PacketDistributor.PLAYER.with(player).send(new StopCutscenePacket());
     }
 }

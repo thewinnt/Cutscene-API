@@ -48,7 +48,7 @@ public class CutsceneInstance {
             }
             transition.onFrame(progress, cutscene);
             if (progress >= 1) {
-                ClientCutsceneManager.stopCutscene();
+                ClientCutsceneManager.stopCutsceneImmediate();
                 cutscene.endTransition.onEnd(cutscene);
             }
         } else if (phase == 1) {

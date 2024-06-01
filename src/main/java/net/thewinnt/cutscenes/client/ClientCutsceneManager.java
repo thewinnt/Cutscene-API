@@ -57,7 +57,7 @@ public class ClientCutsceneManager {
     @OnlyIn(Dist.CLIENT)
     public static void startCutscene(CutsceneType type, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll) {
         CutsceneAPI.updateSalt();
-        stopCutscene();
+        stopCutsceneImmediate();
         // if the specified rotation value is NaN, use the initial values
         startCameraYaw = Float.isNaN(cameraYaw) ? initCameraYaw : cameraYaw;
         startCameraPitch = Float.isNaN(cameraPitch) ? initCameraPitch : cameraPitch;
@@ -100,7 +100,7 @@ public class ClientCutsceneManager {
         CLIENT_REGISTRY.put(id, type);
     }
 
-    public static void stopCutscene() {
+    public static void stopCutsceneImmediate() {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.options.hideGui = hidGuiBefore;
         minecraft.smartCull = true;
@@ -151,12 +151,12 @@ public class ClientCutsceneManager {
         if (isCutsceneRunning) {
             if (camera == null) {
                 CutsceneAPI.LOGGER.warn("Found ourselves running a cutscene despite the camera being null. Is this normal?");
-                stopCutscene();
+                stopCutsceneImmediate();
                 return;
             }
             if (runningCutscene == null) {
                 CutsceneAPI.LOGGER.error("Attempted to run an invalid cutscene!");
-                stopCutscene();
+                stopCutsceneImmediate();
                 return;
             }
             long currentTime = Minecraft.getInstance().level.getGameTime();
@@ -200,7 +200,7 @@ public class ClientCutsceneManager {
 
     @SubscribeEvent
     public static void onLogout(LoggingOut event) {
-        stopCutscene();
+        stopCutsceneImmediate();
         previewedCutscene = null;
     }
 
