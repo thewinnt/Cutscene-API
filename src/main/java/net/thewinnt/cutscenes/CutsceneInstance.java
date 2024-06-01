@@ -11,7 +11,7 @@ import java.util.List;
 public class CutsceneInstance {
     public final CutsceneType cutscene;
     public final double startTime;
-    private float lastTick;
+    private double lastTick;
     private int phase = 0;
     private final List<CutsceneEffect<?>> startedEffects = new ArrayList<>();
     private final List<CutsceneEffect<?>> endedEffects = new ArrayList<>();
@@ -21,13 +21,14 @@ public class CutsceneInstance {
     public CutsceneInstance(CutsceneType cutscene) {
         this.cutscene = cutscene;
         this.startTime = Minecraft.getInstance().level.getGameTime() + Minecraft.getInstance().getPartialTick();
+        this.lastTick = startTime;
     }
 
     /**
      * Ticks the cutscene logic, mainly the {@code onStart}/{@code onFrame}/{@code onEnd} methods
      * of {@link Transition transitions} and {@link CutsceneEffect cutscene effects}
      */
-    public void tick(float time) {
+    public void tick(double time) {
         if (time < lastTick) time = lastTick;
         lastTick = time;
         double localTime = getTime();

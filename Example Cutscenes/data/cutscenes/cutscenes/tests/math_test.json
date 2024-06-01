@@ -5,13 +5,30 @@
       {
         "type": "cutscenes:calculated",
         "x": {
-          "type": "cutscenes:mul",
-          "arg1": {
-            "type": "cutscenes:add",
-            "arg1": "t",
-            "arg2": -0.5
-          },
-          "arg2": 12
+          "type": "cutscenes:spline",
+          "points": [
+            -6,
+            -2,
+            -4,
+            3,
+            {
+              "type": "cutscenes:mul",
+              "arg1": {
+                "type": "cutscenes:add",
+                "arg1": {
+                  "type": "cutscenes:sin",
+                  "arg": "cutscenes:16_pi_t"
+                },
+                "arg2": 2
+              },
+              "arg2": 2
+            },
+            {
+              "type": "cutscenes:add",
+              "arg1": "t",
+              "arg2": 5
+            }
+          ]
         },
         "y": {
           "type": "cutscenes:clamp",

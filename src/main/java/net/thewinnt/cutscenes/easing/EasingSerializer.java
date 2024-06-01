@@ -75,6 +75,8 @@ public interface EasingSerializer<T extends Easing> {
     EasingSerializer<DoubleArgumentEasing> MAX = registerDoubleArg(new ResourceLocation("cutscenes:max"), Math::max);
     EasingSerializer<DoubleArgumentEasing> ATAN2 = registerDoubleArg(new ResourceLocation("cutscenes:atan2"), Math::atan2);
     EasingSerializer<ClampEasing> CLAMP = register(new ResourceLocation("cutscenes:clamp"), ClampEasingSerializer.INSTANCE);
+    EasingSerializer<SplineEasing> SPLINE = register(new ResourceLocation("cutscenes:spline"), SplineEasingSerializer.INSTANCE);
+
 
     T fromNetwork(FriendlyByteBuf buf);
     T fromJSON(JsonObject json);
