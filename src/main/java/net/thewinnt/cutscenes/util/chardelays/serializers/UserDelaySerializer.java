@@ -28,7 +28,7 @@ public class UserDelaySerializer implements DelayProviderSerializer<UserDefinedD
 
     @Override
     public UserDefinedDelays fromJSON(JsonObject json) {
-        char activation = GsonHelper.getAsCharacter(json, "activation_character");
+        int activation = GsonHelper.getAsString(json, "activation_character").codePointAt(0);
         JsonObject mapSpecial = GsonHelper.getAsJsonObject(json, "delays_active");
         Map<Integer, Double> delaysSpecial = new Int2DoubleOpenHashMap();
         for (Entry<String, JsonElement> i : mapSpecial.entrySet()) {

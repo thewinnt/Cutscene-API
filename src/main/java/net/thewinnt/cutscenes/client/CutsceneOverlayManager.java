@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CutsceneOverlayManager {
+    public static boolean renderedThisFrame = false;
     private static List<Overlay> overlays = new ArrayList<>();
     private static List<Object> configs = new ArrayList<>();
 

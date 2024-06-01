@@ -50,15 +50,13 @@ public class AppearingTextOverlay implements Overlay {
                 state.gettingDelay = false;
                 return true;
             }
-            if (codepoint == delays.activationSymbol() && !state.didJustEscape) {
+            if (codepoint == delays.activationCodepoint() && !state.didJustEscape) {
                 state.gettingDelay = true;
             } else if (codepoint == '\\' && !state.didJustEscape) {
                 state.didJustEscape = true;
             } else {
                 state.currentString.appendCodePoint(codepoint);
-                if (codepoint != '\n' && !Character.isWhitespace(codepoint)) {
-                    state.t += delays.defaultDelay(codepoint);
-                }
+                state.t += delays.defaultDelay(codepoint);
                 state.didJustEscape = false;
             }
             return true;

@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 
 public interface DelayProvider {
     /** Returns the symbol that is needed for this provider to be used. */
-    char activationSymbol();
+    int activationCodepoint();
 
     /** Returns the delay in ticks for the given character. It will be applied right afterward. */
     double delay(int codepoint);
@@ -52,7 +52,7 @@ public interface DelayProvider {
         try {
             return fromJSON(json);
         } catch (RuntimeException e) {
-            CutsceneAPI.LOGGER.warn("Exception loading delay provider, returning fallback: ", e);
+            CutsceneAPI.LOGGER.error("Exception loading delay provider, returning fallback: ", e);
             return fallback;
         }
     }

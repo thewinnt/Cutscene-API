@@ -10,7 +10,7 @@ public class UndertaleDelayProvider implements DelayProvider {
     private UndertaleDelayProvider() {}
 
     @Override
-    public char activationSymbol() {
+    public int activationCodepoint() {
         return '^';
     }
 
@@ -33,6 +33,7 @@ public class UndertaleDelayProvider implements DelayProvider {
 
     @Override
     public double defaultDelay(int codepoint) {
+        if (codepoint == '\n' || Character.isWhitespace(codepoint)) return 0;
         return 1;
     }
 

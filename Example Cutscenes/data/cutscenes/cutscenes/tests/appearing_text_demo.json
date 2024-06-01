@@ -89,7 +89,8 @@
           "default": 0
         },
         "delays_global": {
-          ";": -4
+          ";": -4,
+          " ": 1
         }
       },
       "pitch": {

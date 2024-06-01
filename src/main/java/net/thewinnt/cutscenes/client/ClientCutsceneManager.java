@@ -30,6 +30,7 @@ import java.util.Map;
 public class ClientCutsceneManager {
     public static final BiMap<ResourceLocation, CutsceneType> CLIENT_REGISTRY = HashBiMap.create();
     public static final ActionToggles DEFAULT_ACTION_TOGGLES = new ActionToggles.Builder(false).build();
+    public static boolean renderedOverlaysThisFrame = false; // whether the overlays were rendered this frame
     private static boolean isCutsceneRunning = false;
     public static CutsceneInstance runningCutscene;
     private static Vec3 startPosition;

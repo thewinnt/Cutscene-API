@@ -8,7 +8,7 @@ import net.thewinnt.cutscenes.util.chardelays.serializers.UserDelaySerializer;
 import java.util.Map;
 
 public record UserDefinedDelays(
-    char activation,
+    int activation,
     Map<Integer, Double> delaysSpecial,
     double fallbackSpecial,
     Map<Integer, Double> delaysDefault,
@@ -16,7 +16,7 @@ public record UserDefinedDelays(
 ) implements DelayProvider {
 
     @Override
-    public char activationSymbol() {
+    public int activationCodepoint() {
         return activation;
     }
 
