@@ -1,4 +1,4 @@
-package net.thewinnt.cutscenes.util.chardelays;
+package net.thewinnt.cutscenes.effect.chardelays;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

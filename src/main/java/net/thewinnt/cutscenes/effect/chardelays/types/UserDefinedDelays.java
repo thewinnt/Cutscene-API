@@ -1,9 +1,9 @@
-package net.thewinnt.cutscenes.util.chardelays.types;
+package net.thewinnt.cutscenes.effect.chardelays.types;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.thewinnt.cutscenes.util.chardelays.DelayProvider;
-import net.thewinnt.cutscenes.util.chardelays.DelayProviderSerializer;
-import net.thewinnt.cutscenes.util.chardelays.serializers.UserDelaySerializer;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProvider;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
+import net.thewinnt.cutscenes.effect.chardelays.serializers.UserDelaySerializer;
 
 import java.util.Map;
 

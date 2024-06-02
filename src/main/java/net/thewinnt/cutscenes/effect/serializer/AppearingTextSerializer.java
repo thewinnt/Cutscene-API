@@ -14,10 +14,10 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
-import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration.CoordinateProvider;
+import net.thewinnt.cutscenes.util.CoordinateProvider;
 import net.thewinnt.cutscenes.effect.type.AppearingTextEffect;
-import net.thewinnt.cutscenes.util.chardelays.DelayProvider;
-import net.thewinnt.cutscenes.util.chardelays.types.UndertaleDelayProvider;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProvider;
+import net.thewinnt.cutscenes.effect.chardelays.types.UndertaleDelayProvider;
 
 public class AppearingTextSerializer implements CutsceneEffectSerializer<AppearingTextConfiguration> {
     public static final AppearingTextSerializer INSTANCE = new AppearingTextSerializer();

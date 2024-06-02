@@ -10,7 +10,7 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
-import net.thewinnt.cutscenes.util.chardelays.DelayProviderSerializer;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
 
 @Mod.EventBusSubscriber(bus = Bus.MOD)
 public class ModEventListener {

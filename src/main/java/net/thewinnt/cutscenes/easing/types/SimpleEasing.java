@@ -36,8 +36,8 @@ public class SimpleEasing implements Easing {
     public static final SimpleEasing OUT_ELASTIC = new SimpleEasing(t -> t == 0 ? 0 : t == 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * (Math.PI * 2 / 3)) + 1, "out_elastic");
     public static final SimpleEasing IN_OUT_ELASTIC = new SimpleEasing(t -> t == 0 ? 0 : t == 1 ? 1 : t < 0.5 ? -(Math.pow(2, 20 * t - 10) * Math.sin((20 * t - 11.125) * (Math.PI * 2 / 4.5))) / 2 : (Math.pow(2, -20 * t + 10) * Math.sin((20 * t - 11.125) * (Math.PI * 2 / 4.5))) / 2 + 1, "in_out_elastic");
     public static final SimpleEasing OUT_BOUNCE = new SimpleEasing(t -> {
-        double a = 7.5625;
-        double b = 2.75;
+        final double a = 7.5625;
+        final double b = 2.75;
         if (t < 1 / b) {
             return a * t * t;
         } else if (t < 2 / b) {

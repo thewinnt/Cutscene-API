@@ -1,10 +1,9 @@
-package net.thewinnt.cutscenes.util.chardelays.serializers;
+package net.thewinnt.cutscenes.effect.chardelays.serializers;
 
 import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
-import net.thewinnt.cutscenes.util.chardelays.DelayProvider;
-import net.thewinnt.cutscenes.util.chardelays.DelayProviderSerializer;
-import net.thewinnt.cutscenes.util.chardelays.types.UndertaleDelayProvider;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProvider;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
 
 public class SingletonDelaySerializer<T extends DelayProvider> implements DelayProviderSerializer<T> {
     public final T instance;

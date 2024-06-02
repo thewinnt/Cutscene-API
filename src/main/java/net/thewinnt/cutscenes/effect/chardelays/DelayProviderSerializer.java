@@ -1,4 +1,4 @@
-package net.thewinnt.cutscenes.util.chardelays;
+package net.thewinnt.cutscenes.effect.chardelays;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
@@ -7,10 +7,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
-import net.thewinnt.cutscenes.util.chardelays.serializers.SingletonDelaySerializer;
-import net.thewinnt.cutscenes.util.chardelays.serializers.UserDelaySerializer;
-import net.thewinnt.cutscenes.util.chardelays.types.UndertaleDelayProvider;
-import net.thewinnt.cutscenes.util.chardelays.types.UserDefinedDelays;
+import net.thewinnt.cutscenes.effect.chardelays.serializers.SingletonDelaySerializer;
+import net.thewinnt.cutscenes.effect.chardelays.serializers.UserDelaySerializer;
+import net.thewinnt.cutscenes.effect.chardelays.types.UndertaleDelayProvider;
+import net.thewinnt.cutscenes.effect.chardelays.types.UserDefinedDelays;
 
 import java.util.HashMap;
 import java.util.Map;

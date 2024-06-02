@@ -1,12 +1,12 @@
-package net.thewinnt.cutscenes.util.chardelays.serializers;
+package net.thewinnt.cutscenes.effect.chardelays.serializers;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
-import net.thewinnt.cutscenes.util.chardelays.DelayProviderSerializer;
-import net.thewinnt.cutscenes.util.chardelays.types.UserDefinedDelays;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
+import net.thewinnt.cutscenes.effect.chardelays.types.UserDefinedDelays;
 
 import java.util.Map;
 import java.util.Map.Entry;

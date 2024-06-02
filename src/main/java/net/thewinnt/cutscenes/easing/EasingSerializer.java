@@ -76,6 +76,8 @@ public interface EasingSerializer<T extends Easing> {
     EasingSerializer<DoubleArgumentEasing> ATAN2 = registerDoubleArg(new ResourceLocation("cutscenes:atan2"), Math::atan2);
     EasingSerializer<ClampEasing> CLAMP = register(new ResourceLocation("cutscenes:clamp"), ClampEasingSerializer.INSTANCE);
     EasingSerializer<SplineEasing> SPLINE = register(new ResourceLocation("cutscenes:spline"), SplineEasingSerializer.INSTANCE);
+    EasingSerializer<LerpEasing> LERP = register(new ResourceLocation("cutscenes:lerp"), LerpEasingSerializer.INSTANCE);
+    EasingSerializer<ColorEasing> COLOR = register(new ResourceLocation("cutscenes:color"), ColorEasingSerializer.INSTANCE);
 
 
     T fromNetwork(FriendlyByteBuf buf);

@@ -15,10 +15,10 @@ public class FadeToColorOverlay implements Overlay {
         FadeToColorOverlayConfiguration cfg = ((FadeToColorOverlayConfiguration) config);
         Matrix4f matrix4f = graphics.pose().last().pose();
         VertexConsumer builder = graphics.bufferSource().getBuffer(RenderType.gui());
-        float[] colorBottomLeft = cfg.getColorBottomLeft();
-        float[] colorBottomRight = cfg.getColorBottomRight();
-        float[] colorTopLeft = cfg.getColorTopLeft();
-        float[] colorTopRight = cfg.getColorTopRight();
+        float[] colorBottomLeft = cfg.bottomLeft.sample(cfg.getProgress());
+        float[] colorBottomRight = cfg.bottomRight.sample(cfg.getProgress());
+        float[] colorTopLeft = cfg.topLeft.sample(cfg.getProgress());
+        float[] colorTopRight = cfg.topRight.sample(cfg.getProgress());
         float alpha = cfg.getAlpha();
         builder.vertex(matrix4f, 0, height, 0).color(colorBottomLeft[0], colorBottomLeft[1], colorBottomLeft[2], colorBottomLeft[3] * alpha).endVertex();
         builder.vertex(matrix4f, width, height, 0).color(colorBottomRight[0], colorBottomRight[1], colorBottomRight[2], colorBottomRight[3] * alpha).endVertex();

@@ -11,7 +11,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
 import net.thewinnt.cutscenes.effect.type.AppearingTextEffect.TimeProvider;
-import net.thewinnt.cutscenes.util.chardelays.DelayProvider;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProvider;
 
 import java.util.ArrayList;
 import java.util.List;

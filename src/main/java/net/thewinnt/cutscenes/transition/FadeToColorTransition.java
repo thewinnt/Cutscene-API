@@ -15,61 +15,50 @@ import net.thewinnt.cutscenes.client.CutsceneOverlayManager;
 import net.thewinnt.cutscenes.client.overlay.FadeToColorOverlay;
 import net.thewinnt.cutscenes.client.overlay.FadeToColorOverlayConfiguration;
 import net.thewinnt.cutscenes.easing.Easing;
+import net.thewinnt.cutscenes.easing.types.ColorEasing;
+import net.thewinnt.cutscenes.easing.types.CompoundEasing;
+import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
+import net.thewinnt.cutscenes.util.DynamicColor;
 import net.thewinnt.cutscenes.util.JsonHelper;
 
+import java.util.List;
+import java.util.Objects;
+
 public class FadeToColorTransition implements Transition {
-    private final float[] startColorBottomLeft;
-    private final float[] startColorTopLeft;
-    private final float[] startColorTopRight;
-    private final float[] startColorBottomRight;
-    private final float[] endColorBottomLeft;
-    private final float[] endColorTopLeft;
-    private final float[] endColorTopRight;
-    private final float[] endColorBottomRight;
+    private final DynamicColor colorBottomLeft;
+    private final DynamicColor colorTopLeft;
+    private final DynamicColor colorTopRight;
+    private final DynamicColor colorBottomRight;
     private final int lengthA;
     private final int lengthB;
     private final double progressLengthA;
     private final double progressLengthB;
-    private final int gradientTimeA;
-    private final int gradientTimeB;
     private final Easing easeIn;
     private final Easing easeOut;
-    private final Easing colorEase;
     private final boolean isStart;
     private FadeToColorOverlayConfiguration config;
 
-    public FadeToColorTransition(float[] startColorBottomLeft, float[] startColorTopLeft, float[] startColorTopRight, float[] startColorBottomRight, float[] endColorBottomLeft, float[] endColorTopLeft, float[] endColorTopRight, float[] endColorBottomRight, int lengthA, int lengthB, int gradientTimeA, int gradientTimeB, Easing easeIn, Easing easeOut, Easing colorEase, boolean isStart) {
-        this.startColorBottomLeft = startColorBottomLeft;
-        this.startColorTopLeft = startColorTopLeft;
-        this.startColorTopRight = startColorTopRight;
-        this.startColorBottomRight = startColorBottomRight;
-        this.endColorBottomLeft = endColorBottomLeft;
-        this.endColorTopLeft = endColorTopLeft;
-        this.endColorTopRight = endColorTopRight;
-        this.endColorBottomRight = endColorBottomRight;
+    public FadeToColorTransition(DynamicColor colorBottomLeft, DynamicColor colorTopLeft, DynamicColor colorTopRight, DynamicColor colorBottomRight, int lengthA, int lengthB, Easing easeIn, Easing easeOut, boolean isStart) {
+        this.colorBottomLeft = colorBottomLeft;
+        this.colorTopLeft = colorTopLeft;
+        this.colorTopRight = colorTopRight;
+        this.colorBottomRight = colorBottomRight;
         this.lengthA = lengthA;
         this.lengthB = lengthB;
         this.progressLengthA = (double)lengthA / (lengthA + lengthB);
         this.progressLengthB = (double)lengthB / (lengthA + lengthB);
-        this.gradientTimeA = gradientTimeA;
-        this.gradientTimeB = gradientTimeB;
         this.easeIn = easeIn;
         this.easeOut = easeOut;
-        this.colorEase = colorEase;
         this.isStart = isStart;
     }
 
-    public FadeToColorTransition(float[] color1, float[] color2, int lengthA, int lengthB, int gradientTimeA, int gradientTimeB, Easing easeIn, Easing easeOut, Easing colorEase, boolean isStart) {
-        this(color1, color1, color1, color1, color2, color2, color2, color2, lengthA, lengthB, gradientTimeA, gradientTimeB, easeIn, easeOut, colorEase, isStart);
+    public FadeToColorTransition(DynamicColor color, int lengthA, int lengthB, Easing easeIn, Easing easeOut, boolean isStart) {
+        this(color, color, color, color, lengthA, lengthB, easeIn, easeOut, isStart);
     }
 
-    public FadeToColorTransition(float[] color, int lengthA, int lengthB, Easing easeIn, Easing easeOut, boolean isStart) {
-        this(color, color, lengthA, lengthB, 0, lengthA, easeIn, easeOut, SimpleEasing.LINEAR, isStart);
-    }
-
-    public FadeToColorTransition(float[] color, int length, Easing easeIn, Easing easeOut, boolean isStart) {
+    public FadeToColorTransition(DynamicColor color, int length, Easing easeIn, Easing easeOut, boolean isStart) {
         this(color, length, length, easeIn, easeOut, isStart);
     }
 
@@ -136,7 +125,7 @@ public class FadeToColorTransition implements Transition {
 
     @Override
     public void onStart(CutsceneType cutscene) {
-        this.config = new FadeToColorOverlayConfiguration(startColorBottomLeft, startColorTopLeft, startColorTopRight, startColorBottomRight, 0);
+        this.config = new FadeToColorOverlayConfiguration(colorBottomLeft, colorTopLeft, colorTopRight, colorBottomRight, 0);
         CutsceneOverlayManager.addOverlay(FadeToColorOverlay.INSTANCE, this.config);
     }
 
@@ -145,21 +134,9 @@ public class FadeToColorTransition implements Transition {
         if (progress < progressLengthA) {
             this.config.setAlpha((float)easeIn.get(progress / progressLengthA));
         } else {
-            this.config.setAlpha((float)easeOut.get((1 - progress + progressLengthA) / progressLengthB));
+            this.config.setAlpha((float)easeOut.get(Mth.clamp(1 - progress, 0, 1) / progressLengthB));
         }
-        double colorLerpStartProgress = (double)gradientTimeA / (lengthA + lengthB);
-        double colorLerpEndProgress = (double)gradientTimeB / (lengthA + lengthB);
-        if (progress < colorLerpStartProgress) {
-            this.config.setColors(startColorBottomLeft, startColorTopLeft, startColorTopRight, startColorBottomRight);
-        } else if (progress > colorLerpEndProgress) {
-            this.config.setColors(endColorBottomLeft, endColorTopLeft, endColorTopRight, endColorBottomRight);
-        } else {
-            float lerpProgress = (float)colorEase.get((progress - colorLerpStartProgress) / (colorLerpEndProgress - colorLerpStartProgress));
-            this.config.setColorBottomLeft(lerpColor(startColorBottomLeft, endColorBottomLeft, lerpProgress));
-            this.config.setColorTopLeft(lerpColor(startColorTopLeft, endColorTopLeft, lerpProgress));
-            this.config.setColorTopRight(lerpColor(startColorTopRight, endColorTopRight, lerpProgress));
-            this.config.setColorBottomRight(lerpColor(startColorBottomRight, endColorBottomRight, lerpProgress));
-        }
+        this.config.setProgress(progress);
     }
 
     @Override
@@ -170,21 +147,14 @@ public class FadeToColorTransition implements Transition {
 
     @Override
     public void toNetwork(FriendlyByteBuf buf) {
-        CutsceneNetworkHandler.writeColorRGBA(buf, startColorBottomLeft);
-        CutsceneNetworkHandler.writeColorRGBA(buf, startColorTopLeft);
-        CutsceneNetworkHandler.writeColorRGBA(buf, startColorTopRight);
-        CutsceneNetworkHandler.writeColorRGBA(buf, startColorBottomRight);
-        CutsceneNetworkHandler.writeColorRGBA(buf, endColorBottomLeft);
-        CutsceneNetworkHandler.writeColorRGBA(buf, endColorTopLeft);
-        CutsceneNetworkHandler.writeColorRGBA(buf, endColorTopRight);
-        CutsceneNetworkHandler.writeColorRGBA(buf, endColorBottomRight);
+        colorBottomLeft.toNetwork(buf);
+        colorTopLeft.toNetwork(buf);
+        colorTopRight.toNetwork(buf);
+        colorBottomRight.toNetwork(buf);
         buf.writeInt(lengthA);
         buf.writeInt(lengthB);
-        buf.writeInt(gradientTimeA);
-        buf.writeInt(gradientTimeB);
         Easing.toNetwork(easeIn, buf);
         Easing.toNetwork(easeOut, buf);
-        Easing.toNetwork(colorEase, buf);
         buf.writeBoolean(isStart);
     }
 
@@ -194,59 +164,125 @@ public class FadeToColorTransition implements Transition {
     }
 
     public static FadeToColorTransition fromNetwork(FriendlyByteBuf buf) {
-        float[] startColorBottomLeft = CutsceneNetworkHandler.readColorRGBA(buf);
-        float[] startColorTopLeft = CutsceneNetworkHandler.readColorRGBA(buf);
-        float[] startColorTopRight = CutsceneNetworkHandler.readColorRGBA(buf);
-        float[] startColorBottomRight = CutsceneNetworkHandler.readColorRGBA(buf);
-        float[] endColorBottomLeft = CutsceneNetworkHandler.readColorRGBA(buf);
-        float[] endColorTopLeft = CutsceneNetworkHandler.readColorRGBA(buf);
-        float[] endColorTopRight = CutsceneNetworkHandler.readColorRGBA(buf);
-        float[] endColorBottomRight = CutsceneNetworkHandler.readColorRGBA(buf);
+        DynamicColor colorBottomLeft = DynamicColor.fromNetwork(buf);
+        DynamicColor colorTopLeft = DynamicColor.fromNetwork(buf);
+        DynamicColor colorTopRight = DynamicColor.fromNetwork(buf);
+        DynamicColor colorBottomRight = DynamicColor.fromNetwork(buf);
         int lengthA = buf.readInt();
         int lengthB = buf.readInt();
-        int gradientTimeA = buf.readInt();
-        int gradientTimeB = buf.readInt();
         Easing easeIn = CutsceneAPI.EASING_SERIALIZERS.byId(buf.readInt()).fromNetwork(buf);
         Easing easeOut = CutsceneAPI.EASING_SERIALIZERS.byId(buf.readInt()).fromNetwork(buf);
-        Easing colorEase = CutsceneAPI.EASING_SERIALIZERS.byId(buf.readInt()).fromNetwork(buf);
         boolean isStart = buf.readBoolean();
-        return new FadeToColorTransition(startColorBottomLeft, startColorTopLeft, startColorTopRight, startColorBottomRight, endColorBottomLeft, endColorTopLeft, endColorTopRight, endColorBottomRight, lengthA, lengthB, gradientTimeA, gradientTimeB, easeIn, easeOut, colorEase, isStart);
+        return new FadeToColorTransition(colorBottomLeft, colorTopLeft, colorTopRight, colorBottomRight, lengthA, lengthB, easeIn, easeOut, isStart);
     }
 
     public static FadeToColorTransition fromJSON(JsonObject json) {
         int lengthA = GsonHelper.getAsInt(json, "length_a");
         int lengthB = GsonHelper.getAsInt(json, "length_b", lengthA);
-        int gradientTimeA = GsonHelper.getAsInt(json, "gradient_time_a", lengthA);
-        int gradientTimeB = GsonHelper.getAsInt(json, "gradient_time_b", lengthA);
         Easing easeIn = Easing.fromJSON(json.get("ease_in"), SimpleEasing.LINEAR);
         Easing easeOut = Easing.fromJSON(json.get("ease_out"), SimpleEasing.LINEAR);
-        Easing colorEase = Easing.fromJSON(json.get("color_ease"), SimpleEasing.LINEAR);
         boolean isStart = GsonHelper.getAsBoolean(json, "is_start");
         String colorType = GsonHelper.getAsString(json, "color_definition", "single_color");
-        if ("four_angles".equals(colorType)) {
-            float[] startColorBottomLeft = JsonHelper.getColor(json, "start_color_bottom_left", 1);
-            float[] startColorTopLeft = JsonHelper.getColor(json, "start_color_top_left", 1);
-            float[] startColorTopRight = JsonHelper.getColor(json, "start_color_top_right", 1);
-            float[] startColorBottomRight = JsonHelper.getColor(json, "start_color_bottom_right", 1);
-            float[] endColorBottomLeft = JsonHelper.getColor(json, "end_color_bottom_left", 1);
-            float[] endColorTopLeft = JsonHelper.getColor(json, "end_color_top_left", 1);
-            float[] endColorTopRight = JsonHelper.getColor(json, "end_color_top_right", 1);
-            float[] endColorBottomRight = JsonHelper.getColor(json, "end_color_bottom_right", 1);
-            return new FadeToColorTransition(startColorBottomLeft, startColorTopLeft, startColorTopRight, startColorBottomRight, endColorBottomLeft, endColorTopLeft, endColorTopRight, endColorBottomRight, lengthA, lengthB, gradientTimeA, gradientTimeB, easeIn, easeOut, colorEase, isStart);
-        } else if ("two_colors".equals(colorType)) {
-            float[] color1 = JsonHelper.getColor(json, "color1", 1);
-            float[] color2 = JsonHelper.getColor(json, "color1", 1);
-            return new FadeToColorTransition(color1, color2, lengthA, lengthB, gradientTimeA, gradientTimeB, easeIn, easeOut, colorEase, isStart);
-        } else {
-            float[] color = JsonHelper.getColor(json, "color", 1);
-            return new FadeToColorTransition(color, lengthA, lengthB, easeIn, easeOut, isStart);
+        switch (colorType) {
+            case "per_angle" -> {
+                DynamicColor colorBottomLeft = DynamicColor.fromJSON(json.get("bottom_left"));
+                DynamicColor colorTopLeft = DynamicColor.fromJSON(json.get("top_left"));
+                DynamicColor colorTopRight = DynamicColor.fromJSON(json.get("top_right"));
+                DynamicColor colorBottomRight = DynamicColor.fromJSON(json.get("bottom_right"));
+                return new FadeToColorTransition(colorBottomLeft, colorTopLeft, colorTopRight, colorBottomRight, lengthA, lengthB, easeIn, easeOut, isStart);
+            }
+            case "horizontal_gradient" -> {
+                DynamicColor color1 = DynamicColor.fromJSON(json.get("color1"));
+                DynamicColor color2 = DynamicColor.fromJSON(json.get("color2"));
+                return new FadeToColorTransition(color1, color1, color2, color2, lengthA, lengthB, easeIn, easeOut, isStart);
+            }
+            case "vertical_gradient" -> {
+                DynamicColor color1 = DynamicColor.fromJSON(json.get("color1"));
+                DynamicColor color2 = DynamicColor.fromJSON(json.get("color2"));
+                return new FadeToColorTransition(color1, color2, color2, color1, lengthA, lengthB, easeIn, easeOut, isStart);
+            }
+            case "four_angles" -> {
+                DynamicColor[] colors = legacyFourAngles(json, lengthA, lengthB);
+                return new FadeToColorTransition(colors[0], colors[1], colors[2], colors[3], lengthA, lengthB, easeIn, easeOut, isStart);
+            }
+            case "two_colors" -> {
+                DynamicColor color = legacyTwoColors(json, lengthA, lengthB);
+                return new FadeToColorTransition(color, lengthA, lengthB, easeIn, easeOut, isStart);
+            }
+            default -> {
+                DynamicColor color = DynamicColor.fromJSON(json.get("color"));
+                return new FadeToColorTransition(color, lengthA, lengthB, easeIn, easeOut, isStart);
+            }
         }
     }
 
-    public static float[] lerpColor(float[] from, float[] to, float progress) {
-        from = new float[]{from[0] * from[0], from[1] * from[1], from[2] * from[2], from[3]};
-        to = new float[]{to[0] * to[0], to[1] * to[1], to[2] * to[2], to[3]};
-        float[] output = new float[]{Mth.lerp(progress, from[0], to[0]), Mth.lerp(progress, from[1], to[1]), Mth.lerp(progress, from[2], to[2]), Mth.lerp(progress, from[3], to[3])};
-        return new float[]{Mth.sqrt(output[0]), Mth.sqrt(output[1]), Mth.sqrt(output[2]), output[3]};
+    private static DynamicColor[] legacyFourAngles(JsonObject json, int lengthA, int lengthB) {
+        DynamicColor startColorBottomLeft = DynamicColor.fromJSON(json.get("start_color_bottom_left"));
+        DynamicColor startColorTopLeft = DynamicColor.fromJSON(json.get("start_color_top_left"));
+        DynamicColor startColorTopRight = DynamicColor.fromJSON(json.get("start_color_top_right"));
+        DynamicColor startColorBottomRight = DynamicColor.fromJSON(json.get("start_color_bottom_right"));
+        DynamicColor endColorBottomLeft = DynamicColor.fromJSON(json.get("end_color_bottom_left"));
+        DynamicColor endColorTopLeft = DynamicColor.fromJSON(json.get("end_color_top_left"));
+        DynamicColor endColorTopRight = DynamicColor.fromJSON(json.get("end_color_top_right"));
+        DynamicColor endColorBottomRight = DynamicColor.fromJSON(json.get("end_color_bottom_right"));
+
+        int gradientTimeA = GsonHelper.getAsInt(json, "gradient_time_a", lengthA);
+        int gradientTimeB = GsonHelper.getAsInt(json, "gradient_time_b", lengthA);
+        Easing colorEase = Easing.fromJSON(json.get("color_ease"), SimpleEasing.LINEAR);
+
+        double progressGA = (double) gradientTimeA / (lengthA + lengthB);
+        double progressGB = (double) gradientTimeB / (lengthA + lengthB);
+        DynamicColor bottomLeft = new DynamicColor(
+            createCompound(progressGA, progressGB, startColorBottomLeft.r(), endColorBottomLeft.r(), colorEase),
+            createCompound(progressGA, progressGB, startColorBottomLeft.g(), endColorBottomLeft.g(), colorEase),
+            createCompound(progressGA, progressGB, startColorBottomLeft.b(), endColorBottomLeft.b(), colorEase),
+            createCompound(progressGA, progressGB, startColorBottomLeft.a(), endColorBottomLeft.a(), colorEase)
+        );
+        DynamicColor topLeft = new DynamicColor(
+            createCompound(progressGA, progressGB, startColorTopLeft.r(), endColorTopLeft.r(), colorEase),
+            createCompound(progressGA, progressGB, startColorTopLeft.g(), endColorTopLeft.g(), colorEase),
+            createCompound(progressGA, progressGB, startColorTopLeft.b(), endColorTopLeft.b(), colorEase),
+            createCompound(progressGA, progressGB, startColorTopLeft.a(), endColorTopLeft.a(), colorEase)
+        );
+        DynamicColor topRight = new DynamicColor(
+            createCompound(progressGA, progressGB, startColorTopRight.r(), endColorTopRight.r(), colorEase),
+            createCompound(progressGA, progressGB, startColorTopRight.g(), endColorTopRight.g(), colorEase),
+            createCompound(progressGA, progressGB, startColorTopRight.b(), endColorTopRight.b(), colorEase),
+            createCompound(progressGA, progressGB, startColorTopRight.a(), endColorTopRight.a(), colorEase)
+        );
+        DynamicColor bottomRight = new DynamicColor(
+            createCompound(progressGA, progressGB, startColorBottomRight.r(), endColorBottomRight.r(), colorEase),
+            createCompound(progressGA, progressGB, startColorBottomRight.g(), endColorBottomRight.g(), colorEase),
+            createCompound(progressGA, progressGB, startColorBottomRight.b(), endColorBottomRight.b(), colorEase),
+            createCompound(progressGA, progressGB, startColorBottomRight.a(), endColorBottomRight.a(), colorEase)
+        );
+        return new DynamicColor[]{bottomLeft, topLeft, topRight, bottomRight};
+    }
+
+    private static DynamicColor legacyTwoColors(JsonObject json, int lengthA, int lengthB) {
+        DynamicColor color1 = DynamicColor.fromJSON(json.get("color1"));
+        DynamicColor color2 = DynamicColor.fromJSON(json.get("color2"));
+
+        int gradientTimeA = GsonHelper.getAsInt(json, "gradient_time_a", lengthA);
+        int gradientTimeB = GsonHelper.getAsInt(json, "gradient_time_b", lengthA);
+        Easing colorEase = Easing.fromJSON(json.get("color_ease"), SimpleEasing.LINEAR);
+
+        double progressGA = (double) gradientTimeA / (lengthA + lengthB);
+        double progressGB = (double) gradientTimeB / (lengthA + lengthB);
+        return new DynamicColor(
+            createCompound(progressGA, progressGB, color1.r(), color2.r(), colorEase),
+            createCompound(progressGA, progressGB, color1.g(), color2.g(), colorEase),
+            createCompound(progressGA, progressGB, color1.b(), color2.b(), colorEase),
+            createCompound(progressGA, progressGB, color1.a(), color2.a(), colorEase)
+        );
+    }
+
+    private static CompoundEasing createCompound(double progressGA, double progressGB, Easing color1, Easing color2, Easing colorDelta) {
+        ColorEasing colorEasing = new ColorEasing(colorDelta, color1, color2);
+        return new CompoundEasing(List.of(
+            new CompoundEasing.TimedEasingEntry(0, new CompoundEasing.RangeAppliedEasing(0, 1, new ConstantEasing(colorEasing.get(0)))),
+            new CompoundEasing.TimedEasingEntry(progressGA, new CompoundEasing.RangeAppliedEasing(0, 1, colorEasing)),
+            new CompoundEasing.TimedEasingEntry(progressGB, new CompoundEasing.RangeAppliedEasing(0, 1, new ConstantEasing(colorEasing.get(1))))
+        ));
     }
 }

@@ -112,9 +112,8 @@ public class JsonHelper {
             int r = Integer.valueOf(value.substring(0, 2), 16);
             int g = Integer.valueOf(value.substring(2, 4), 16);
             int b = Integer.valueOf(value.substring(4, 6), 16);
-            int a;
             if (value.length() > 7) {
-                a = Integer.valueOf(value.substring(6, 8), 16);
+                int a = Integer.valueOf(value.substring(6, 8), 16);
                 return new float[]{r/255f, g/255f, b/255f, a/255f};
             } else {
                 return new float[]{r/255f, g/255f, b/255f, defaultAlpha};
@@ -133,5 +132,16 @@ public class JsonHelper {
         JsonElement element = json.get(name);
         if (element.isJsonNull()) return null;
         return element.getAsJsonObject();
+    }
+
+    /**
+     *
+     * Returns a JSON element from an array, or null if the array is too short or the element is null
+     */
+    public static @Nullable JsonElement getFromArraySafe(JsonArray array, int index) {
+        if (index >= array.size()) return null;
+        JsonElement output = array.get(index);
+        if (output.isJsonNull()) return null;
+        return output;
     }
 }

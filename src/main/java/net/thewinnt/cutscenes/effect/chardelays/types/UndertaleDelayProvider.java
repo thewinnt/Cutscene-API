@@ -1,8 +1,8 @@
-package net.thewinnt.cutscenes.util.chardelays.types;
+package net.thewinnt.cutscenes.effect.chardelays.types;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.thewinnt.cutscenes.util.chardelays.DelayProvider;
-import net.thewinnt.cutscenes.util.chardelays.DelayProviderSerializer;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProvider;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
 
 public class UndertaleDelayProvider implements DelayProvider {
     public static final UndertaleDelayProvider INSTANCE = new UndertaleDelayProvider();

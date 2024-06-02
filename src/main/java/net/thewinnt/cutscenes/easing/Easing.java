@@ -68,7 +68,7 @@ public interface Easing {
 
 
     static Easing fromJSON(@Nullable JsonElement json, Easing fallback) {
-        if (json == null) {
+        if (json == null || json.isJsonNull()) {
             return fallback;
         }
         try {

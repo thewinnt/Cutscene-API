@@ -28,7 +28,7 @@ import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
 import net.thewinnt.cutscenes.util.LoadResolver;
-import net.thewinnt.cutscenes.util.chardelays.DelayProviderSerializer;
+import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
 import org.slf4j.Logger;
 
 import java.util.Map;
