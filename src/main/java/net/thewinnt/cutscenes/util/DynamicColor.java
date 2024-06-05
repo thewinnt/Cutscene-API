@@ -10,13 +10,14 @@ import net.minecraft.util.Mth;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
-import net.thewinnt.cutscenes.easing.types.LerpEasing;
-import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public record DynamicColor(Easing r, Easing g, Easing b, Easing a) {
+    public static final DynamicColor BLACK = new DynamicColor(ConstantEasing.ZERO, ConstantEasing.ZERO, ConstantEasing.ZERO, ConstantEasing.ONE);
+    public static final DynamicColor WHITE = new DynamicColor(ConstantEasing.ONE, ConstantEasing.ONE, ConstantEasing.ONE, ConstantEasing.ONE);
+
     public int toARGB(double t) {
         int r = (int) Mth.clamp(this.r.get(t) * 255, 0, 255);
         int g = (int) Mth.clamp(this.g.get(t) * 255, 0, 255);

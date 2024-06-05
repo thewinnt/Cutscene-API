@@ -7,13 +7,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
+import net.thewinnt.cutscenes.effect.configuration.RectangleConfiguration;
 import net.thewinnt.cutscenes.effect.configuration.TriangleStripConfiguration;
 import net.thewinnt.cutscenes.effect.serializer.AppearingTextSerializer;
+import net.thewinnt.cutscenes.effect.serializer.RectangleSerializer;
 import net.thewinnt.cutscenes.effect.serializer.TriangleStripSerializer;
 
 public interface CutsceneEffectSerializer<T> {
     CutsceneEffectSerializer<AppearingTextConfiguration> APPEARING_TEXT = register(new ResourceLocation("cutscenes:appearing_text"), AppearingTextSerializer.INSTANCE);
     CutsceneEffectSerializer<TriangleStripConfiguration> TRIANGLE_STRIP = register(new ResourceLocation("cutscenes:triangle_strip"), TriangleStripSerializer.INSTANCE);
+    CutsceneEffectSerializer<RectangleConfiguration> RECTANGLE = register(new ResourceLocation("cutscenes:rectangle"), RectangleSerializer.INSTANCE);
 
     T fromNetwork(FriendlyByteBuf buf);
     T fromJSON(JsonObject json);

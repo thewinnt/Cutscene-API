@@ -34,7 +34,7 @@ public interface Easing {
     EasingSerializer<?> getSerializer();
 
     /**
-     * @deprecated use {@link Easing#toNetwork(Easing, FriendlyByteBuf)} instead
+     * @deprecated use static {@link Easing#toNetwork(Easing, FriendlyByteBuf)} instead
      */
     @Deprecated
     void toNetwork(FriendlyByteBuf buf);

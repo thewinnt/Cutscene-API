@@ -1,5 +1,6 @@
 package net.thewinnt.cutscenes.mixin;
 
+import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,6 +19,8 @@ public class DebugRendererMixin {
     @Inject(method = "render", at = @At("RETURN"))
     private void beforeDebugRender(PoseStack stack, MultiBufferSource.BufferSource source, double x, double y, double z, CallbackInfo callback) {
         VertexConsumer consumer = source.getBuffer(RenderType.lines());
+        Minecraft.getInstance().getProfiler().push("cutscene_preview");
         PathPreviewRenderer.beforeDebugRender(stack, consumer);
+        Minecraft.getInstance().getProfiler().pop();
     }
 }

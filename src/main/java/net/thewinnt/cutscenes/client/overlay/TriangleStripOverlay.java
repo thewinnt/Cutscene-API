@@ -41,6 +41,7 @@ public class TriangleStripOverlay implements Overlay {
 
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object config) {
+        minecraft.getProfiler().push("cutscenes:triangle_strip");
         TimeProvider time = (TimeProvider) config;
         VertexConsumer consumer = graphics.bufferSource().getBuffer(TRIANGLE_STRIP);
         PoseStack stack = graphics.pose();
@@ -50,10 +51,9 @@ public class TriangleStripOverlay implements Overlay {
         for (DynamicVertex i : this.config.vertices()) {
             float x = i.x().get(t, width);
             float y = i.y().get(t, height);
-//            float[] colors = i.color().sample(t);
-//            CutsceneAPI.LOGGER.debug("vertex {} / {} ({}, {}, {}, {})", x, y, (int)(colors[0] * 255), (int)(colors[1] * 255), (int)(colors[2] * 255), (int)(colors[3] * 255));
             consumer.vertex(matrix4f, x, y, 0).color(i.color().toARGB(t)).endVertex();
         }
         stack.popPose();
+        minecraft.getProfiler().pop();
     }
 }

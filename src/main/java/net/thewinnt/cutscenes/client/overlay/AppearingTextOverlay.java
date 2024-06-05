@@ -26,6 +26,8 @@ public class AppearingTextOverlay implements Overlay {
 
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object config) {
+        minecraft.getProfiler().push("cutscenes:appearing_text");
+        minecraft.getProfiler().push("prepare");
         TimeProvider time = (TimeProvider) config;
         Component text = this.config.text();
         // list 1: each component split into formatted strings
@@ -78,10 +80,13 @@ public class AppearingTextOverlay implements Overlay {
         int lineWidth = (int)this.config.width().get(time.getProgress(), width);
         // i could've used drawWordWrap() here, but it doesn't do a shadow
         // the code below is copied from GuiGraphics#drawWordWrap
+        minecraft.getProfiler().popPush("draw");
         for (FormattedCharSequence j : minecraft.font.split(FormattedText.composite(result), lineWidth)) {
             graphics.drawString(minecraft.font, j, x, y, 0xffffff, this.config.dropShadow());
             y += minecraft.font.lineHeight;
         }
+        minecraft.getProfiler().pop();
+        minecraft.getProfiler().pop();
     }
 
     private static class DrawingState {

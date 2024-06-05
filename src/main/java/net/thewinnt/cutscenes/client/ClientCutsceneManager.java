@@ -162,6 +162,7 @@ public class ClientCutsceneManager {
             long currentTime = Minecraft.getInstance().level.getGameTime();
             float partialTick = (float)event.getPartialTick();
             Level level = Minecraft.getInstance().level;
+            Minecraft.getInstance().getProfiler().push("cutscene_rotation");
             Vec3 startRot = new Vec3(startCameraYaw, startCameraPitch, startCameraRoll);
             Vec3 initCamRot = new Vec3(initCameraYaw, initCameraPitch, initCameraRoll);
 
@@ -189,7 +190,9 @@ public class ClientCutsceneManager {
                     event.setYaw(camera.getViewYRot(partialTick));
                 }
             }
+            Minecraft.getInstance().getProfiler().popPush("cutscene_tick");
             runningCutscene.tick(currentTime + partialTick);
+            Minecraft.getInstance().getProfiler().pop();
         } else {
             hidGuiBefore = event.getRenderer().getMinecraft().options.hideGui;
             initCameraYaw = event.getYaw();

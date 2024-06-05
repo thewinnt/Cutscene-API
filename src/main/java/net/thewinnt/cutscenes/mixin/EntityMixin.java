@@ -18,7 +18,9 @@ public class EntityMixin {
     public void getPosition(float partialTick, CallbackInfoReturnable<Vec3> callback) {
         if (!ClientCutsceneManager.isCutsceneRunning()) return;
         if (((Entity)(Object)this) instanceof CutsceneCameraEntity camera) {
+            Minecraft.getInstance().getProfiler().push("cutscene_position");
             Vec3 pos = camera.getProperPosition(partialTick);
+            Minecraft.getInstance().getProfiler().pop();
             if (pos == null) return;
             callback.setReturnValue(pos);
         }

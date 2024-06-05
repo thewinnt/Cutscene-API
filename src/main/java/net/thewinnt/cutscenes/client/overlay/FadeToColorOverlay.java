@@ -12,6 +12,7 @@ public class FadeToColorOverlay implements Overlay {
 
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object config) {
+        minecraft.getProfiler().push("cutscenes:fade");
         FadeToColorOverlayConfiguration cfg = ((FadeToColorOverlayConfiguration) config);
         Matrix4f matrix4f = graphics.pose().last().pose();
         VertexConsumer builder = graphics.bufferSource().getBuffer(RenderType.gui());
@@ -24,6 +25,7 @@ public class FadeToColorOverlay implements Overlay {
         builder.vertex(matrix4f, width, height, 0).color(colorBottomRight[0], colorBottomRight[1], colorBottomRight[2], colorBottomRight[3] * alpha).endVertex();
         builder.vertex(matrix4f, width, 0, 0).color(colorTopRight[0], colorTopRight[1], colorTopRight[2], colorTopRight[3] * alpha).endVertex();
         builder.vertex(matrix4f, 0, 0, 0).color(colorTopLeft[0], colorTopLeft[1], colorTopLeft[2], colorTopLeft[3] * alpha).endVertex();
+        minecraft.getProfiler().pop();
 
 //        graphics.drawString(minecraft.font, Component.literal("alpha " + alpha), 0, 0, 16777215);
 //        graphics.drawString(minecraft.font, Component.literal("alpha_bl " + alpha * colorBottomLeft[3]), 0, 9, 16777215);
