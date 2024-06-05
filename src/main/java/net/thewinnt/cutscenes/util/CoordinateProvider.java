@@ -8,9 +8,9 @@ import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
 
 public record CoordinateProvider(boolean isAbsolute, Easing value) {
-    public int get(double t, int scale) {
-        if (isAbsolute) return (int) value.get(t);
-        return (int) (value.get(t) * scale);
+    public float get(double t, float scale) {
+        if (isAbsolute) return (float) value.get(t);
+        return (float) (value.get(t) * scale);
     }
 
     public void toNetwork(FriendlyByteBuf buf) {

@@ -32,7 +32,7 @@ public class LoadResolver<T> {
     }
 
     /**
-     * Resolves a single object from its ID, also resolving and objects it depends on.
+     * Resolves a single object from its ID, also resolving any objects it depends on.
      * If an exception occurs when loading, returns {@code null} if {@code allowExceptions} is {@code true},
      * and throws the exception otherwise.
      * @throws LoopingReferenceException in case of an infinite loop

@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
-import net.thewinnt.cutscenes.effect.type.AppearingTextEffect.TimeProvider;
+import net.thewinnt.cutscenes.util.TimeProvider;
 import net.thewinnt.cutscenes.effect.chardelays.DelayProvider;
 
 import java.util.ArrayList;
@@ -73,9 +73,9 @@ public class AppearingTextOverlay implements Overlay {
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(this.config.soundbite(), this.config.pitch().sample(minecraft.player.getRandom()), 1));
         }
         lastT = state.t;
-        int x = this.config.rx().get(time.getProgress(), width);
-        int y = this.config.ry().get(time.getProgress(), height);
-        int lineWidth = this.config.width().get(time.getProgress(), width);
+        float x = this.config.rx().get(time.getProgress(), width);
+        float y = this.config.ry().get(time.getProgress(), height);
+        int lineWidth = (int)this.config.width().get(time.getProgress(), width);
         // i could've used drawWordWrap() here, but it doesn't do a shadow
         // the code below is copied from GuiGraphics#drawWordWrap
         for (FormattedCharSequence j : minecraft.font.split(FormattedText.composite(result), lineWidth)) {

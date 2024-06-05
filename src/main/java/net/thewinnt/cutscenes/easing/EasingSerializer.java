@@ -57,6 +57,7 @@ public interface EasingSerializer<T extends Easing> {
     EasingSerializer<SingleArgumentEasing> ABS = registerSingleArg(new ResourceLocation("cutscenes:abs"), Math::abs);
     EasingSerializer<SingleArgumentEasing> SQUARE = registerSingleArg(new ResourceLocation("cutscenes:square"), t -> t * t);
     EasingSerializer<SingleArgumentEasing> CUBE = registerSingleArg(new ResourceLocation("cutscenes:cube"), t -> t * t * t);
+    EasingSerializer<SingleArgumentEasing> SQRT = registerSingleArg(new ResourceLocation("cutscenes:sqrt"), Math::sqrt);
     EasingSerializer<SingleArgumentEasing> SIN = registerSingleArg(new ResourceLocation("cutscenes:sin"), Math::sin);
     EasingSerializer<SingleArgumentEasing> COS = registerSingleArg(new ResourceLocation("cutscenes:cos"), Math::cos);
     EasingSerializer<SingleArgumentEasing> TAN = registerSingleArg(new ResourceLocation("cutscenes:tan"), Math::tan);
