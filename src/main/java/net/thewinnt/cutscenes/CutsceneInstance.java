@@ -43,6 +43,16 @@ public class CutsceneInstance {
         } else if (isTimeForEnd()) {
             Transition transition = cutscene.endTransition;
             double progress = getEndProress();
+            // this is here in case the else branch never executes (e.g. the time between transitions is zero)
+            if (phase == 0) {
+                cutscene.startTransition.onStart(cutscene); // hold our promise!
+                phase++;
+            }
+            if (phase == 1) {
+                cutscene.startTransition.onEnd(cutscene);
+                endedStartTransition = true;
+                phase++;
+            }
             if (phase == 2) {
                 phase++;
                 transition.onStart(cutscene);
@@ -53,7 +63,19 @@ public class CutsceneInstance {
                 cutscene.endTransition.onEnd(cutscene);
                 endedEndTransition = true;
             }
-        } else if (phase == 1) {
+        } else {
+            // if the starting transition was too quick, we may end up never ticking it. no_op usually does it.
+            if (phase == 0) {
+                cutscene.startTransition.onStart(cutscene); // hold our promise!
+                phase++;
+            }
+            if (phase == 1) {
+                cutscene.startTransition.onEnd(cutscene);
+                phase++;
+                endedStartTransition = true;
+            }
+        }
+        if (phase == 1) {
             phase++;
             cutscene.startTransition.onEnd(cutscene);
             endedStartTransition = true;
