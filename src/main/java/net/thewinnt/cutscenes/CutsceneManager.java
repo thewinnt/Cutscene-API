@@ -31,6 +31,7 @@ import net.thewinnt.cutscenes.util.ServerPlayerExt;
 import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Mod.EventBusSubscriber(bus = Bus.FORGE)
 public class CutsceneManager {
@@ -220,16 +221,19 @@ public class CutsceneManager {
     }
 
     /** Returns the point serializer with this ID, or {@code null} if it doesn't exist */
+    @Nullable
     public static PointSerializer<?> getPointType(ResourceLocation id) {
         return CutsceneAPI.POINT_TYPES.get(id);
     }
 
     /** Returns the ID of the specified transition type, or {@code null} if it's not registered */
+    @Nullable
     public static ResourceLocation getTransitionTypeId(TransitionSerializer<?> type) {
         return CutsceneAPI.TRANSITION_TYPES.getKey(type);
     }
 
     /** Returns the transition serializer with this ID, or {@code null} if it doesn't exist */
+    @Nullable
     public static TransitionSerializer<?> getTransitionType(ResourceLocation id) {
         return CutsceneAPI.TRANSITION_TYPES.get(id);
     }

@@ -1,8 +1,10 @@
 package net.thewinnt.cutscenes.util;
 
 import com.google.gson.JsonElement;
+import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneAPI;
+import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -13,6 +15,7 @@ import java.util.function.BiFunction;
 
 /** Loads some things that may refer to others of their kind. */
 public class LoadResolver<T> {
+    public static final Logger LOGGER = LogUtils.getLogger();
     private final BiFunction<JsonElement, LoadResolver<T>, T> reader;
     private final Map<ResourceLocation, JsonElement> saveData;
     private final Map<ResourceLocation, T> resolved = new HashMap<>();
@@ -49,7 +52,7 @@ public class LoadResolver<T> {
             } catch (Exception e) {
                 if (e instanceof LoopingReferenceException) throw e;
                 if (allowExceptions) {
-                    CutsceneAPI.LOGGER.error("Couldn't load object {}: ", id, e);
+                    LOGGER.error("Couldn't load object {}: ", id, e);
                     return null;
                 }
                 throw e;

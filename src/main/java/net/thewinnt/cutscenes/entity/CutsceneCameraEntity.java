@@ -137,6 +137,14 @@ public class CutsceneCameraEntity extends LocalPlayer {
     }
 
     public Vec3 getProperPosition(float partialTick) {
+        Vec3 output = getPositionAndTick(partialTick);
+        BlockPos pos = BlockPos.containing(output.x, output.y, output.z);
+        Level level = level();
+        minecraft.smartCull = !level.getBlockState(pos).isSolidRender(level, pos);
+        return output;
+    }
+
+    private Vec3 getPositionAndTick(float partialTick) {
         if (cutscene.isTimeForStart()) {
             Transition transition = cutscene.cutscene.startTransition;
             double progress = cutscene.getTime() / transition.getLength();

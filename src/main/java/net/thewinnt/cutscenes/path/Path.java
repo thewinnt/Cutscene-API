@@ -190,7 +190,7 @@ public class Path implements PathLike {
             JsonObject j = i.getAsJsonObject();
             ResourceLocation id = new ResourceLocation(j.get("type").getAsString());
             if (CutsceneManager.getSegmentType(id) == null) {
-                throw new IllegalArgumentException("Unknown segment type: " + id.toString());
+                throw new IllegalArgumentException("Unknown segment type: " + id);
             }
             if (id.equals(new ResourceLocation("cutscenes", "look_at_point"))) {
                 // special handling - look_at_point needs a rotation path, while others need this path
@@ -215,7 +215,7 @@ public class Path implements PathLike {
     }
 
     public Pair<Double, Double> getSegmentRange(PathLike segment) {
-        double previousSum = 0; // don't wanna cast it later
+        double previousSum = 0; // don't want to cast it later
         int targetIndex = this.segments.indexOf(segment);
         if (targetIndex == -1) {
             throw new IllegalArgumentException("Attempted to get a range of values for a missing segment");

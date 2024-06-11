@@ -114,6 +114,7 @@ public interface PathLike {
          *             At the moment of construction, the constructed element is the last in the path, so its
          *             future index is equal to the current size of the path.
          * @return a segment created from the given JSON object.
+         * @throws IllegalArgumentException if there's not enough data to create a segment, or it is invalid
          */
         T fromJSON(JsonObject json, Path path);
 
