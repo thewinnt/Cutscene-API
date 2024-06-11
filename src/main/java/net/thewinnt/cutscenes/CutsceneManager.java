@@ -167,6 +167,12 @@ public class CutsceneManager {
     /** Fades the screen to a color (or several colors that may change too) */
     public static final TransitionSerializer<FadeToColorTransition> FADE = TransitionSerializer.of(FadeToColorTransition::fromNetwork, FadeToColorTransition::fromJSON);
 
+    // UTILITY CONSTANTS //
+    // Some constants of variable usefulness.
+
+    /** Pass this as a camera rotation to {@link #startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer)} and it will make the start camera rotation equal to the current rotation. */
+    public static final Vec3 KEEP_ROTATION = new Vec3(Double.NaN, Double.NaN, Double.NaN);
+
     /** 
      * Registers a cutscene type
      * @param id The ID of the cutscene type that will be used in commands
@@ -294,6 +300,10 @@ public class CutsceneManager {
         PacketDistributor.PLAYER.with(player).send(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
     }
 
+    /**
+     * Stops a cutscene for a player, regardless of whether they were actually watching it or not.
+     * @param player The player to stop the cutscene for
+     */
     public static void stopCutscene(ServerPlayer player) {
         ((ServerPlayerExt)player).csapi$setCutsceneTicks(0);
         ((ServerPlayerExt)player).csapi$setRunningCutscene(null);

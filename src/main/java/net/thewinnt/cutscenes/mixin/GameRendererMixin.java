@@ -27,7 +27,7 @@ public abstract class GameRendererMixin {
         )
     )
     private void cs$render(float pPartialTicks, long pNanoTime, boolean pRenderLevel, CallbackInfo ci, @Local GuiGraphics guigraphics) {
-        // this method gets called several times, but we only want
+        // this method gets called several times, but we only want the first one
         if (!ClientCutsceneManager.renderedOverlaysThisFrame) {
             this.minecraft.getProfiler().push("cutscene_overlay");
             if (ClientCutsceneManager.isCutsceneRunning()) {

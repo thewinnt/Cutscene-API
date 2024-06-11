@@ -38,6 +38,7 @@ public class CutsceneType {
     public final ActionToggles actionToggles;
     public final boolean hideHand;
     public final boolean hideBlockOutline;
+    public final boolean disableF5;
     public final List<CutsceneEffect<?>> effects;
 
     /** Constructs a cutscene type with all parameters specified. */
@@ -59,6 +60,7 @@ public class CutsceneType {
         this.hideHand = hideHand;
         this.hideBlockOutline = hideBlockOutline;
         this.effects = effects;
+        this.disableF5 = path != null || rotationProvider != null || actionToggles.disablePerspectiveChanging();
     }
 
     /** Constructs a simple cutscene type with default parameters for most settings. */
@@ -80,6 +82,7 @@ public class CutsceneType {
         this.hideHand = false;
         this.hideBlockOutline = false;
         this.effects = List.of();
+        this.disableF5 = path != null || rotationProvider != null;
     }
 
     /**

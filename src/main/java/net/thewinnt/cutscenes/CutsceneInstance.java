@@ -26,7 +26,7 @@ public class CutsceneInstance {
 
     /**
      * Ticks the cutscene logic, mainly the {@code onStart}/{@code onFrame}/{@code onEnd} methods
-     * of {@link Transition transitions} and {@link CutsceneEffect cutscene effects}
+     * of {@linkplain Transition transitions} and {@linkplain CutsceneEffect cutscene effects}
      */
     public void tick(double time) {
         if (time < lastTick) time = lastTick;

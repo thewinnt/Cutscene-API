@@ -50,7 +50,6 @@ public class ClientCutsceneManager {
     public static float previewPathPitch;
     public static float previewPathRoll;
 
-    public static CameraType prevF5state;
     public static CutsceneCameraEntity camera;
     public static float initCameraYaw;
     public static float initCameraPitch;
@@ -76,10 +75,6 @@ public class ClientCutsceneManager {
         }
         if (runningCutscene.cutscene.hideBlockOutline) {
             minecraft.gameRenderer.setRenderBlockOutline(false);
-        }
-        prevF5state = minecraft.options.getCameraType();
-        if (minecraft.gameRenderer.getMainCamera().isDetached()) {
-            minecraft.options.setCameraType(CameraType.FIRST_PERSON);
         }
         camera = new CutsceneCameraEntity(-69420, runningCutscene, startPos, startCameraYaw, startCameraPitch, pathYaw, pathPitch, pathRoll);
         if (runningCutscene.cutscene.blockMovement) { // special case: keep the player if we want them to move

@@ -23,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.connection.ConnectionType;
 import net.thewinnt.cutscenes.CutsceneInstance;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
@@ -40,7 +41,8 @@ public class CutsceneCameraEntity extends LocalPlayer {
             FeatureFlagSet.of(),
             null,
             MINECRAFT.getCurrentServer(),
-            MINECRAFT.screen
+            MINECRAFT.screen,
+            ConnectionType.OTHER
         )
     ) {
         public void send(Packet<?> pPacket) {}
@@ -55,7 +57,6 @@ public class CutsceneCameraEntity extends LocalPlayer {
     private final float pathYaw;
     private final float pathPitch;
     private final float pathRoll;
-    private byte cutscenePhase = 0;
 
     public CutsceneCameraEntity(int id, CutsceneInstance cutscene, Vec3 startPos, float camStartYaw, float camStartPitch, float pathYaw, float pathPitch, float pathRoll) {
         super(MINECRAFT, MINECRAFT.level, NETWORK_HANDLER, MINECRAFT.player.getStats(), MINECRAFT.player.getRecipeBook(), false, false);

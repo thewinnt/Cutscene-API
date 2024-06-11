@@ -8,11 +8,22 @@ import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneType;
 
+/**
+ * A CutsceneEffect does all the visuals not related to the camera during a cutscene. It can be an overlay,
+ * or an operation in the world, or something else entirely.
+ * @param <T> The class for this effect's configuration
+ */
 public abstract class CutsceneEffect<T> {
     public final double startTime;
     public final double endTime;
     protected final T config;
 
+    /**
+     * Constructs a new {@link CutsceneEffect}.
+     * @param startTime the starting time, in ticks since the cutscene started
+     * @param endTime the ending time, in ticks since the cutscene started
+     * @param config a config object that a superclass uses to display the effect
+     */
     public CutsceneEffect(double startTime, double endTime, T config) {
         this.startTime = startTime;
         this.endTime = endTime;

@@ -28,7 +28,7 @@ public class EntityMixin {
 
     @Inject(method = "shouldRender(DDD)Z", at = @At("HEAD"), cancellable = true)
     public void shouldRender(double x, double y, double z, CallbackInfoReturnable<Boolean> callback) {
-        if (ClientCutsceneManager.isCutsceneRunning() && this.equals(Minecraft.getInstance().player)) {
+        if (ClientCutsceneManager.isCutsceneRunning() && this.equals(Minecraft.getInstance().player) && ClientCutsceneManager.actionToggles().hideSelf()) {
             callback.setReturnValue(false);
         }
     }
