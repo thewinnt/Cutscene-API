@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.valueproviders.ConstantFloat;
 import net.minecraft.util.valueproviders.FloatProvider;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
@@ -46,7 +47,7 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         boolean dropShadow = GsonHelper.getAsBoolean(json, "drop_shadow", true);
         SoundEvent soundbite = SoundEvent.CODEC.parse(JsonOps.INSTANCE, json.get("soundbite")).result().orElse(Holder.direct(SoundEvents.EMPTY)).value();
         DelayProvider delayProvider = DelayProvider.fromJSON(json.get("delays"), UndertaleDelayProvider.INSTANCE);
-        FloatProvider pitch = FloatProvider.CODEC.parse(JsonOps.INSTANCE, json.get("pitch")).getOrThrow(false, CutsceneAPI.LOGGER::error);
+        FloatProvider pitch = FloatProvider.CODEC.parse(JsonOps.INSTANCE, json.get("pitch")).result().orElse(ConstantFloat.of(1));
         return new AppearingTextConfiguration(text, rx, ry, lineWidth, dropShadow, soundbite, delayProvider, pitch);
     }
 

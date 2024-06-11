@@ -23,7 +23,7 @@ public abstract class CutsceneEffect<T> {
      * Called before the first tick of the effect
      * @param cutscene the cutscene type that this effect is used from
      */
-    public abstract void onStart(CutsceneType cutscene);
+    public abstract void onStart(ClientLevel level, CutsceneType cutscene);
 
     /**
      * Called every frame that the cutscene is rendered
@@ -37,7 +37,7 @@ public abstract class CutsceneEffect<T> {
      * Called after the last tick of the effect
      * @param cutscene the cutscene type that this effect is used from
      */
-    public abstract void onEnd(CutsceneType cutscene);
+    public abstract void onEnd(ClientLevel level, CutsceneType cutscene);
 
     public abstract CutsceneEffectSerializer<T> getSerializer();
 

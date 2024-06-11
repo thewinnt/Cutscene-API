@@ -9,6 +9,7 @@ import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.chardelays.serializers.SingletonDelaySerializer;
 import net.thewinnt.cutscenes.effect.chardelays.serializers.UserDelaySerializer;
+import net.thewinnt.cutscenes.effect.chardelays.types.InstantDelayProvider;
 import net.thewinnt.cutscenes.effect.chardelays.types.UndertaleDelayProvider;
 import net.thewinnt.cutscenes.effect.chardelays.types.UserDefinedDelays;
 
@@ -20,6 +21,7 @@ public interface DelayProviderSerializer<T extends DelayProvider> {
 
     DelayProviderSerializer<UndertaleDelayProvider> UNDERTALE = registerSingle(new ResourceLocation("cutscenes:undertale"), UndertaleDelayProvider.INSTANCE);
     DelayProviderSerializer<UserDefinedDelays> USER_DEFINED = register(new ResourceLocation("cutscenes:custom"), UserDelaySerializer.INSTANCE);
+    DelayProviderSerializer<InstantDelayProvider> INSTANT = registerSingle(new ResourceLocation("cutscenes:instant"), InstantDelayProvider.INSTANCE);
 
     T fromNetwork(FriendlyByteBuf buf);
     T fromJSON(JsonObject json);

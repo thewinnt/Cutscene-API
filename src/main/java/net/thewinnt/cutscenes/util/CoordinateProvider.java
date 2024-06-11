@@ -11,8 +11,8 @@ import java.util.function.DoubleUnaryOperator;
 
 public record CoordinateProvider(boolean isAbsolute, Easing value, CoordinateAnchor anchor) {
     public float get(double t, float scale) {
-        if (isAbsolute) return (float) anchor.apply(value.get(t));
-        return (float) anchor.apply(value.get(t) * scale);
+        if (isAbsolute) return (float) anchor.apply(value.get(t) / scale) * scale;
+        return (float) anchor.apply(value.get(t)) * scale;
     }
 
     public void toNetwork(FriendlyByteBuf buf) {
@@ -29,6 +29,9 @@ public record CoordinateProvider(boolean isAbsolute, Easing value, CoordinateAnc
     }
 
     public static CoordinateProvider fromJSON(JsonElement json, Easing fallback) {
+        if (json == null) {
+            return new CoordinateProvider(false, fallback, CoordinateAnchor.START);
+        }
         if (json.isJsonPrimitive()) {
             return new CoordinateProvider(false, Easing.fromJSON(json, fallback), CoordinateAnchor.START);
         } else if (json.isJsonObject()) {

@@ -1,0 +1,287 @@
+{
+  "length": 1000,
+  "disable_actions": false,
+  "start_transition": {
+    "type": "cutscenes:no_op"
+  },
+  "end_transition": {
+    "type": "cutscenes:no_op"
+  },
+  "effects": [
+    {
+      "type": "cutscenes:appearing_text",
+      "start": 20,
+      "end": 1000,
+      "text": [
+        {
+          "text": "This is some example text!\n"
+        },
+        {
+          "text": "...^1with multiline support!^1\nUse ",
+          "bold": true,
+          "color": "red"
+        },
+        {
+          "text": "\\^",
+          "color": "gold"
+        },
+        {
+          "text": " followed by a digit for ",
+          "bold": true,
+          "color": "red"
+        },
+        {
+          "text": "^1e^1x^1t^1r^1a ^1d^2e^4l^9a^1y^3\n\n",
+          "italic": true,
+          "color": "green"
+        },
+        {
+          "text": "You can use custom soundbites and delay configurations! ^1 ",
+          "color": "#0885bf"
+        },
+        {
+          "translate": "block.minecraft.waxed_cut_copper_stairs",
+          "color": "gold",
+          "underlined": true
+        },
+        {
+          "text": "^1 <- that text is translated, by the way. And if the line gets too long, it will be wrapped around. ",
+          "color": "#0885bf"
+        },
+        {
+          "text": "(I think that's enough length already, isn't it? ",
+          "color": "gray",
+          "italic": true
+        },
+        {
+          "text": "It'd be really cool to skip; some...;;; characters right there with custom delays)\n\n",
+          "color": "gray",
+          "italic": true
+        },
+        {
+          "text": "Expect more in the future!\n",
+          "underlined": true,
+          "color": "blue"
+        },
+        {
+          "text": "It's gonna be VERY VERY INTERESTING",
+          "strikethrough": true,
+          "obfuscated": true,
+          "color": "#aa8020",
+          "font": "minecraft:alt"
+        }
+      ],
+      "x": 0.025,
+      "y": 0.025,
+      "line_width": 0.95,
+      "drop_shadow": false,
+      "soundbite": {
+        "sound_id": "minecraft:block.note_block.flute"
+      },
+      "delays": {
+        "type": "cutscenes:custom",
+        "activation_character": "^",
+        "delays_active": {
+          "1": 6.66,
+          "2": 13.33,
+          "4": 26.66,
+          "9": 60,
+          "default": 0
+        },
+        "delays_global": {
+          ";": -4,
+          " ": 1
+        }
+      },
+      "pitch": {
+        "type": "uniform",
+        "value": {
+          "min_inclusive": 0.75,
+          "max_exclusive": 1.25
+        }
+      }
+    },
+    {
+      "type": "cutscenes:triangle_strip",
+      "start": 0,
+      "end": 1000,
+      "vertices": [
+        {
+          "x": 0.025,
+          "y": 0.425,
+          "color": "FFFFFF"
+        },
+        {
+          "x": 0.025,
+          "y": 0.45,
+          "color": "FFFFFF"
+        },
+        {
+          "x": 0.05,
+          "y": 0.425,
+          "color": "FFFFFF"
+        },
+        {
+          "x": 0.075,
+          "y": 0.45,
+          "color": "000000"
+        },
+        {
+          "x": 0.1,
+          "y": 0.425,
+          "color": ["cutscenes:color_r", "cutscenes:color_g", "cutscenes:color_b"]
+        },
+        {
+          "x": 0.125,
+          "y": {
+            "type": "cutscenes:add",
+            "arg2": {
+              "type": "cutscenes:mul",
+              "arg1": "cutscenes:loop50_sin",
+              "arg2": 0.125
+            },
+            "arg1": 0.425
+          },
+          "color": ["cutscenes:color_r", "cutscenes:color_g", "cutscenes:color_b"]
+        },
+        {
+          "x": 0.15,
+          "y": {
+            "type": "cutscenes:add",
+            "arg1": {
+              "type": "cutscenes:mul",
+              "arg1": "cutscenes:loop50_sin",
+              "arg2": -0.2
+            },
+            "arg2": 0.625
+          },
+          "color": ["cutscenes:color_r", "cutscenes:color_g", "cutscenes:color_b", 0.5]
+        },
+        {
+          "x": 0.175,
+          "y": {
+            "type": "cutscenes:add",
+            "arg1": {
+              "type": "cutscenes:mul",
+              "arg1": "cutscenes:loop50_sin",
+              "arg2": 0.125
+            },
+            "arg2": 0.425
+          },
+          "color": ["cutscenes:color_r", "cutscenes:color_g", "cutscenes:color_b"]
+        },
+        {
+          "x": 0.2,
+          "y": 0.425,
+          "color": ["cutscenes:color_r", "cutscenes:color_g", "cutscenes:color_b"]
+        },
+        {
+          "x": 0.225,
+          "y": 0.45,
+          "color": "000000"
+        },
+        {
+          "x": 0.25,
+          "y": 0.425,
+          "color": "FF0000"
+        },
+        {
+          "x": 0.275,
+          "y": 0.45,
+          "color": "00FF00"
+        },
+        {
+          "x": 0.3,
+          "y": 0.425,
+          "color": "0000FF"
+        }
+      ]
+    },
+    {
+      "type": "cutscenes:rectangle",
+      "start": 0,
+      "end": 1000,
+      "x": 0.325,
+      "y": 0.425,
+      "width": {
+        "type": "cutscenes:add",
+        "arg1": 0.25,
+        "arg2": {
+          "type": "cutscenes:mul",
+          "arg1": "cutscenes:loop50_sin",
+          "arg2": 0.1
+        }
+      },
+      "height": 0.025,
+      "color_top": {
+        "r": "cutscenes:loop50_sin",
+        "g": "cutscenes:loop50_sin",
+        "b": "cutscenes:color_b",
+        "a": 0.75
+      },
+      "color_bottom": "FFFFFF"
+    },
+    {
+      "type": "cutscenes:blit",
+      "start": 100,
+      "end": 1000,
+      "texture": "minecraft:textures/map/map_background.png",
+      "x1": {
+        "type": "cutscenes:constant",
+        "absolute": true,
+        "anchor": "start",
+        "value": 5
+      },
+      "x2": {
+        "type": "cutscenes:constant",
+        "absolute": true,
+        "anchor": "before_center",
+        "value": 5
+      },
+      "y1": {
+        "type": "cutscenes:add",
+        "absolute": true,
+        "anchor": "end",
+        "arg1": 50,
+        "arg2": {
+          "type": "cutscenes:mul",
+          "arg1": "cutscenes:loop50_sin",
+          "arg2": 10
+        }
+      },
+      "y2": {
+        "type": "cutscenes:constant",
+        "absolute": true,
+        "anchor": "end",
+        "value": 5
+      }
+    },
+    {
+      "type": "cutscenes:appearing_text",
+      "start": 120,
+      "end": 1000,
+      "text": "The background is made using a blit! The texture can have dynamic blit and UV coordinates, as well as a tint",
+      "delays": {
+        "type": "cutscenes:instant"
+      },
+      "x": {
+        "type": "cutscenes:constant",
+        "absolute": true,
+        "anchor": "start",
+        "value": 25
+      },
+      "y": {
+        "type": "cutscenes:constant",
+        "absolute": true,
+        "anchor": "end",
+        "value": 40
+      },
+      "line_width": {
+        "type": "cutscenes:constant",
+        "absolute": true,
+        "anchor": "before_center",
+        "value": 50
+      }
+    }
+  ]
+}

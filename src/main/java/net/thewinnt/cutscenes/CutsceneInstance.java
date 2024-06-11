@@ -51,21 +51,23 @@ public class CutsceneInstance {
             if (progress >= 1) {
                 ClientCutsceneManager.stopCutsceneImmediate();
                 cutscene.endTransition.onEnd(cutscene);
+                endedEndTransition = true;
             }
         } else if (phase == 1) {
             phase++;
             cutscene.startTransition.onEnd(cutscene);
+            endedStartTransition = true;
         }
         for (CutsceneEffect<?> i : cutscene.effects) {
             if (localTime >= i.startTime) {
                 if (!startedEffects.contains(i)) {
-                    i.onStart(cutscene);
+                    i.onStart(Minecraft.getInstance().level, cutscene);
                     startedEffects.add(i);
                 }
                 if (localTime < i.endTime) {
                     i.onFrame(localTime - i.startTime, Minecraft.getInstance().level, cutscene);
                 } else if (!endedEffects.contains(i)) {
-                    i.onEnd(cutscene);
+                    i.onEnd(Minecraft.getInstance().level, cutscene);
                     endedEffects.add(i);
                 }
             }
