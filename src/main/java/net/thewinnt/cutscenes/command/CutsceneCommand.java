@@ -65,17 +65,22 @@ public class CutsceneCommand {
                 }
                 return showCutscene(source, type, player, new Vec3(CutsceneManager.getOffset()), Vec3.ZERO, new Vec3(CutsceneManager.previewPathYaw, CutsceneManager.previewPathPitch, CutsceneManager.previewPathRoll));
             })
-            .then(argument("camera_rotation", new Vec3Argument(false))
+            .then(argument("camera_rotation_xy", RotationArgument.rotation())
+            .then(argument("camera_rotation_z", DoubleArgumentType.doubleArg())
             .executes(arg -> {
                 CommandSourceStack source = arg.getSource();
                 ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
-                Vec3 rot = Vec3Argument.getVec3(arg, "camera_rotation");
+                Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
+                double rotZ = DoubleArgumentType.getDouble(arg, "camera_rotation_z");
+                double xRot = rot.x < -180 || rot.x > 180 ? Double.NaN : rot.x;
+                double yRot = rot.y < -90 || rot.y > 90 ? Double.NaN : rot.y;
+                double zRot = rotZ < -180 || rotZ > 180 ? Double.NaN : rotZ;
                 if (CutsceneManager.getPreviewedCutscene() != null && type != CutsceneManager.REGISTRY.inverse().get(CutsceneManager.getPreviewedCutscene())) {
                     arg.getSource().sendSuccess(() -> Component.translatable("commands.cutscene.warning.cutscene_mismatch").withStyle(ChatFormatting.GOLD), false);
                 }
-                return showCutscene(source, type, player, new Vec3(CutsceneManager.getOffset()), rot, new Vec3(CutsceneManager.previewPathYaw, CutsceneManager.previewPathPitch, CutsceneManager.previewPathPitch));
-            })))
+                return showCutscene(source, type, player, new Vec3(CutsceneManager.getOffset()), new Vec3(xRot, yRot, zRot), new Vec3(CutsceneManager.previewPathYaw, CutsceneManager.previewPathPitch, CutsceneManager.previewPathPitch));
+            }))))
             .then(argument("start_pos", Vec3Argument.vec3())
             .executes(arg -> {
                 CommandSourceStack source = arg.getSource();
@@ -150,9 +155,9 @@ public class CutsceneCommand {
                 ResourceLocation id = ResourceLocationArgument.getId(arg, "cutscene");
                 CutsceneType type = CutsceneManager.REGISTRY.get(id);
                 if (type == null) {
-                    throw NO_CUTSCENE.create(id);
+                    throw NO_CUTSCENE.create(id.toString());
                 }
-                source.sendSuccess(() -> Component.translatable("commands.cutscene.preview.from_block", id), true);
+                source.sendSuccess(() -> Component.translatable("commands.cutscene.preview.from_block", id.toString()), true);
                 CutsceneManager.setPreviewedCutscene(type, source.getPosition(), 0, 0, 0);
                 return 1;
             })
@@ -162,10 +167,10 @@ public class CutsceneCommand {
                 ResourceLocation id = ResourceLocationArgument.getId(arg, "cutscene");
                 CutsceneType type = CutsceneManager.REGISTRY.get(id);
                 if (type == null) {
-                    throw NO_CUTSCENE.create(id);
+                    throw NO_CUTSCENE.create(id.toString());
                 }
                 Vec3 pos = Vec3Argument.getVec3(arg, "start_pos");
-                source.sendSuccess(() -> Component.translatable("commands.cutscene.preview.from_block", id), true);
+                source.sendSuccess(() -> Component.translatable("commands.cutscene.preview.from_block", id.toString()), true);
                 CutsceneManager.setPreviewedCutscene(type, pos, 0, 0, 0);
                 return 1;
             })
@@ -176,12 +181,12 @@ public class CutsceneCommand {
                 ResourceLocation id = ResourceLocationArgument.getId(arg, "cutscene");
                 CutsceneType type = CutsceneManager.REGISTRY.get(id);
                 if (type == null) {
-                    throw NO_CUTSCENE.create(id);
+                    throw NO_CUTSCENE.create(id.toString());
                 }
                 Vec3 pos = Vec3Argument.getVec3(arg, "start_pos");
                 Vec2 rotXY = RotationArgument.getRotation(arg, "path_rotation_xy").getRotation(source);
                 double rotZ = DoubleArgumentType.getDouble(arg, "path_rotation_z");
-                source.sendSuccess(() -> Component.translatable("commands.cutscene.preview.from_block", id), true);
+                source.sendSuccess(() -> Component.translatable("commands.cutscene.preview.from_block", id.toString()), true);
                 CutsceneManager.setPreviewedCutscene(type, pos, rotXY.x, rotXY.y, (float)rotZ);
                 return 1;
             }))))))
@@ -198,13 +203,13 @@ public class CutsceneCommand {
 
     private static int showCutscene(CommandSourceStack source, ResourceLocation id, ServerPlayer player, Vec3 pos, Vec3 camRot, Vec3 pathRot) throws CommandSyntaxException {
         if (!CutsceneManager.REGISTRY.containsKey(id)) {
-            throw NO_CUTSCENE.create(id);
+            throw NO_CUTSCENE.create(id.toString());
         }
         CutsceneType type = CutsceneManager.REGISTRY.get(id);
         PacketDistributor.PLAYER.with(player).send(new StartCutscenePacket(id, pos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z));
         ((ServerPlayerExt)player).csapi$setCutsceneTicks(type.length);
         ((ServerPlayerExt)player).csapi$setRunningCutscene(type);
-        source.sendSuccess(() -> Component.translatable("commands.cutscene.showing", id, player.getDisplayName()), true);
+        source.sendSuccess(() -> Component.translatable("commands.cutscene.showing", id.toString(), player.getDisplayName()), true);
         return 1;
     }
 }

@@ -26,6 +26,7 @@ public class JsonHelper {
      * @return the Vec3, if it's there and written correctly, or null otherwise
      * @throws IndexOutOfBoundsException if the vector array is shorter than 3 numbers
      */
+    @Nullable
     public static Vec3 vec3FromJson(JsonObject json, String name) {
         JsonElement element = json.get(name);
         if (element == null || element instanceof JsonNull) {
@@ -43,6 +44,7 @@ public class JsonHelper {
      * @return the Vec3, if it's written correctly, or null otherwise
      * @throws IndexOutOfBoundsException if the vector array is shorter than 3 numbers
      */
+    @Nullable
     public static Vec3 vec3FromJson(JsonElement json) {
         if (!json.isJsonArray()) return null;
         JsonArray array = json.getAsJsonArray();
@@ -57,6 +59,7 @@ public class JsonHelper {
      * @param name The name of the field
      * @return a point provider
      */
+    @Nullable
     public static PointProvider pointFromJson(JsonObject json, String name) {
         Vec3 test = vec3FromJson(json, name);
         if (test != null) return new StaticPointProvider(test);
@@ -82,6 +85,7 @@ public class JsonHelper {
      * @param json The JSON object to look for
      * @return a point provider
      */
+    @Nullable
     public static PointProvider pointFromJson(JsonElement json) {
         Vec3 test = vec3FromJson(json);
         if (test != null) return new StaticPointProvider(test);
@@ -103,6 +107,7 @@ public class JsonHelper {
      * @return the float array, if it's there and written correctly, or null otherwise
      * @throws IndexOutOfBoundsException if the color array is shorter than 3 numbers
      */
+    @Nullable
     public static float[] getColor(JsonObject json, String name, float defaultAlpha) {
         JsonElement element = json.get(name);
         if (element == null || element instanceof JsonNull) {

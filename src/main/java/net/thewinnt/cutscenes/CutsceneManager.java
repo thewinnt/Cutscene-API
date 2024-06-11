@@ -274,7 +274,7 @@ public class CutsceneManager {
 
     @SubscribeEvent
     public static void sendPreviewToNewPlayers(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
+        if (event.getEntity() instanceof ServerPlayer player && previewedCutscene != null && previewOffset != null) {
             PacketDistributor.PLAYER.with(player).send(new PreviewCutscenePacket(REGISTRY.inverse().get(previewedCutscene), previewOffset, previewPathYaw, previewPathPitch, previewPathRoll));
         }
     }

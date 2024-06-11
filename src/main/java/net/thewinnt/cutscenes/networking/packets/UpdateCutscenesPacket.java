@@ -22,7 +22,7 @@ public class UpdateCutscenesPacket implements CustomPacketPayload {
     }
 
     public void write(FriendlyByteBuf buf) {
-        buf.writeMap(registry, (b, id) -> b.writeResourceLocation(id), (b, cs) -> cs.toNetwork(b));
+        buf.writeMap(registry, FriendlyByteBuf::writeResourceLocation, (b, cs) -> cs.toNetwork(b));
     }
 
     public void handle(PlayPayloadContext context) {

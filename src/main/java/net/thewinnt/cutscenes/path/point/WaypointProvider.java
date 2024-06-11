@@ -20,7 +20,6 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
 
     @Override
     public Vec3 getPoint(Level level, Vec3 cutsceneStart) {
-        Vec3 offset = Objects.requireNonNullElse(this.offset, Vec3.ZERO);
         List<WaypointEntity> entities = level.getEntitiesOfClass(WaypointEntity.class, new AABB(cutsceneStart, cutsceneStart).inflate(searchRadius), e -> e.getWaypointName().equals(name));
         if (!entities.isEmpty()) {
             switch (sorting) {
@@ -78,7 +77,7 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
         } catch (IllegalArgumentException e) {
             sortType = SortType.NEAREST;
         }
-        Vec3 offset = JsonHelper.vec3FromJson(obj, "offset");
+        Vec3 offset = Objects.requireNonNullElse(JsonHelper.vec3FromJson(obj, "offset"), Vec3.ZERO);
         PointProvider fallback = JsonHelper.pointFromJson(obj, "fallback");
         return new WaypointProvider(name, searchRadius, sortType, offset, Optional.ofNullable(fallback));
     }

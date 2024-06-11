@@ -13,7 +13,7 @@ import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 public class OptionsMixin {
     @Inject(method = "setCameraType", at = @At("HEAD"), cancellable = true)
     public void setPerspective(CameraType cameraType, CallbackInfo callback) {
-        if (ClientCutsceneManager.isCutsceneRunning()) {
+        if (ClientCutsceneManager.isCutsceneRunning() && (ClientCutsceneManager.runningCutscene.cutscene.blockMovement || ClientCutsceneManager.runningCutscene.cutscene.blockCameraRotation)) {
             callback.cancel();
         }
     }

@@ -75,11 +75,6 @@ public class CutsceneInstance {
                 endedStartTransition = true;
             }
         }
-        if (phase == 1) {
-            phase++;
-            cutscene.startTransition.onEnd(cutscene);
-            endedStartTransition = true;
-        }
         for (CutsceneEffect<?> i : cutscene.effects) {
             if (localTime >= i.startTime) {
                 if (!startedEffects.contains(i)) {

@@ -55,7 +55,6 @@ public class ClientCutsceneManager {
     public static float initCameraYaw;
     public static float initCameraPitch;
     public static float initCameraRoll;
-    private static boolean hidGuiBefore;
     
     @OnlyIn(Dist.CLIENT)
     public static void startCutscene(CutsceneType type, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll) {
@@ -72,7 +71,6 @@ public class ClientCutsceneManager {
 
         // initialize minecraft
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.smartCull = false;
         if (runningCutscene.cutscene.hideHand) {
             minecraft.gameRenderer.setRenderHand(false);
         }
@@ -105,8 +103,6 @@ public class ClientCutsceneManager {
 
     public static void stopCutsceneImmediate() {
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.options.hideGui = hidGuiBefore;
-        minecraft.smartCull = true;
         minecraft.gameRenderer.setRenderHand(true);
         minecraft.setCameraEntity(minecraft.player);
         minecraft.gameRenderer.setRenderBlockOutline(true);
@@ -197,7 +193,6 @@ public class ClientCutsceneManager {
             runningCutscene.tick(currentTime + partialTick);
             Minecraft.getInstance().getProfiler().pop();
         } else {
-            hidGuiBefore = event.getRenderer().getMinecraft().options.hideGui;
             initCameraYaw = event.getYaw();
             initCameraPitch = event.getPitch();
             initCameraRoll = event.getRoll();
