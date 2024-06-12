@@ -1,0 +1,34 @@
+{
+  "length": 200,
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:calculated",
+        "x": {
+          "type": "cutscenes:mul",
+          "arg1": {
+            "type": "cutscenes:add",
+            "arg1": "t",
+            "arg2": -0.5
+          },
+          "arg2": 12
+        },
+        "y": {
+          "type": "cutscenes:spline",
+          "points": [
+            0,
+            2,
+            1,
+            3,
+            {
+              "type": "cutscenes:sin",
+              "arg": "cutscenes:16_pi_t"
+            },
+            "t"
+          ]
+        },
+        "z": 0
+      }
+    ]
+  }
+}

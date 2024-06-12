@@ -1,0 +1,20 @@
+{
+  "type": "cutscenes:div",
+  "arg1": {
+    "type": "cutscenes:add",
+    "arg1": {
+      "type": "cutscenes:sin",
+      "arg": {
+        "type": "cutscenes:mul",
+        "arg1": "t",
+        "arg2": {
+          "type": "cutscenes:mul",
+          "arg1": "pi",
+          "arg2": 100
+        }
+      }
+    },
+    "arg2": 1
+  },
+  "arg2": 2
+}

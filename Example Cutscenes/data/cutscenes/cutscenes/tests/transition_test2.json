@@ -1,0 +1,13 @@
+{
+  "length": 20,
+  "start_transition": {
+    "type": "cutscenes:no_op"
+  },
+  "end_transition": {
+    "type": "cutscenes:fade",
+    "length_a": 20,
+    "length_b": 20,
+    "is_start": false,
+    "color": [1, 1, 1, 1]
+  }
+}

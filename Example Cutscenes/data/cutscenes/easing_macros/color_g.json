@@ -1,0 +1,13 @@
+{
+  "type": "cutscenes:chain",
+  "argument": {
+    "type": "cutscenes:mod",
+    "arg1": {
+      "type": "cutscenes:add",
+      "arg1": "cutscenes:loop25",
+      "arg2": 0.33333
+    },
+    "arg2": 1
+  },
+  "easing": "cutscenes:color_wheel_channel"
+}

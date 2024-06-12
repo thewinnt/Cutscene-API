@@ -1,0 +1,5 @@
+{
+  "type": "cutscenes:chain",
+  "argument": "cutscenes:loop25",
+  "easing": "cutscenes:color_wheel_channel"
+}

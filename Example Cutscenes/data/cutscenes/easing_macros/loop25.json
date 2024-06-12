@@ -1,0 +1,9 @@
+{
+  "type": "cutscenes:mod",
+  "arg1": {
+    "type": "cutscenes:mul",
+    "arg1": "t",
+    "arg2": 25
+  },
+  "arg2": 1
+}
