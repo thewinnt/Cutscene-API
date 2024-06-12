@@ -40,7 +40,9 @@ public record ActionToggles(
         buf.writeBoolean(disableUsingItems);
         buf.writeBoolean(disableBlockInteractions);
         buf.writeBoolean(disableEntityInteractions);
+        buf.writeBoolean(disablePerspectiveChanging);
         buf.writeBoolean(considerSpectator);
+        buf.writeBoolean(hideSelf);
     }
 
     public static ActionToggles fromNetwork(FriendlyByteBuf buf) {

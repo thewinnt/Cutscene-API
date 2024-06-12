@@ -32,7 +32,7 @@ public class TriangleStripSerializer implements CutsceneEffectSerializer<Triangl
 
     @Override
     public void toNetwork(TriangleStripConfiguration object, FriendlyByteBuf buf) {
-        buf.writeArray(object.vertices(), (buf1, vertex) -> vertex.toNetwork(buf));
+        buf.writeArray(object.vertices(), (buf1, vertex) -> vertex.toNetwork(buf1));
     }
 
     @Override

@@ -19,7 +19,9 @@ import net.thewinnt.cutscenes.util.JsonHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A cutscene type consists of a camera path, rotation, transitions and some parameters. A cutscene has a fixed length,
@@ -129,7 +131,7 @@ public class CutsceneType {
         actionToggles.toNetwork(buf);
         buf.writeBoolean(hideHand);
         buf.writeBoolean(hideBlockOutline);
-        buf.writeCollection(effects, (buf1, effect) -> effect.toNetwork(buf1));
+        buf.writeArray(effects.toArray(CutsceneEffect[]::new), (friendlyByteBuf, cutsceneEffect) -> cutsceneEffect.toNetwork(friendlyByteBuf));
     }
 
     /** Reads a cutscene type from network. */
@@ -153,7 +155,7 @@ public class CutsceneType {
         ActionToggles actionToggles = ActionToggles.fromNetwork(buf);
         boolean hideHand = buf.readBoolean();
         boolean hideBlockOutline = buf.readBoolean();
-        List<CutsceneEffect<?>> effects = buf.readList(CutsceneEffect::fromNetwork);
+        List<CutsceneEffect<?>> effects = Arrays.stream(buf.readArray(CutsceneEffect<?>[]::new, CutsceneEffect::fromNetwork)).filter(Objects::nonNull).toList();
         return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, blockCameraRotation, actionToggles, hideHand, hideBlockOutline, effects);
     }
 
