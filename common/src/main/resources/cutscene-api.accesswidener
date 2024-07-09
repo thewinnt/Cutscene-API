@@ -1,0 +1,7 @@
+accessWidener v2 named
+
+transitive-accessible class net/minecraft/client/renderer/RenderType$CompositeState
+transitive-accessible field net/minecraft/client/renderer/RenderStateShard RENDERTYPE_GUI_SHADER Lnet/minecraft/client/renderer/RenderStateShard$ShaderStateShard;
+transitive-accessible field net/minecraft/client/renderer/RenderStateShard TRANSLUCENT_TRANSPARENCY Lnet/minecraft/client/renderer/RenderStateShard$TransparencyStateShard;
+transitive-accessible field net/minecraft/client/renderer/RenderStateShard LEQUAL_DEPTH_TEST Lnet/minecraft/client/renderer/RenderStateShard$DepthTestStateShard;
+transitive-accessible field net/minecraft/client/renderer/RenderStateShard NO_CULL Lnet/minecraft/client/renderer/RenderStateShard$CullStateShard;

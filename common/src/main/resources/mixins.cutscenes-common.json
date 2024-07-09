@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.thewinnt.cutscenes.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ServerPlayerMixin"
+  ],
+  "client": [
+    "CameraMixin",
+    "DebugRendererMixin",
+    "EntityMixin",
+    "GameRendererMixin",
+    "GuiMixin",
+    "MinecraftMixin",
+    "MultiPlayerGameModeMixin",
+    "OptionsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "mixins.cutscenes.refmap.json"
+}
