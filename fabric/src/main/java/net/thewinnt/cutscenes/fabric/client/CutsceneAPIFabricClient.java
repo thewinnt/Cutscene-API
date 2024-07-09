@@ -25,6 +25,7 @@ public final class CutsceneAPIFabricClient implements ClientModInitializer {
                 client.execute(packet::execute);
             });
         });
+        CutsceneAPI.onInitializeClient(CLIENT_PLATFORM);
         EntityRendererRegistry.register(CutsceneAPIFabric.WAYPOINT, NoopRenderer::new);
     }
 }

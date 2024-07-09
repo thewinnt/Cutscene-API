@@ -6,6 +6,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
 import net.thewinnt.cutscenes.fabric.CameraAngleSetterImpl;
 import net.thewinnt.cutscenes.fabric.CutsceneAPIFabric;
+import net.thewinnt.cutscenes.fabric.client.CutsceneAPIFabricClient;
 import net.thewinnt.cutscenes.fabric.util.duck.CameraExt;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,7 +22,7 @@ public class GameRendererMixin {
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetProjectionMatrix(Lorg/joml/Matrix4f;)V", shift = At.Shift.AFTER))
     private void cameraAnglesEvent(float f, long l, PoseStack poseStack, CallbackInfo ci) {
         CameraAngleSetterImpl impl = new CameraAngleSetterImpl(mainCamera.getXRot(), mainCamera.getYRot(), 0);
-        CutsceneAPIFabric.PLATFORM.angleSetters.forEach(consumer -> consumer.accept(impl));
+        CutsceneAPIFabricClient.CLIENT_PLATFORM.angleSetters.forEach(consumer -> consumer.accept(impl));
         ((CameraExt)mainCamera).csapi$setAngles(impl.getPitch(), impl.getYaw());
         poseStack.mulPose(Axis.ZP.rotationDegrees(impl.getRoll()));
     }

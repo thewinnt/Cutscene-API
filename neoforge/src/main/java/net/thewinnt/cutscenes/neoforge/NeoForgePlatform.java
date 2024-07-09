@@ -49,10 +49,10 @@ import java.util.function.Consumer;
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class NeoForgePlatform implements PlatformAbstractions {
     private List<PreparableReloadListener> reloadListeners = new ArrayList<>();
-    private final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();
+    protected final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();
     private final List<Consumer<CommandDispatcher<CommandSourceStack>>> commandMakers = new ArrayList<>();
     private final List<Runnable> onLogout = new ArrayList<>();
-    private final List<Runnable> clientTick = new ArrayList<>();
+    protected final List<Runnable> clientTick = new ArrayList<>();
     public Map<ResourceLocation, Pair<AbstractPacket.PacketReader, BiConsumer<AbstractPacket, FriendlyByteBuf>>> packets = new HashMap<>();
 
     @Override
@@ -120,21 +120,8 @@ public class NeoForgePlatform implements PlatformAbstractions {
     // --- EVENT LISTENERS ---
 
     @SubscribeEvent
-    public static void computeCameraAngles(ViewportEvent.ComputeCameraAngles event) {
-        CameraAngleSetterImpl impl = new CameraAngleSetterImpl(event);
-        CutsceneAPINeoForge.PLATFORM.angleSetters.forEach(consumer -> consumer.accept(impl));
-    }
-
-    @SubscribeEvent
     public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         CutsceneAPINeoForge.PLATFORM.onLogout.forEach(Runnable::run);
-    }
-
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
-            CutsceneAPINeoForge.PLATFORM.clientTick.forEach(Runnable::run);
-        }
     }
 
     /** Sends the cutscene registry to client */
