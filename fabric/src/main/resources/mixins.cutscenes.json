@@ -12,5 +12,5 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "refmap": "mixins.cutscenes.refmap.json"
+  "refmap": "cutscenes-fabric-fabric-refmap.json"
 }

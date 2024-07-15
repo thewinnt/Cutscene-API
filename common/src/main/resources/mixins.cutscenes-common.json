@@ -18,5 +18,6 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "refmap": "cutscenes-common-common-refmap.json"
 }
