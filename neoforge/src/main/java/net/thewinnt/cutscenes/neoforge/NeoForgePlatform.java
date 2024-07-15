@@ -48,7 +48,7 @@ import java.util.function.Consumer;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class NeoForgePlatform implements PlatformAbstractions {
-    private List<PreparableReloadListener> reloadListeners = new ArrayList<>();
+    private final List<PreparableReloadListener> reloadListeners = new ArrayList<>();
     protected final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();
     private final List<Consumer<CommandDispatcher<CommandSourceStack>>> commandMakers = new ArrayList<>();
     private final List<Runnable> onLogout = new ArrayList<>();
@@ -57,9 +57,6 @@ public class NeoForgePlatform implements PlatformAbstractions {
 
     @Override
     public void registerReloadListener(PreparableReloadListener listener, ResourceLocation id) {
-        if (this.reloadListeners == null) {
-            throw new IllegalStateException("Too late! The registration of reload listeners has ended.");
-        }
         reloadListeners.add(listener);
     }
 
