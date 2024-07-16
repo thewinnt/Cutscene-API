@@ -1,15 +1,16 @@
 package net.thewinnt.cutscenes.networking.packets;
 
+import java.util.Map;
+
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 
-import java.util.Map;
-
 public class UpdateCutscenesPacket implements AbstractPacket {
-    public static final ResourceLocation ID = new ResourceLocation("cutscenes:update_cutscenes");
+    public static final String ID = "cutscenes:update_cutscenes";
     private final Map<ResourceLocation, CutsceneType> registry;
     
     public UpdateCutscenesPacket(Map<ResourceLocation, CutsceneType> registry) {
@@ -29,9 +30,9 @@ public class UpdateCutscenesPacket implements AbstractPacket {
     public void execute() {
        ClientCutsceneManager.updateRegistry(registry);
     }
-
+    
     @Override
-    public ResourceLocation id() {
-        return ID;
+    public Type<? extends CustomPacketPayload> type() {
+        return CustomPacketPayload.createType(ID);
     }
 }

@@ -1,6 +1,5 @@
 package net.thewinnt.cutscenes.mixin;
 
-import net.thewinnt.cutscenes.CutsceneType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,6 +25,7 @@ public class EntityMixin {
         }
     }
 
+    @SuppressWarnings("unlikely-arg-type")
     @Inject(method = "shouldRender(DDD)Z", at = @At("HEAD"), cancellable = true)
     public void shouldRender(double x, double y, double z, CallbackInfoReturnable<Boolean> callback) {
         if (ClientCutsceneManager.isCutsceneRunning() && this.equals(Minecraft.getInstance().player) && ClientCutsceneManager.actionToggles().hideSelf()) {

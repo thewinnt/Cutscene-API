@@ -1,13 +1,14 @@
 package net.thewinnt.cutscenes.networking.packets;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 
 public class PreviewCutscenePacket implements AbstractPacket {
-    public static final ResourceLocation ID = new ResourceLocation("cutscenes:preview_cutscene");
+    public static final String ID = "cutscenes:preview_cutscene";
     public final ResourceLocation type;
     public final Vec3 startPos;
     public final float pathYaw;
@@ -45,7 +46,7 @@ public class PreviewCutscenePacket implements AbstractPacket {
     }
 
     @Override
-    public ResourceLocation id() {
-        return ID;
+    public Type<? extends CustomPacketPayload> type() {
+        return CustomPacketPayload.createType(ID);
     }
 }

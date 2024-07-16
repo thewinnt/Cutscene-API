@@ -7,6 +7,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
@@ -71,8 +72,9 @@ public class AppearingTextOverlay implements Overlay {
         for (Pair<String, Style> i : styles) {
             result.add(FormattedText.of(i.getFirst(), i.getSecond()));
         }
+        SoundEvent soundbite = SoundEvent.createVariableRangeEvent(this.config.soundbite());
         if (lastT != state.t) {
-            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(this.config.soundbite(), this.config.pitch().sample(minecraft.player.getRandom()), 1));
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(soundbite, this.config.pitch().sample(minecraft.player.getRandom()), 1));
         }
         lastT = state.t;
         float x = this.config.rx().get(time.getProgress(), width);

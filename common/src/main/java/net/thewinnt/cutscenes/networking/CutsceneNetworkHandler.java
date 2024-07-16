@@ -1,6 +1,8 @@
 package net.thewinnt.cutscenes.networking;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamDecoder;
+import net.minecraft.network.codec.StreamEncoder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
@@ -71,18 +73,18 @@ public class CutsceneNetworkHandler {
         buf.writeFloat(color[3]);
     }
 
-    public static <T> T[] readArray(FriendlyByteBuf buf, IntFunction<T[]> generator, FriendlyByteBuf.Reader<T> reader) {
+    public static <T> T[] readArray(FriendlyByteBuf buf, IntFunction<T[]> generator, StreamDecoder<FriendlyByteBuf, T> reader) {
         T[] array = generator.apply(buf.readInt());
         for (int i = 0; i < array.length; i++) {
-            array[i] = reader.apply(buf);
+            array[i] = reader.decode(buf);
         }
         return array;
     }
 
-    public static <T> void writeArray(FriendlyByteBuf buf, T[] array, FriendlyByteBuf.Writer<T> writer) {
+    public static <T> void writeArray(FriendlyByteBuf buf, T[] array, StreamEncoder<FriendlyByteBuf, T> writer) {
         buf.writeInt(array.length);
         for (T i : array) {
-            writer.accept(buf, i);
+            writer.encode(buf, i);
         }
     }
 }

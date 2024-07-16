@@ -1,19 +1,17 @@
 package net.thewinnt.cutscenes.platform;
 
+import java.util.Collection;
+import java.util.function.Consumer;
+
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.client.renderer.RenderType;
+
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.EntityType;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
-
-import java.util.Collection;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * Abstracts away the platform-specific APIs found in Minecraft. Both Fabric and NeoForge have their own implementations
@@ -28,7 +26,7 @@ public interface PlatformAbstractions {
     void registerReloadListener(PreparableReloadListener listener, ResourceLocation id);
 
     // networking
-    void registerClientboundPacket(ResourceLocation id, AbstractPacket.PacketReader reader, BiConsumer<AbstractPacket, FriendlyByteBuf> writer);
+    <T extends AbstractPacket> void registerClientboundPacket(String id, AbstractPacket.PacketReader<T> reader, Consumer<T> handler);
     void sendPacketToPlayer(AbstractPacket packet, ServerPlayer player);
     default void sendPacketToPlayers(AbstractPacket packet, Collection<ServerPlayer> players) {
         players.forEach(player -> sendPacketToPlayer(packet, player));

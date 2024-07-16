@@ -4,9 +4,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.client.CutsceneOverlayManager;
 import net.thewinnt.cutscenes.client.Overlay;
-import net.thewinnt.cutscenes.client.overlay.BlitOverlay;
 import net.thewinnt.cutscenes.effect.CutsceneEffect;
-import net.thewinnt.cutscenes.effect.configuration.BlitConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
 
 /**

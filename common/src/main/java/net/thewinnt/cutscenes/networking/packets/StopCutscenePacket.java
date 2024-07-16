@@ -1,12 +1,12 @@
 package net.thewinnt.cutscenes.networking.packets;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 
 public class StopCutscenePacket implements AbstractPacket {
-    public static final ResourceLocation ID = new ResourceLocation("cutscenes:stop_cutscene");
+    public static final String ID = "cutscenes:stop_cutscene";
 
     @Override
     public void execute() {
@@ -14,10 +14,10 @@ public class StopCutscenePacket implements AbstractPacket {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) {}
+    public void write(FriendlyByteBuf FriendlyByteBuf) {}
 
     @Override
-    public ResourceLocation id() {
-        return ID;
+    public Type<? extends CustomPacketPayload> type() {
+        return CustomPacketPayload.createType(ID);
     }
 }

@@ -95,10 +95,8 @@
       },
       "pitch": {
         "type": "uniform",
-        "value": {
-          "min_inclusive": 0.75,
-          "max_exclusive": 1.25
-        }
+        "min_inclusive": 0.75,
+        "max_exclusive": 1.25
       }
     },
     {

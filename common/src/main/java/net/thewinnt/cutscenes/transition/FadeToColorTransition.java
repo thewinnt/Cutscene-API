@@ -19,12 +19,9 @@ import net.thewinnt.cutscenes.easing.types.ColorEasing;
 import net.thewinnt.cutscenes.easing.types.CompoundEasing;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
-import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.util.DynamicColor;
-import net.thewinnt.cutscenes.util.JsonHelper;
 
 import java.util.List;
-import java.util.Objects;
 
 public class FadeToColorTransition implements Transition {
     private final DynamicColor colorBottomLeft;

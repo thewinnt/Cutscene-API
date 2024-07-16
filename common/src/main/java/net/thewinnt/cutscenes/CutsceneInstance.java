@@ -3,7 +3,6 @@ package net.thewinnt.cutscenes;
 import net.minecraft.client.Minecraft;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.effect.CutsceneEffect;
-import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 import net.thewinnt.cutscenes.transition.Transition;
 
 import java.util.ArrayList;

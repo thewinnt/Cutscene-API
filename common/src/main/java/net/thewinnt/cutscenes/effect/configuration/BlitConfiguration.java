@@ -1,7 +1,6 @@
 package net.thewinnt.cutscenes.effect.configuration;
 
 import net.minecraft.resources.ResourceLocation;
-import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.util.CoordinateProvider;
 import net.thewinnt.cutscenes.util.DynamicColor;
 

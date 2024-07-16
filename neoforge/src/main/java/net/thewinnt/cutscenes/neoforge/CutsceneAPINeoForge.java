@@ -11,7 +11,6 @@ public final class CutsceneAPINeoForge {
 
     public CutsceneAPINeoForge(IEventBus bus, Dist dist) {
         // Run our common setup.
-        // TODO neoforge platform abstractions
         CutsceneAPI.onInitialize(PLATFORM);
         CutsceneAPIEntities.REGISTRY.register(bus);
     }

@@ -4,7 +4,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.RectangleConfiguration;
-import net.thewinnt.cutscenes.util.DynamicColor;
 import net.thewinnt.cutscenes.util.TimeProvider;
 
 public class RectangleOverlay implements Overlay {

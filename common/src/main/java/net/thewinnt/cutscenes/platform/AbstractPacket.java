@@ -8,7 +8,7 @@ public interface AbstractPacket extends CustomPacketPayload {
     void execute();
 
     @FunctionalInterface
-    interface PacketReader {
-        AbstractPacket read(FriendlyByteBuf buf);
+    interface PacketReader<T extends AbstractPacket> {
+        T read(FriendlyByteBuf buf);
     }
 }

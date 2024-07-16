@@ -3,6 +3,7 @@ package net.thewinnt.cutscenes.fabric.mixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Timer;
 import net.thewinnt.cutscenes.fabric.CutsceneAPIFabric;
+import net.thewinnt.cutscenes.fabric.client.CutsceneAPIFabricClient;
 import net.thewinnt.cutscenes.fabric.util.duck.MinecraftExt;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,6 +33,6 @@ public class MinecraftMixin implements MinecraftExt {
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("HEAD"))
     private void onLogout(CallbackInfo info) {
         // we don't really care about the exact moment here, we just need a good moment to stop it all
-        CutsceneAPIFabric.PLATFORM.onLogout.forEach(Runnable::run);
+        CutsceneAPIFabricClient.CLIENT_PLATFORM.onLogout.forEach(Runnable::run);
     }
 }

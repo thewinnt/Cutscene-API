@@ -5,7 +5,6 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -84,9 +83,8 @@ public class PathPreviewRenderer {
     /** Draws a line relative to the camera */
     private static void drawLineLocal(PoseStack stack, VertexConsumer consumer, float x1, float y1, float z1, float x2, float y2, float z2, Vector3f color) {
         Matrix4f matrix4f = stack.last().pose();
-        Matrix3f matrix3f = stack.last().normal();
-        consumer.vertex(matrix4f, x1, y1, z1).color(color.x(), color.y(), color.z(), 1f).normal(matrix3f, 0, 0, 0).endVertex();
-        consumer.vertex(matrix4f, x2, y2, z2).color(color.x(), color.y(), color.z(), 1f).normal(matrix3f, 0, 0, 0).endVertex();
+        consumer.vertex(matrix4f, x1, y1, z1).color(color.x(), color.y(), color.z(), 1f).normal(0, 0, 0).endVertex();
+        consumer.vertex(matrix4f, x2, y2, z2).color(color.x(), color.y(), color.z(), 1f).normal(0, 0, 0).endVertex();
     }
 
     /** Draws a line relative to the world center */

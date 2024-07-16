@@ -78,6 +78,6 @@ public class CalculatedPoint implements PathLike {
         Easing easingY = Easing.fromJSON(json.get("y"), SimpleEasing.LINEAR);
         Easing easingZ = Easing.fromJSON(json.get("z"), SimpleEasing.LINEAR);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
-        return new CalculatedPoint(easingX, easingY, easingZ);
+        return new CalculatedPoint(easingX, easingY, easingZ, weight);
     }
 }

@@ -1,15 +1,16 @@
 package net.thewinnt.cutscenes.networking.packets;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 
-public record StartCutscenePacket(ResourceLocation type, Vec3 startPos, float cameraYaw, float cameraPitch,
+public record StartCutscenePacket(ResourceLocation cutscene, Vec3 startPos, float cameraYaw, float cameraPitch,
                                   float cameraRoll, float pathYaw, float pathPitch,
                                   float pathRoll) implements AbstractPacket {
-    public static final ResourceLocation ID = new ResourceLocation("cutscenes:start_cutscene");
+    public static final String ID = "cutscenes:start_cutscene";
 
     public static StartCutscenePacket read(FriendlyByteBuf buf) {
         ResourceLocation type = buf.readNullable(FriendlyByteBuf::readResourceLocation);
@@ -25,7 +26,7 @@ public record StartCutscenePacket(ResourceLocation type, Vec3 startPos, float ca
 
     @Override
     public void write(FriendlyByteBuf buf) {
-        buf.writeNullable(type, FriendlyByteBuf::writeResourceLocation);
+        buf.writeNullable(cutscene, FriendlyByteBuf::writeResourceLocation);
         buf.writeVec3(startPos);
         buf.writeFloat(cameraYaw);
         buf.writeFloat(cameraPitch);
@@ -37,11 +38,11 @@ public record StartCutscenePacket(ResourceLocation type, Vec3 startPos, float ca
 
     @Override
     public void execute() {
-        ClientCutsceneManager.startCutscene(ClientCutsceneManager.CLIENT_REGISTRY.get(type), startPos, cameraYaw, cameraPitch, cameraRoll, pathYaw, pathPitch, pathRoll);
+        ClientCutsceneManager.startCutscene(ClientCutsceneManager.CLIENT_REGISTRY.get(cutscene), startPos, cameraYaw, cameraPitch, cameraRoll, pathYaw, pathPitch, pathRoll);
     }
-
+    
     @Override
-    public ResourceLocation id() {
-        return ID;
+    public Type<? extends CustomPacketPayload> type() {
+        return CustomPacketPayload.createType(ID);
     }
 }

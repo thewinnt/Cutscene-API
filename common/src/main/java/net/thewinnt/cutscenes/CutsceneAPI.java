@@ -1,24 +1,28 @@
 package net.thewinnt.cutscenes;
 
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
+
 import net.minecraft.core.DefaultedMappedRegistry;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
@@ -27,7 +31,6 @@ import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
-import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StopCutscenePacket;
@@ -39,13 +42,6 @@ import net.thewinnt.cutscenes.platform.ClientPlatformAbstractions;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
 import net.thewinnt.cutscenes.util.LoadResolver;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 /** The main class of Cutscene API. Sort of. */
 public class CutsceneAPI {
@@ -80,10 +76,10 @@ public class CutsceneAPI {
         CutsceneAPI.PLATFORM = abstractions;
 
         // networking
-        abstractions.registerClientboundPacket(PreviewCutscenePacket.ID, PreviewCutscenePacket::read, AbstractPacket::write);
-        abstractions.registerClientboundPacket(StartCutscenePacket.ID, StartCutscenePacket::read, AbstractPacket::write);
-        abstractions.registerClientboundPacket(StopCutscenePacket.ID, buf -> new StopCutscenePacket(), AbstractPacket::write);
-        abstractions.registerClientboundPacket(UpdateCutscenesPacket.ID, UpdateCutscenesPacket::read, AbstractPacket::write);
+        abstractions.registerClientboundPacket(PreviewCutscenePacket.ID, PreviewCutscenePacket::read, AbstractPacket::execute);
+        abstractions.registerClientboundPacket(StartCutscenePacket.ID, StartCutscenePacket::read, AbstractPacket::execute);
+        abstractions.registerClientboundPacket(StopCutscenePacket.ID, buf -> new StopCutscenePacket(), AbstractPacket::execute);
+        abstractions.registerClientboundPacket(UpdateCutscenesPacket.ID, UpdateCutscenesPacket::read, AbstractPacket::execute);
 
         // other stuff
         addReloadListeners(abstractions);

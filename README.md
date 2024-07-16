@@ -1,7 +1,7 @@
 # Cutscene API
 A Minecraft mod for making cutscenes using existing game mechanics
 
-This mod is for Fabric/NeoForge 1.20.4.
+This mod is for Fabric/NeoForge 1.20.6.
 
 **Requires [Fabric API](https://modrinth.com/mod/fabric-api) on Fabric.**
 

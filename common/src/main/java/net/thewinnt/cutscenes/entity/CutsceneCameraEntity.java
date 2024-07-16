@@ -1,19 +1,23 @@
 package net.thewinnt.cutscenes.entity;
 
+import java.util.Map;
+import java.util.UUID;
+
 import com.mojang.authlib.GameProfile;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.Level;
@@ -22,8 +26,6 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneInstance;
 import net.thewinnt.cutscenes.transition.Transition;
-
-import java.util.UUID;
 
 public class CutsceneCameraEntity extends LocalPlayer {
     private static final Minecraft MINECRAFT = Minecraft.getInstance();
@@ -36,8 +38,11 @@ public class CutsceneCameraEntity extends LocalPlayer {
             RegistryAccess.Frozen.EMPTY,
             FeatureFlagSet.of(),
             null,
-            MINECRAFT.getCurrentServer(),
-            MINECRAFT.screen
+            null,
+            null,
+            Map.of(),
+            null,
+            false
         )
     ) {
         public void send(Packet<?> pPacket) {}
@@ -78,6 +83,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
         this.pathPitch = (float)Math.toRadians(pathPitch);
         this.pathRoll = (float)Math.toRadians(pathRoll);
         this.pathRot = new Vec3(this.pathRoll, this.pathYaw, this.pathPitch);
+        
     }
 
     public void spawn() {
@@ -94,7 +100,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
     protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {}
 
     @Override
-    public MobEffectInstance getEffect(MobEffect pEffect) {
+    public MobEffectInstance getEffect(Holder<MobEffect> pEffect) {
         return MINECRAFT.player.getEffect(pEffect);
     }
 
@@ -114,7 +120,6 @@ public class CutsceneCameraEntity extends LocalPlayer {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     protected boolean updateIsUnderwater() {
         this.wasUnderwater = this.isEyeInFluid(FluidTags.WATER);
         return this.wasUnderwater;
@@ -205,22 +210,12 @@ public class CutsceneCameraEntity extends LocalPlayer {
     }
 
     @Override
-    public float getEyeHeight(Pose pPose) {
-        return 0;
-    }
-
-    @Override
     public double getEyeY() {
         return getY();
     }
 
     @Override
-    public float getStandingEyeHeight(Pose pPose, EntityDimensions pSize) {
-        return 0;
-    }
-
-    @Override
-    public boolean hasEffect(MobEffect pEffect) {
+    public boolean hasEffect(Holder<MobEffect> pEffect) {
         return minecraft.player.hasEffect(pEffect);
     }
 }

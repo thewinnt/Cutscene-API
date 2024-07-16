@@ -1,5 +1,10 @@
 package net.thewinnt.cutscenes;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -16,12 +21,6 @@ import net.thewinnt.cutscenes.transition.Transition;
 import net.thewinnt.cutscenes.util.ActionToggles;
 import net.thewinnt.cutscenes.util.ActionToggles.Builder;
 import net.thewinnt.cutscenes.util.JsonHelper;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * A cutscene type consists of a camera path, rotation, transitions and some parameters. A cutscene has a fixed length,
@@ -131,7 +130,7 @@ public class CutsceneType {
         actionToggles.toNetwork(buf);
         buf.writeBoolean(hideHand);
         buf.writeBoolean(hideBlockOutline);
-        buf.writeCollection(effects, (friendlyByteBuf, cutsceneEffect) -> cutsceneEffect.toNetwork(friendlyByteBuf));
+        buf.writeCollection(effects, (buf1, cutsceneEffect) -> cutsceneEffect.toNetwork(buf1));
     }
 
     /** Reads a cutscene type from network. */

@@ -2,11 +2,9 @@ package net.thewinnt.cutscenes.neoforge;
 
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
-import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.thewinnt.cutscenes.CutsceneAPI;
@@ -14,20 +12,13 @@ import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
-import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
-import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
-import net.thewinnt.cutscenes.networking.packets.StopCutscenePacket;
-import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
-import net.thewinnt.cutscenes.platform.AbstractPacket;
 
-@Mod.EventBusSubscriber(bus = Bus.MOD)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class ModEventListener {
     @SubscribeEvent
-    public static void registerNetwork(final RegisterPayloadHandlerEvent event) {
-        final IPayloadRegistrar registrar = event.registrar("cutscenes").versioned("1.5.1");
-        CutsceneAPINeoForge.PLATFORM.packets.forEach((id, serializer) -> {
-            registrar.play(id, buf -> serializer.getFirst().read(buf), handler -> handler.client((packet, context) -> context.workHandler().submitAsync(packet::execute)));
-        });
+    public static void registerNetwork(final RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar("cutscenes").versioned("1.5.2");
+        CutsceneAPINeoForge.PLATFORM.packets.forEach(type -> NeoForgePlatform.registerPacket(registrar, type));
     }
 
     @SubscribeEvent

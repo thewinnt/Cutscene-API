@@ -1,18 +1,24 @@
 package net.thewinnt.cutscenes.fabric;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.datafixers.util.Pair;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,22 +31,13 @@ import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.fabric.util.duck.MinecraftExt;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 import net.thewinnt.cutscenes.platform.CameraAngleSetter;
+import net.thewinnt.cutscenes.platform.PacketType;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
 public class FabricPlatform implements PlatformAbstractions {
-    public Map<ResourceLocation, Pair<AbstractPacket.PacketReader, BiConsumer<AbstractPacket, FriendlyByteBuf>>> packets = new HashMap<>();
+    public List<PacketType<?>> packets = new ArrayList<>();
     public final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();
     public final List<Runnable> onLogout = new ArrayList<>();
-    private final List<Runnable> clientTick = new ArrayList<>();
     public MinecraftServer server;
 
     @Override
@@ -59,18 +56,18 @@ public class FabricPlatform implements PlatformAbstractions {
     }
 
     @Override
-    public void registerClientboundPacket(ResourceLocation id, AbstractPacket.PacketReader reader, BiConsumer<AbstractPacket, FriendlyByteBuf> writer) {
+    public <T extends AbstractPacket> void registerClientboundPacket(String id, AbstractPacket.PacketReader<T> reader, Consumer<T> handler) {
         if (packets == null) {
             throw new IllegalStateException("Too late! Clientbound packets should be registered during mod initialization");
         }
-        packets.put(id, new Pair<>(reader, writer));
+        packets.add(new PacketType<>(CustomPacketPayload.createType(id), reader, handler));
     }
 
     @Override
     public void sendPacketToPlayer(AbstractPacket packet, ServerPlayer player) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         packet.write(buf);
-        ServerPlayNetworking.send(player, packet.id(), buf);
+        ServerPlayNetworking.send(player, packet);
     }
 
     @Override
@@ -110,5 +107,9 @@ public class FabricPlatform implements PlatformAbstractions {
 
     public void setServer(MinecraftServer server) {
         this.server = server;
+    }
+
+    public static <T extends AbstractPacket> void registerPacket(PacketType<T> type) {
+        PayloadTypeRegistry.playS2C().register(type.type(), type.codec());
     }
 }

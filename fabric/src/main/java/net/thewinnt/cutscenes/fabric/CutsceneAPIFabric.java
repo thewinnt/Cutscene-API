@@ -1,8 +1,8 @@
 package net.thewinnt.cutscenes.fabric;
 
-import com.mojang.serialization.Lifecycle;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -44,12 +44,12 @@ public final class CutsceneAPIFabric implements ModInitializer {
             }
         });
         // register stuff
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.EASING_SERIALIZER_KEY, CutsceneAPI.EASING_SERIALIZERS, Lifecycle.stable());
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.CUTSCENE_EFFECT_SERIALIZER_KEY, CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS, Lifecycle.stable());
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.SEGMENT_TYPE_KEY, CutsceneAPI.SEGMENT_TYPES, Lifecycle.stable());
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.POINT_TYPE_KEY, CutsceneAPI.POINT_TYPES, Lifecycle.stable());
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.TRANSITION_TYPE_KEY, CutsceneAPI.TRANSITION_TYPES, Lifecycle.stable());
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.DELAY_PROVIDER_KEY, CutsceneAPI.DELAY_PROVIDERS, Lifecycle.stable());
+        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.EASING_SERIALIZER_KEY, CutsceneAPI.EASING_SERIALIZERS, RegistrationInfo.BUILT_IN);
+        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.CUTSCENE_EFFECT_SERIALIZER_KEY, CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS, RegistrationInfo.BUILT_IN);
+        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.SEGMENT_TYPE_KEY, CutsceneAPI.SEGMENT_TYPES, RegistrationInfo.BUILT_IN);
+        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.POINT_TYPE_KEY, CutsceneAPI.POINT_TYPES, RegistrationInfo.BUILT_IN);
+        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.TRANSITION_TYPE_KEY, CutsceneAPI.TRANSITION_TYPES, RegistrationInfo.BUILT_IN);
+        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.DELAY_PROVIDER_KEY, CutsceneAPI.DELAY_PROVIDERS, RegistrationInfo.BUILT_IN);
         Registry.register(BuiltInRegistries.ENTITY_TYPE, "cutscenes:waypoint", WAYPOINT);
 
         CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "line"), CutsceneManager.LINE);
@@ -72,5 +72,7 @@ public final class CutsceneAPIFabric implements ModInitializer {
         EasingSerializer.init();
         CutsceneEffectSerializer.init();
         DelayProviderSerializer.init();
+
+        PLATFORM.packets.forEach(FabricPlatform::registerPacket);
     }
 }

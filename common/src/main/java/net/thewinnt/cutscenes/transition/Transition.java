@@ -11,7 +11,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
-import net.thewinnt.cutscenes.path.Path;
 
 /**
  * A Transition provides a smooth change between the player doing their business and watching a cutscene.
