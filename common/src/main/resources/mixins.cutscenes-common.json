@@ -19,5 +19,5 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "refmap": "cutscenes-common-common-refmap.json"
+  "refmap": "cutscene_api-common-common-refmap.json"
 }

@@ -12,5 +12,5 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "refmap": "cutscenes-fabric-fabric-refmap.json"
+  "refmap": "cutscene_api-fabric-fabric-refmap.json"
 }

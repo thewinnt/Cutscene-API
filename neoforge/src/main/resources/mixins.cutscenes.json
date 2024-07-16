@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [],
   "client": [
-    "GuiMixin"
+    "GuiMixin",
+    "RenderStateShardAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
