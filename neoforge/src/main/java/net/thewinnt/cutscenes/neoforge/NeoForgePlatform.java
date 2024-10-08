@@ -69,7 +69,7 @@ public class NeoForgePlatform implements PlatformAbstractions {
 
     @Override
     public float getPartialTick() {
-        return Minecraft.getInstance().getPartialTick();
+        return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
     }
 
     @Override

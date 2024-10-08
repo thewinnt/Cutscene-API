@@ -37,7 +37,7 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
                 default:
                     break;
             }
-            return entities.get(0).getPosition(1).subtract(cutsceneStart).add(offset);
+            return entities.getFirst().getPosition(1).subtract(cutsceneStart).add(offset);
         } else if (fallback.isPresent()) {
             return fallback.get().getPoint(level, cutsceneStart);
         } else {
@@ -57,6 +57,11 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
     @Override
     public PointSerializer<WaypointProvider> getSerializer() {
         return CutsceneManager.WAYPOINT;
+    }
+
+    @Override
+    public boolean shouldCache() {
+        return sorting != SortType.TRUE_RANDOM;
     }
 
     public static WaypointProvider fromNetwork(FriendlyByteBuf buf) {

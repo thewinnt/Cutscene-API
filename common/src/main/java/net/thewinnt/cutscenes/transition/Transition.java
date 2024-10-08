@@ -88,7 +88,7 @@ public interface Transition {
     default void onFrame(double progress, CutsceneType cutscene) {}
 
     public static Transition fromJSON(JsonObject json) {
-        ResourceLocation type = new ResourceLocation(GsonHelper.getAsString(json, "type"));
+        ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(json, "type"));
         TransitionSerializer<?> serializer = CutsceneManager.getTransitionType(type);
         if (serializer == null) {
             throw new IllegalArgumentException("Unknown transition type: " + type);

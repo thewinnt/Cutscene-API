@@ -1,5 +1,8 @@
 package net.thewinnt.cutscenes.path.point;
 
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -12,6 +15,7 @@ import net.thewinnt.cutscenes.path.Path;
 
 /** The base interface for point types. */
 public interface PointProvider {
+    Map<PointProvider, Vec3> POINT_CACHE = new IdentityHashMap<>();
     /**
      * Returns the point this PointProvider represents.
      * @param level the level the point is being obtained in.
@@ -32,6 +36,13 @@ public interface PointProvider {
      * the same object.
      */
     PointSerializer<?> getSerializer();
+
+    /**
+     * @return whether this point's value should be cached before starting the cutscene
+     */
+    default boolean shouldCache() {
+        return true;
+    }
 
     /** An object that constructs point providers from JSON and network. */
     public static interface PointSerializer<T extends PointProvider> {
@@ -54,6 +65,13 @@ public interface PointProvider {
          * @see net.thewinnt.cutscenes.path.PathLike.SegmentSerializer#fromNetwork(FriendlyByteBuf, Path)
          */
         T fromJSON(JsonObject json);
+
+        static Vec3 getPoint(PointProvider point, Level level, Vec3 startPosition) {
+            if (point.shouldCache()) {
+                return POINT_CACHE.computeIfAbsent(point, p -> p.getPoint(level, startPosition));
+            }
+            return point.getPoint(level, startPosition);
+        }
 
         /**
          * A helper method to create a segment serializer from 2 functions.

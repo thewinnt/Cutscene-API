@@ -68,7 +68,7 @@ public class JsonHelper {
             obj = null;
         }
         if (obj == null) return null;
-        ResourceLocation type = new ResourceLocation(GsonHelper.getAsString(obj, "type"));
+        ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
         PointSerializer<?> serializer = CutsceneManager.getPointType(type);
         if (serializer == null) {
             throw new IllegalArgumentException("Unknown point type: " + type);
@@ -89,7 +89,7 @@ public class JsonHelper {
         if (test != null) return new StaticPointProvider(test);
         if (json.isJsonNull()) return null;
         JsonObject obj = json.getAsJsonObject();
-        ResourceLocation type = new ResourceLocation(GsonHelper.getAsString(obj, "type"));
+        ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
         PointSerializer<?> serializer = CutsceneManager.getPointType(type);
         if (serializer == null) {
             throw new IllegalArgumentException("Unknown point type: " + type);

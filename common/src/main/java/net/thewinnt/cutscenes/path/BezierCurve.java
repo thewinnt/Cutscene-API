@@ -2,6 +2,7 @@ package net.thewinnt.cutscenes.path;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -134,6 +135,14 @@ public class BezierCurve implements PathLike {
                 new Line(control_b, end, initLevel)
             );
         }
+    }
+
+    @Override
+    public void getAllPoints(Stream.Builder<PointProvider> builder) {
+        builder.accept(start);
+        builder.accept(control_a);
+        builder.accept(control_b);
+        builder.accept(end);
     }
 
     public static BezierCurve fromNetwork(FriendlyByteBuf buf, Path path) {

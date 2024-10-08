@@ -57,12 +57,12 @@ public class CutsceneAPI {
     private static ClientPlatformAbstractions CLIENT_PLATFORM;
 
     // registry keys
-    public static final ResourceKey<Registry<EasingSerializer<?>>> EASING_SERIALIZER_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:easing_types"));
-    public static final ResourceKey<Registry<CutsceneEffectSerializer<?>>> CUTSCENE_EFFECT_SERIALIZER_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:effect_serializers"));
-    public static final ResourceKey<Registry<SegmentSerializer<?>>> SEGMENT_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:segment_types"));
-    public static final ResourceKey<Registry<PointSerializer<?>>> POINT_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:point_providers"));
-    public static final ResourceKey<Registry<TransitionSerializer<?>>> TRANSITION_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:transition_types"));
-    public static final ResourceKey<Registry<DelayProviderSerializer<?>>> DELAY_PROVIDER_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:delay_providers"));
+    public static final ResourceKey<Registry<EasingSerializer<?>>> EASING_SERIALIZER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:easing_types"));
+    public static final ResourceKey<Registry<CutsceneEffectSerializer<?>>> CUTSCENE_EFFECT_SERIALIZER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:effect_serializers"));
+    public static final ResourceKey<Registry<SegmentSerializer<?>>> SEGMENT_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:segment_types"));
+    public static final ResourceKey<Registry<PointSerializer<?>>> POINT_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:point_providers"));
+    public static final ResourceKey<Registry<TransitionSerializer<?>>> TRANSITION_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:transition_types"));
+    public static final ResourceKey<Registry<DelayProviderSerializer<?>>> DELAY_PROVIDER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:delay_providers"));
 
     // registries
     public static final MappedRegistry<EasingSerializer<?>> EASING_SERIALIZERS = new DefaultedMappedRegistry<>("cutscenes:linear", EASING_SERIALIZER_KEY, Lifecycle.stable(), false);
@@ -124,7 +124,7 @@ public class CutsceneAPI {
                 Easing.EASING_MACROS.putAll(macroLoader.load());
                 LOGGER.info("Loaded {} easing macros", Easing.EASING_MACROS.size());
             }
-        }, new ResourceLocation("cutscenes:easing_macros"));
+        }, ResourceLocation.parse("cutscenes:easing_macros"));
         abstractions.registerReloadListener(new SimpleJsonResourceReloadListener(GSON, "cutscenes") {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
@@ -142,6 +142,6 @@ public class CutsceneAPI {
                 });
                 LOGGER.info("Loaded {} cutscenes", loaded.get());
             }
-        }, new ResourceLocation("cutscenes:cutscenes"));
+        }, ResourceLocation.parse("cutscenes:cutscenes"));
     }
 }

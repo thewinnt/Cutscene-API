@@ -32,7 +32,7 @@ public class TriangleStripOverlay implements Overlay {
         for (DynamicVertex i : this.config.vertices()) {
             float x = i.x().get(t, width);
             float y = i.y().get(t, height);
-            consumer.vertex(matrix4f, x, y, 0).color(i.color().toARGB(t)).endVertex();
+            consumer.addVertex(matrix4f, x, y, 0).setColor(i.color().toARGB(t));
         }
         stack.popPose();
         minecraft.getProfiler().pop();

@@ -1,19 +1,24 @@
 package net.thewinnt.cutscenes.entity;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.CommonListenerCookie;
+import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.ServerLinks;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -34,15 +39,17 @@ public class CutsceneCameraEntity extends LocalPlayer {
         MINECRAFT.getConnection().getConnection(),
         new CommonListenerCookie(
             new GameProfile(UUID.randomUUID(), "CutsceneAPI$Camera"),
-            MINECRAFT.getTelemetryManager().createWorldSessionManager(false, null, null),
+            MINECRAFT.getTelemetryManager().createWorldSessionManager(false, Duration.ZERO, "cutscene-api$fakedata"),
             RegistryAccess.Frozen.EMPTY,
             FeatureFlagSet.of(),
-            null,
-            null,
-            null,
+            "cutscene-api$fakedata",
+            new ServerData("csapi$fakedata", "127.0.0.1", ServerData.Type.OTHER),
+            Minecraft.getInstance().screen,
             Map.of(),
-            null,
-            false
+            new ChatComponent.State(List.of(), List.of(), List.of()),
+            false,
+            Map.of(),
+            new ServerLinks(List.of())
         )
     ) {
         public void send(Packet<?> pPacket) {}

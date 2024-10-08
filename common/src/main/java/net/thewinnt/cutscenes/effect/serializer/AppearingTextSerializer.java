@@ -72,8 +72,8 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
     }
 
     private static ResourceLocation tryGetSoundEffect(JsonElement json) {
-        if (json == null) return new ResourceLocation("minecraft:empty");
-        if (json.isJsonPrimitive()) return new ResourceLocation(json.getAsString());
-        return new ResourceLocation(GsonHelper.getAsString(json.getAsJsonObject(), "sound_id", "minecraft:empty"));
+        if (json == null) return ResourceLocation.parse("minecraft:empty");
+        if (json.isJsonPrimitive()) return ResourceLocation.parse(json.getAsString());
+        return ResourceLocation.parse(GsonHelper.getAsString(json.getAsJsonObject(), "sound_id", "minecraft:empty"));
     }
 }

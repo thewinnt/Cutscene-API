@@ -35,22 +35,22 @@ public class ModEventListener {
     @SubscribeEvent
     public static void registerStuff(RegisterEvent event) {
         if (event.getRegistry() == CutsceneAPI.SEGMENT_TYPES) {
-            CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "line"), CutsceneManager.LINE);
-            CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "bezier"), CutsceneManager.BEZIER);
-            CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "catmull_rom"), CutsceneManager.CATMULL_ROM);
-            CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "path"), CutsceneManager.PATH);
-            CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "constant"), CutsceneManager.CONSTANT);
-            CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "look_at_point"), CutsceneManager.LOOK_AT_POINT);
-            CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "transition"), CutsceneManager.PATH_TRANSITION);
-            CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "calculated"), CutsceneManager.CALCULATED_POINT);
+            CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "line"), CutsceneManager.LINE);
+            CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "bezier"), CutsceneManager.BEZIER);
+            CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "catmull_rom"), CutsceneManager.CATMULL_ROM);
+            CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "path"), CutsceneManager.PATH);
+            CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "constant"), CutsceneManager.CONSTANT);
+            CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"), CutsceneManager.LOOK_AT_POINT);
+            CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "transition"), CutsceneManager.PATH_TRANSITION);
+            CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "calculated"), CutsceneManager.CALCULATED_POINT);
         } else if (event.getRegistry() == CutsceneAPI.POINT_TYPES) {
-            CutsceneManager.registerPointType(new ResourceLocation("cutscenes", "static"), CutsceneManager.STATIC);
-            CutsceneManager.registerPointType(new ResourceLocation("cutscenes", "waypoint"), CutsceneManager.WAYPOINT);
-            CutsceneManager.registerPointType(new ResourceLocation("cutscenes", "world"), CutsceneManager.WORLD);
+            CutsceneManager.registerPointType(ResourceLocation.fromNamespaceAndPath("cutscenes", "static"), CutsceneManager.STATIC);
+            CutsceneManager.registerPointType(ResourceLocation.fromNamespaceAndPath("cutscenes", "waypoint"), CutsceneManager.WAYPOINT);
+            CutsceneManager.registerPointType(ResourceLocation.fromNamespaceAndPath("cutscenes", "world"), CutsceneManager.WORLD);
         } else if (event.getRegistry() == CutsceneAPI.TRANSITION_TYPES) {
-            CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "no_op"), CutsceneManager.NO_OP);
-            CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "smooth_ease"), CutsceneManager.SMOOTH_EASE);
-            CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "fade"), CutsceneManager.FADE);
+            CutsceneManager.registerTransitionType(ResourceLocation.fromNamespaceAndPath("cutscenes", "no_op"), CutsceneManager.NO_OP);
+            CutsceneManager.registerTransitionType(ResourceLocation.fromNamespaceAndPath("cutscenes", "smooth_ease"), CutsceneManager.SMOOTH_EASE);
+            CutsceneManager.registerTransitionType(ResourceLocation.fromNamespaceAndPath("cutscenes", "fade"), CutsceneManager.FADE);
         } else {
             EasingSerializer.init();
             CutsceneEffectSerializer.init();

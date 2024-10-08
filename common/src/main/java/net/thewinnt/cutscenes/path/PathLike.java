@@ -3,6 +3,7 @@ package net.thewinnt.cutscenes.path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import com.google.gson.JsonObject;
 
@@ -57,7 +58,7 @@ public interface PathLike {
     /**
      * Returns the weight of this segment. Used for timing in {@link Path paths}.
      * The higher the value, the more time is dedicated to this segment and the slower
-     * it runs, and vice-versa.
+     * it runs, and vice versa.
      * @return this segment's weight
      */
     int getWeight();
@@ -91,6 +92,16 @@ public interface PathLike {
     default Collection<Line> getUtilityPoints(Level level, Vec3 cutsceneStart, int initLevel) {
         return Collections.emptySet();
     };
+
+    /**
+     * Adds all the {@link PointProvider point providers} that this segment contains to the
+     * given stream builder.
+     * @param builder the stream builder to add all the points to
+     */
+    default void getAllPoints(Stream.Builder<PointProvider> builder) {
+        builder.add(getStart(null, null));
+        builder.add(getEnd(null, null));
+    }
 
     /** An object that constructs path segments from JSON and network. */
     public static interface SegmentSerializer<T extends PathLike> {

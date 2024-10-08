@@ -14,7 +14,7 @@ import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
 @Mixin(Entity.class)
 public class EntityMixin {
     @Inject(method = "getPosition(F)Lnet/minecraft/world/phys/Vec3;", at = @At("HEAD"), cancellable = true)
-    public void getPosition(float partialTick, CallbackInfoReturnable<Vec3> callback) {
+    public void csapi$getPosition(float partialTick, CallbackInfoReturnable<Vec3> callback) {
         if (!ClientCutsceneManager.isCutsceneRunning()) return;
         if (((Entity)(Object)this) instanceof CutsceneCameraEntity camera) {
             Minecraft.getInstance().getProfiler().push("cutscene_position");
@@ -27,7 +27,7 @@ public class EntityMixin {
 
     @SuppressWarnings("unlikely-arg-type")
     @Inject(method = "shouldRender(DDD)Z", at = @At("HEAD"), cancellable = true)
-    public void shouldRender(double x, double y, double z, CallbackInfoReturnable<Boolean> callback) {
+    public void csapi$shouldRender(double x, double y, double z, CallbackInfoReturnable<Boolean> callback) {
         if (ClientCutsceneManager.isCutsceneRunning() && this.equals(Minecraft.getInstance().player) && ClientCutsceneManager.actionToggles().hideSelf()) {
             callback.setReturnValue(false);
         }

@@ -28,7 +28,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
-import net.thewinnt.cutscenes.fabric.util.duck.MinecraftExt;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 import net.thewinnt.cutscenes.platform.CameraAngleSetter;
 import net.thewinnt.cutscenes.platform.PacketType;
@@ -72,7 +71,7 @@ public class FabricPlatform implements PlatformAbstractions {
 
     @Override
     public float getPartialTick() {
-        return ((MinecraftExt) Minecraft.getInstance()).csapi$getPartialTick();
+        return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
     }
 
     @Override

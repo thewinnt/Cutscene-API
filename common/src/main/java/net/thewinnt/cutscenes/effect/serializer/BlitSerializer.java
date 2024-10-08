@@ -33,7 +33,7 @@ public class BlitSerializer implements CutsceneEffectSerializer<BlitConfiguratio
 
     @Override
     public BlitConfiguration fromJSON(JsonObject json) {
-        ResourceLocation texture = new ResourceLocation(GsonHelper.getAsString(json, "texture"));
+        ResourceLocation texture = ResourceLocation.parse(GsonHelper.getAsString(json, "texture"));
         CoordinateProvider x1 = CoordinateProvider.fromJSON(json.get("x1"), ConstantEasing.ZERO);
         CoordinateProvider y1 = CoordinateProvider.fromJSON(json.get("y1"), ConstantEasing.ZERO);
         CoordinateProvider x2 = CoordinateProvider.fromJSON(json.get("x2"), ConstantEasing.ONE);

@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.GameRenderer;
 import net.thewinnt.cutscenes.fabric.CameraAngleSetterImpl;
 import net.thewinnt.cutscenes.fabric.client.CutsceneAPIFabricClient;
@@ -24,14 +25,14 @@ public class GameRendererMixin {
     @Unique private CameraAngleSetterImpl impl = new CameraAngleSetterImpl(0, 0, 0);
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetProjectionMatrix(Lorg/joml/Matrix4f;)V", shift = At.Shift.AFTER))
-    private void cameraAnglesEvent(float partialTick, long nanoTime, CallbackInfo ci) {
+    private void cameraAnglesEvent(DeltaTracker deltaTracker, CallbackInfo ci) {
         this.impl = new CameraAngleSetterImpl(mainCamera.getXRot(), mainCamera.getYRot(), 0);
         CutsceneAPIFabricClient.CLIENT_PLATFORM.angleSetters.forEach(consumer -> consumer.accept(impl));
         ((CameraExt)mainCamera).csapi$setAngles(impl.getPitch(), impl.getYaw());
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;prepareCullFrustum(Lnet/minecraft/world/phys/Vec3;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V", shift = At.Shift.BEFORE))
-    private void applyRoll(float partialTick, long nanoTime, CallbackInfo ci, @Local(ordinal = 1) LocalRef<Matrix4f> matrix4f) {
+    private void applyRoll(DeltaTracker deltaTracker, CallbackInfo ci, @Local(ordinal = 1) LocalRef<Matrix4f> matrix4f) {
         matrix4f.set(new Matrix4f().rotationZ(impl.getRoll() * 0.017453292F).mul(matrix4f.get()));
     }
 }

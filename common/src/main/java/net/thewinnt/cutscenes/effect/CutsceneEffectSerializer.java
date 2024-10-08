@@ -16,10 +16,10 @@ import net.thewinnt.cutscenes.effect.serializer.RectangleSerializer;
 import net.thewinnt.cutscenes.effect.serializer.TriangleStripSerializer;
 
 public interface CutsceneEffectSerializer<T> {
-    CutsceneEffectSerializer<AppearingTextConfiguration> APPEARING_TEXT = register(new ResourceLocation("cutscenes:appearing_text"), AppearingTextSerializer.INSTANCE);
-    CutsceneEffectSerializer<TriangleStripConfiguration> TRIANGLE_STRIP = register(new ResourceLocation("cutscenes:triangle_strip"), TriangleStripSerializer.INSTANCE);
-    CutsceneEffectSerializer<RectangleConfiguration> RECTANGLE = register(new ResourceLocation("cutscenes:rectangle"), RectangleSerializer.INSTANCE);
-    CutsceneEffectSerializer<BlitConfiguration> BLIT = register(new ResourceLocation("cutscenes:blit"), BlitSerializer.INSTANCE);
+    CutsceneEffectSerializer<AppearingTextConfiguration> APPEARING_TEXT = register(ResourceLocation.parse("cutscenes:appearing_text"), AppearingTextSerializer.INSTANCE);
+    CutsceneEffectSerializer<TriangleStripConfiguration> TRIANGLE_STRIP = register(ResourceLocation.parse("cutscenes:triangle_strip"), TriangleStripSerializer.INSTANCE);
+    CutsceneEffectSerializer<RectangleConfiguration> RECTANGLE = register(ResourceLocation.parse("cutscenes:rectangle"), RectangleSerializer.INSTANCE);
+    CutsceneEffectSerializer<BlitConfiguration> BLIT = register(ResourceLocation.parse("cutscenes:blit"), BlitSerializer.INSTANCE);
 
     T fromNetwork(FriendlyByteBuf buf);
     T fromJSON(JsonObject json);

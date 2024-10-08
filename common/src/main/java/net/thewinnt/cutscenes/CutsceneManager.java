@@ -56,11 +56,11 @@ public class CutsceneManager {
     // They're not used anywhere and are here to show how you can make some yourself with code
     // You can also use datapacks to create cutscenes, it has all the same functionality, except it's better
 
-    public static final ResourceLocation ASCEND_ID = new ResourceLocation("cutscenes:tests/ascend");
-    public static final ResourceLocation COOL_PATH_ID = new ResourceLocation("cutscenes:tests/cool_path");
-    public static final ResourceLocation MULTI_TYPE_ID = new ResourceLocation("cutscenes:tests/multi_type");
-    public static final ResourceLocation HORIZONTAL_LINE_ID = new ResourceLocation("cutscenes:tests/horizontal_line");
-    public static final ResourceLocation CATMULL_ROM_TEST_ID = new ResourceLocation("cutscenes:tests/catmull_rom_test");
+    public static final ResourceLocation ASCEND_ID = ResourceLocation.parse("cutscenes:tests/ascend");
+    public static final ResourceLocation COOL_PATH_ID = ResourceLocation.parse("cutscenes:tests/cool_path");
+    public static final ResourceLocation MULTI_TYPE_ID = ResourceLocation.parse("cutscenes:tests/multi_type");
+    public static final ResourceLocation HORIZONTAL_LINE_ID = ResourceLocation.parse("cutscenes:tests/horizontal_line");
+    public static final ResourceLocation CATMULL_ROM_TEST_ID = ResourceLocation.parse("cutscenes:tests/catmull_rom_test");
 
     /** Ascends you 25 blocks up with a little twist */
     public static final CutsceneType ASCEND = new CutsceneType(

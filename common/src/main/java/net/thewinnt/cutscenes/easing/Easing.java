@@ -56,7 +56,7 @@ public interface Easing {
             return fromJSONPrimitive(json.getAsJsonPrimitive());
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.get(new ResourceLocation(GsonHelper.getAsString(obj, "type")));
+            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.get(ResourceLocation.parse(GsonHelper.getAsString(obj, "type")));
             if (serializer == null) {
                 throw new IllegalArgumentException("Unknown easing type: " + GsonHelper.getAsString(obj, "type"));
             }
@@ -70,7 +70,7 @@ public interface Easing {
             return fromJSONPrimitive(json.getAsJsonPrimitive(), context);
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.get(new ResourceLocation(obj.get("type").getAsString()));
+            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.get(ResourceLocation.parse(obj.get("type").getAsString()));
             if (serializer == null) {
                 throw new IllegalArgumentException("Unknown easing type: " + GsonHelper.getAsString(obj, "type"));
             }
@@ -110,7 +110,7 @@ public interface Easing {
         }
 
         // then, a macro
-        ResourceLocation test = new ResourceLocation(value);
+        ResourceLocation test = ResourceLocation.parse(value);
         if (EASING_MACROS.containsKey(test)) {
             return EASING_MACROS.get(test);
         } else {
@@ -137,7 +137,7 @@ public interface Easing {
         }
 
         // then, a macro
-        ResourceLocation test = new ResourceLocation(value);
+        ResourceLocation test = ResourceLocation.parse(value);
         return context.resolve(test);
     }
 

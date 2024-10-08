@@ -1,6 +1,7 @@
 package net.thewinnt.cutscenes.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
@@ -26,7 +27,7 @@ public abstract class GameRendererMixin {
             to = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getOverlay()Lnet/minecraft/client/gui/screens/Overlay;", ordinal = 0)
         )
     )
-    private void cs$render(float pPartialTicks, long pNanoTime, boolean pRenderLevel, CallbackInfo ci, @Local GuiGraphics guigraphics) {
+    private void cs$render(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci, @Local GuiGraphics guigraphics) {
         // this method gets called several times, but we only want the first one
         if (!ClientCutsceneManager.renderedOverlaysThisFrame) {
             this.minecraft.getProfiler().push("cutscene_overlay");
@@ -41,7 +42,7 @@ public abstract class GameRendererMixin {
     }
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void cs$markNewFrame(float pPartialTicks, long pNanoTime, boolean pRenderLevel, CallbackInfo ci) {
+    private void cs$markNewFrame(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci) {
         ClientCutsceneManager.renderedOverlaysThisFrame = false;
     }
 }

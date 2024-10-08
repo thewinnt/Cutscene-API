@@ -19,9 +19,9 @@ import java.util.Map;
 public interface DelayProviderSerializer<T extends DelayProvider> {
     Map<ResourceLocation, DelayProvider> SINGLETONS = new HashMap<>();
 
-    DelayProviderSerializer<UndertaleDelayProvider> UNDERTALE = registerSingle(new ResourceLocation("cutscenes:undertale"), UndertaleDelayProvider.INSTANCE);
-    DelayProviderSerializer<UserDefinedDelays> USER_DEFINED = register(new ResourceLocation("cutscenes:custom"), UserDelaySerializer.INSTANCE);
-    DelayProviderSerializer<InstantDelayProvider> INSTANT = registerSingle(new ResourceLocation("cutscenes:instant"), InstantDelayProvider.INSTANCE);
+    DelayProviderSerializer<UndertaleDelayProvider> UNDERTALE = registerSingle(ResourceLocation.parse("cutscenes:undertale"), UndertaleDelayProvider.INSTANCE);
+    DelayProviderSerializer<UserDefinedDelays> USER_DEFINED = register(ResourceLocation.parse("cutscenes:custom"), UserDelaySerializer.INSTANCE);
+    DelayProviderSerializer<InstantDelayProvider> INSTANT = registerSingle(ResourceLocation.parse("cutscenes:instant"), InstantDelayProvider.INSTANCE);
 
     T fromNetwork(FriendlyByteBuf buf);
     T fromJSON(JsonObject json);

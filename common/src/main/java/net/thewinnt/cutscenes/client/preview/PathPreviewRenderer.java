@@ -83,8 +83,8 @@ public class PathPreviewRenderer {
     /** Draws a line relative to the camera */
     private static void drawLineLocal(PoseStack stack, VertexConsumer consumer, float x1, float y1, float z1, float x2, float y2, float z2, Vector3f color) {
         Matrix4f matrix4f = stack.last().pose();
-        consumer.vertex(matrix4f, x1, y1, z1).color(color.x(), color.y(), color.z(), 1f).normal(0, 0, 0).endVertex();
-        consumer.vertex(matrix4f, x2, y2, z2).color(color.x(), color.y(), color.z(), 1f).normal(0, 0, 0).endVertex();
+        consumer.addVertex(matrix4f, x1, y1, z1).setColor(color.x(), color.y(), color.z(), 1f).setNormal(0, 0, 0);
+        consumer.addVertex(matrix4f, x2, y2, z2).setColor(color.x(), color.y(), color.z(), 1f).setNormal(0, 0, 0);
     }
 
     /** Draws a line relative to the world center */

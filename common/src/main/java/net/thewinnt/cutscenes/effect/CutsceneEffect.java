@@ -67,7 +67,7 @@ public abstract class CutsceneEffect<T> {
     }
 
     public static CutsceneEffect<?> fromJSON(JsonObject json) {
-        ResourceLocation type = new ResourceLocation(GsonHelper.getAsString(json, "type"));
+        ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(json, "type"));
         CutsceneEffectSerializer<?> serializer = CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS.get(type);
         if (serializer == null) {
             throw new IllegalArgumentException("Unknown cutscene type effect: " + type);

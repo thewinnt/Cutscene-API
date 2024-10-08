@@ -51,6 +51,8 @@ processResources {
     filesMatching(['META-INF/neoforge.mods.toml']) {
         expand replaceProperties + [project: project]
     }
+
+    exclude ("cutscenes-common-common-refmap.json")
 }
 
 shadowJar {

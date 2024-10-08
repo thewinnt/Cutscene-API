@@ -162,7 +162,7 @@ public class Path implements PathLike {
             if (CutsceneManager.getSegmentType(id) == null) {
                 throw new IllegalArgumentException("Unknown segment type: " + id.toString());
             }
-            if (id.equals(new ResourceLocation("cutscenes", "look_at_point"))) {
+            if (id.equals(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"))) {
                 // special handling - look_at_point needs a rotation path, while others need this path
                 output.add(CutsceneManager.LOOK_AT_POINT.fromNetwork(buf, path));
             } else {
@@ -188,11 +188,11 @@ public class Path implements PathLike {
         JsonArray segments_j = json.getAsJsonArray("segments");
         for (JsonElement i : segments_j) {
             JsonObject j = i.getAsJsonObject();
-            ResourceLocation id = new ResourceLocation(j.get("type").getAsString());
+            ResourceLocation id = ResourceLocation.parse(j.get("type").getAsString());
             if (CutsceneManager.getSegmentType(id) == null) {
                 throw new IllegalArgumentException("Unknown segment type: " + id);
             }
-            if (id.equals(new ResourceLocation("cutscenes", "look_at_point"))) {
+            if (id.equals(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"))) {
                 // special handling - look_at_point needs a rotation path, while others need this path
                 output.add(CutsceneManager.LOOK_AT_POINT.fromJSON(j, path));
             } else {

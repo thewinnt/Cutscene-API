@@ -18,7 +18,7 @@ import java.util.Objects;
 
 public class LookAtPoint implements PathLike {
     private final PointProvider point;
-    private PathLike pathSupplier;
+    private final PathLike pathSupplier;
     private final int weight;
 
     public LookAtPoint(PointProvider point, PathLike pathSupplier) {
@@ -47,9 +47,6 @@ public class LookAtPoint implements PathLike {
 
     @Override
     public Vec3 getPoint(double t, Level l, Vec3 s) {
-        if (pathSupplier == null) {
-            throw new IllegalStateException("Tried to use LookAtPoint for a camera path");
-        }
         Vec3 start = pathSupplier.getPoint(t, l, s);
         start = start.yRot((float)Math.toRadians(ClientCutsceneManager.startPathYaw));
         start = start.zRot((float)Math.toRadians(ClientCutsceneManager.startPathPitch));

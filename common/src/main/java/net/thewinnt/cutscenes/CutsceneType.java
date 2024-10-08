@@ -43,6 +43,7 @@ public class CutsceneType {
     public final List<CutsceneEffect<?>> effects;
 
     /** Constructs a cutscene type with all parameters specified. */
+    @SuppressWarnings("deprecated")
     public CutsceneType(PathLike path, Path rotationProvider, int length, Transition start, Transition end, boolean blockMovement, boolean blockCameraRotation, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects) {
         if (path instanceof Path pth) {
             this.path = pth;
