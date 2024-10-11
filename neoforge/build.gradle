@@ -7,6 +7,17 @@ architectury {
     neoForge()
 }
 
+loom {
+    runs {
+        configureEach {
+            ideConfigGenerated true
+            property "mixin.debug.export", "true"
+            property "mixin.debug.verbose", "true"
+            property "mixin.env.disableRefMap", "true"
+        }
+    }
+}
+
 configurations {
     common {
         canBeResolved = true
@@ -52,7 +63,7 @@ processResources {
         expand replaceProperties + [project: project]
     }
 
-    exclude ("cutscenes-common-common-refmap.json")
+    exclude "cutscene_api-common-common-refmap.json"
 }
 
 shadowJar {

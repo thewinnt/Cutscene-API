@@ -8,7 +8,7 @@ import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 
 public class PreviewCutscenePacket implements AbstractPacket {
-    public static final String ID = "cutscenes:preview_cutscene";
+    public static final Type<PreviewCutscenePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("cutscenes", "preview_cutscene"));
     public final ResourceLocation type;
     public final Vec3 startPos;
     public final float pathYaw;
@@ -47,6 +47,6 @@ public class PreviewCutscenePacket implements AbstractPacket {
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
-        return CustomPacketPayload.createType(ID);
+        return TYPE;
     }
 }

@@ -55,11 +55,11 @@ public class NeoForgePlatform implements PlatformAbstractions {
     }
 
     @Override
-    public <T extends AbstractPacket> void registerClientboundPacket(String id, AbstractPacket.PacketReader<T> reader, Consumer<T> handler) {
+    public <T extends AbstractPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader, Consumer<T> handler) {
         if (packets == null) {
             throw new IllegalStateException("Too late! Clientbound packets should be registered during mod initialization");
         }
-        packets.add(new PacketType<>(CustomPacketPayload.createType(id), reader, handler));
+        packets.add(new PacketType<>(type, reader, handler));
     }
 
     @Override

@@ -10,7 +10,7 @@ import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 
 public class UpdateCutscenesPacket implements AbstractPacket {
-    public static final String ID = "cutscenes:update_cutscenes";
+    public static final Type<UpdateCutscenesPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("cutscenes", "update_cutscenes"));
     private final Map<ResourceLocation, CutsceneType> registry;
     
     public UpdateCutscenesPacket(Map<ResourceLocation, CutsceneType> registry) {
@@ -33,6 +33,6 @@ public class UpdateCutscenesPacket implements AbstractPacket {
     
     @Override
     public Type<? extends CustomPacketPayload> type() {
-        return CustomPacketPayload.createType(ID);
+        return TYPE;
     }
 }

@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,7 +27,7 @@ public interface PlatformAbstractions {
     void registerReloadListener(PreparableReloadListener listener, ResourceLocation id);
 
     // networking
-    <T extends AbstractPacket> void registerClientboundPacket(String id, AbstractPacket.PacketReader<T> reader, Consumer<T> handler);
+    <T extends AbstractPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader, Consumer<T> handler);
     void sendPacketToPlayer(AbstractPacket packet, ServerPlayer player);
     default void sendPacketToPlayers(AbstractPacket packet, Collection<ServerPlayer> players) {
         players.forEach(player -> sendPacketToPlayer(packet, player));

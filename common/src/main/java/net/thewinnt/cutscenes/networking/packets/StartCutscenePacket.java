@@ -10,7 +10,7 @@ import net.thewinnt.cutscenes.platform.AbstractPacket;
 public record StartCutscenePacket(ResourceLocation cutscene, Vec3 startPos, float cameraYaw, float cameraPitch,
                                   float cameraRoll, float pathYaw, float pathPitch,
                                   float pathRoll) implements AbstractPacket {
-    public static final String ID = "cutscenes:start_cutscene";
+    public static final Type<StartCutscenePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("cutscenes", "start_cutscene"));
 
     public static StartCutscenePacket read(FriendlyByteBuf buf) {
         ResourceLocation type = buf.readNullable(FriendlyByteBuf::readResourceLocation);
@@ -43,6 +43,6 @@ public record StartCutscenePacket(ResourceLocation cutscene, Vec3 startPos, floa
     
     @Override
     public Type<? extends CustomPacketPayload> type() {
-        return CustomPacketPayload.createType(ID);
+        return TYPE;
     }
 }

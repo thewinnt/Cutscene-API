@@ -76,10 +76,10 @@ public class CutsceneAPI {
         CutsceneAPI.PLATFORM = abstractions;
 
         // networking
-        abstractions.registerClientboundPacket(PreviewCutscenePacket.ID, PreviewCutscenePacket::read, AbstractPacket::execute);
-        abstractions.registerClientboundPacket(StartCutscenePacket.ID, StartCutscenePacket::read, AbstractPacket::execute);
-        abstractions.registerClientboundPacket(StopCutscenePacket.ID, buf -> new StopCutscenePacket(), AbstractPacket::execute);
-        abstractions.registerClientboundPacket(UpdateCutscenesPacket.ID, UpdateCutscenesPacket::read, AbstractPacket::execute);
+        abstractions.registerClientboundPacket(PreviewCutscenePacket.TYPE, PreviewCutscenePacket::read, AbstractPacket::execute);
+        abstractions.registerClientboundPacket(StartCutscenePacket.TYPE, StartCutscenePacket::read, AbstractPacket::execute);
+        abstractions.registerClientboundPacket(StopCutscenePacket.TYPE, buf -> new StopCutscenePacket(), AbstractPacket::execute);
+        abstractions.registerClientboundPacket(UpdateCutscenesPacket.TYPE, UpdateCutscenesPacket::read, AbstractPacket::execute);
 
         // other stuff
         addReloadListeners(abstractions);

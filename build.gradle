@@ -39,6 +39,10 @@ subprojects {
 
     loom {
         silentMojangMappingsLicense()
+
+        mixin {
+            useLegacyMixinAp = true
+        }
     }
 
     dependencies {
@@ -81,4 +85,7 @@ subprojects {
             // retrieving dependencies.
         }
     }
+
+    // TODO see https://github.com/SpongePowered/Mixin/issues/462#issuecomment-791370319 to fix mixins (potentially)
+    // we need to get rid of refmaps on neoforge somehow, then it'll work
 }
