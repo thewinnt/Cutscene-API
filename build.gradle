@@ -42,6 +42,7 @@ subprojects {
 
         mixin {
             useLegacyMixinAp = true
+            defaultRefmapName = "cutscene_api.${project.name.toLowerCase()}.refmap.json"
         }
     }
 
@@ -64,7 +65,10 @@ subprojects {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    javadoc.options.addStringOption("Xdoclint:none", "-quiet")
+
     tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = "UTF-8"
         it.options.release = 21
     }
 
@@ -85,7 +89,4 @@ subprojects {
             // retrieving dependencies.
         }
     }
-
-    // TODO see https://github.com/SpongePowered/Mixin/issues/462#issuecomment-791370319 to fix mixins (potentially)
-    // we need to get rid of refmaps on neoforge somehow, then it'll work
 }

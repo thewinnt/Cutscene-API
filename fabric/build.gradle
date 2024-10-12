@@ -50,3 +50,16 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
 }
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+javadocJar {
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+    def commonSources = project(":common").javadocJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
