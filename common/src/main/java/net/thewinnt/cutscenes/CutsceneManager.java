@@ -275,6 +275,7 @@ public class CutsceneManager {
      * @param camRot The initial camera rotation of the player as a vector of (yaw, pitch, roll)
      * @param pathRot The path rotation as a vector of (yaw, pitch, roll)
      * @param player The player to play the cutscene to
+     * @see CutsceneManager#KEEP_ROTATION
      */
     public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
         ((ServerPlayerExt)player).csapi$setCutsceneTicks(REGISTRY.get(id).length);

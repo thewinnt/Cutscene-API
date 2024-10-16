@@ -39,7 +39,7 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
             }
             return entities.getFirst().getPosition(1).subtract(cutsceneStart).add(offset);
         } else if (fallback.isPresent()) {
-            return fallback.get().getPoint(level, cutsceneStart);
+            return PointProvider.getPoint(fallback.get(), level, cutsceneStart);
         } else {
             return offset;
         }

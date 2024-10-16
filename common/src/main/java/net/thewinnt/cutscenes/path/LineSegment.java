@@ -86,7 +86,7 @@ public class LineSegment implements PathLike {
     }
     
     public LineSegment(Vec3 start, Vec3 end, Easing easing, boolean isRotation) {
-        this(start, end, easing, easing, easing, false);
+        this(start, end, easing, easing, easing, isRotation);
     }
 
     @Override
@@ -103,13 +103,13 @@ public class LineSegment implements PathLike {
     public Vec3 getPoint(double t, Level l, Vec3 s) {
         double x, y, z;
         if (isRotation) {
-            x = Mth.rotLerp((float)easingX.get(t), (float)a.getPoint(l, s).x, (float)b.getPoint(l, s).x);
-            y = Mth.rotLerp((float)easingY.get(t), (float)a.getPoint(l, s).y, (float)b.getPoint(l, s).y);
-            z = Mth.rotLerp((float)easingZ.get(t), (float)a.getPoint(l, s).z, (float)b.getPoint(l, s).z);
+            x = Mth.rotLerp((float)easingX.get(t), (float)PointProvider.getPoint(a, l, s).x, (float)PointProvider.getPoint(b, l, s).x);
+            y = Mth.rotLerp((float)easingY.get(t), (float)PointProvider.getPoint(a, l, s).y, (float)PointProvider.getPoint(b, l, s).y);
+            z = Mth.rotLerp((float)easingZ.get(t), (float)PointProvider.getPoint(a, l, s).z, (float)PointProvider.getPoint(b, l, s).z);
         } else {
-            x = Mth.lerp(easingX.get(t), a.getPoint(l, s).x, b.getPoint(l, s).x);
-            y = Mth.lerp(easingY.get(t), a.getPoint(l, s).y, b.getPoint(l, s).y);
-            z = Mth.lerp(easingZ.get(t), a.getPoint(l, s).z, b.getPoint(l, s).z);
+            x = Mth.lerp(easingX.get(t), PointProvider.getPoint(a, l, s).x, PointProvider.getPoint(b, l, s).x);
+            y = Mth.lerp(easingY.get(t), PointProvider.getPoint(a, l, s).y, PointProvider.getPoint(b, l, s).y);
+            z = Mth.lerp(easingZ.get(t), PointProvider.getPoint(a, l, s).z, PointProvider.getPoint(b, l, s).z);
         }
         return new Vec3(x, y, z);
     }

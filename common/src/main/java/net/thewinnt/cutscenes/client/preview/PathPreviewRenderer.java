@@ -46,10 +46,10 @@ public class PathPreviewRenderer {
         Level l = Minecraft.getInstance().level;
         for (int i = 0; i < path.size(); i++) {
             PathLike segment = path.getSegment(i);
-            Vec3 start = segment.getStart(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
-            Vec3 end = segment.getEnd(l, s).getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
-            drawPoint(stack, consumer, start, 0.3F, POINT_COLORS.get(0));
-            drawPoint(stack, consumer, end, 0.3F, POINT_COLORS.get(0));
+            Vec3 start = PointProvider.getPoint(segment.getStart(l, s), l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
+            Vec3 end = PointProvider.getPoint(segment.getEnd(l, s), l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
+            drawPoint(stack, consumer, start, 0.3F, POINT_COLORS.getFirst());
+            drawPoint(stack, consumer, end, 0.3F, POINT_COLORS.getFirst());
             float ticksPerWeight = type.length * 3f / path.getWeightSum(); // roughly one line per frame at 60 fps
             int thisLength = (int)(ticksPerWeight * segment.getWeight());
             for (int j = 0; j < thisLength; j++) {
@@ -61,20 +61,20 @@ public class PathPreviewRenderer {
         for (Line i : path.getUtilityPoints(l, s, 0)) {
             Line line;
             if (i.isPoint()) {
-                line = new Line(new StaticPointProvider(i.start.getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot)), null, i.level);
+                line = new Line(new StaticPointProvider(PointProvider.getPoint(i.start, l, s).yRot(yRot).zRot(zRot).xRot(xRot)), null, i.level);
             } else {
                 line = new Line(
-                    new StaticPointProvider(i.start.getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot)),
-                    new StaticPointProvider(i.end.getPoint(l, s).yRot(yRot).zRot(zRot).xRot(xRot)),
+                    new StaticPointProvider(PointProvider.getPoint(i.start, l, s).yRot(yRot).zRot(zRot).xRot(xRot)),
+                    new StaticPointProvider(PointProvider.getPoint(i.end, l, s).yRot(yRot).zRot(zRot).xRot(xRot)),
                     i.level
                 );
             }
             if (line.isPoint()) {
-                drawPoint(stack, consumer, line.start.getPoint(l, s).add(s), 0.2f, POINT_COLORS.get(line.level % POINT_COLORS.size()));
+                drawPoint(stack, consumer, PointProvider.getPoint(line.start, l, s).add(s), 0.2f, POINT_COLORS.get(line.level % POINT_COLORS.size()));
             } else {
                 drawLineGlobal(stack, consumer, line, l, s);
-                drawPoint(stack, consumer, line.start.getPoint(l, s).add(s), 0.2f, POINT_COLORS.get(line.level % POINT_COLORS.size()));
-                drawPoint(stack, consumer, line.end.getPoint(l, s).add(s), 0.2f, POINT_COLORS.get(line.level % POINT_COLORS.size()));
+                drawPoint(stack, consumer, PointProvider.getPoint(line.start, l, s).add(s), 0.2f, POINT_COLORS.get(line.level % POINT_COLORS.size()));
+                drawPoint(stack, consumer, PointProvider.getPoint(line.end, l, s).add(s), 0.2f, POINT_COLORS.get(line.level % POINT_COLORS.size()));
             }
         }
         drawPoint(stack, consumer, ClientCutsceneManager.getOffset(), 0.25f, COLOR_START);
@@ -104,7 +104,7 @@ public class PathPreviewRenderer {
     }
 
     public static void drawLineGlobal(PoseStack stack, VertexConsumer consumer, Line line, Level l, Vec3 s) {
-        drawLineGlobal(stack, consumer, line.start.getPoint(l, s).add(s), line.end.getPoint(l, s).add(s), POINT_COLORS.get(line.level % POINT_COLORS.size()));
+        drawLineGlobal(stack, consumer, PointProvider.getPoint(line.start, l, s).add(s), PointProvider.getPoint(line.end, l, s).add(s), POINT_COLORS.get(line.level % POINT_COLORS.size()));
     }
 
     private static Vector3f getColorAtPoint(float point) {
@@ -138,9 +138,9 @@ public class PathPreviewRenderer {
         drawLineGlobal(stack, consumer, x, y, z-size, x, y, z+size, color);
     }
 
-    public static record Line(PointProvider start, @Nullable PointProvider end, int level) {
+    public record Line(PointProvider start, @Nullable PointProvider end, int level) {
         public boolean isPoint() {
             return end == null;
         }
-    };
+    }
 }

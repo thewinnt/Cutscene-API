@@ -56,32 +56,32 @@ public class CatmullRomSpline implements PathLike {
     public Vec3 getPoint(double t, Level l, Vec3 s) {
         int startSegment = (int)((this.points.size() - 1) * t);
         if (!staticEndPoints) {
-            this.start = new StaticPointProvider(points.get(1).getPoint(l, s).lerp(points.get(0).getPoint(l, s), 2));
-            this.end = new StaticPointProvider(points.get(points.size() - 2).getPoint(l, s).lerp(points.get(points.size() - 1).getPoint(l, s), 2));
+            this.start = new StaticPointProvider(PointProvider.getPoint(points.get(1), l, s).lerp(PointProvider.getPoint(points.getFirst(), l, s), 2));
+            this.end = new StaticPointProvider(PointProvider.getPoint(points.get(points.size() - 2), l, s).lerp(PointProvider.getPoint(points.getLast(), l, s), 2));
         }
         Vec3 a, b, c, d;
-        if (t <= 0) return this.points.get(0).getPoint(l, s);
-        if (t >= 1) return this.points.get(this.points.size() - 1).getPoint(l, s);
+        if (t <= 0) return PointProvider.getPoint(this.points.getFirst(), l, s);
+        if (t >= 1) return PointProvider.getPoint(this.points.getLast(), l, s);
         if (this.points.size() == 2) {
-            a = start.getPoint(l, s);
-            b = points.get(0).getPoint(l, s);
-            c = points.get(1).getPoint(l, s);
-            d = end.getPoint(l, s);
+            a = PointProvider.getPoint(start, l, s);
+            b = PointProvider.getPoint(points.get(0), l, s);
+            c = PointProvider.getPoint(points.get(1), l, s);
+            d = PointProvider.getPoint(end, l, s);
         } else if (startSegment == 0) {
-            a = start.getPoint(l, s);
-            b = points.get(0).getPoint(l, s);
-            c = points.get(1).getPoint(l, s);
-            d = points.get(2).getPoint(l, s);
+            a = PointProvider.getPoint(start, l, s);
+            b = PointProvider.getPoint(points.get(0), l, s);
+            c = PointProvider.getPoint(points.get(1), l, s);
+            d = PointProvider.getPoint(points.get(2), l, s);
         } else if (startSegment == points.size() - 2) {
-            a = points.get(startSegment - 1).getPoint(l, s);
-            b = points.get(startSegment).getPoint(l, s);
-            c = points.get(startSegment + 1).getPoint(l, s);
-            d = end.getPoint(l, s);
+            a = PointProvider.getPoint(points.get(startSegment - 1), l, s);
+            b = PointProvider.getPoint(points.get(startSegment), l, s);
+            c = PointProvider.getPoint(points.get(startSegment + 1), l, s);
+            d = PointProvider.getPoint(end, l, s);
         } else {
-            a = points.get(startSegment - 1).getPoint(l, s);
-            b = points.get(startSegment).getPoint(l, s);
-            c = points.get(startSegment + 1).getPoint(l, s);
-            d = points.get(startSegment + 2).getPoint(l, s);
+            a = PointProvider.getPoint(points.get(startSegment - 1), l, s);
+            b = PointProvider.getPoint(points.get(startSegment), l, s);
+            c = PointProvider.getPoint(points.get(startSegment + 1), l, s);
+            d = PointProvider.getPoint(points.get(startSegment + 2), l, s);
         }
         double step = 1d / (this.points.size() - 1);
         t -= startSegment * step;
@@ -95,12 +95,12 @@ public class CatmullRomSpline implements PathLike {
 
     @Override
     public PointProvider getStart(Level level, Vec3 cutsceneStart) {
-        return this.points.get(0);
+        return this.points.getFirst();
     }
 
     @Override
     public PointProvider getEnd(Level level, Vec3 cutsceneStart) {
-        return this.points.get(this.points.size() - 1);
+        return this.points.getLast();
     }
 
     @Override

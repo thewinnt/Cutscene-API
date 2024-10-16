@@ -15,6 +15,7 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneInstance;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
+import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.platform.CameraAngleSetter;
 import net.thewinnt.cutscenes.util.ActionToggles;
 import org.slf4j.Logger;
@@ -80,6 +81,7 @@ public class ClientCutsceneManager {
 
     public static void updateRegistry(Map<ResourceLocation, CutsceneType> registry) {
         CLIENT_REGISTRY.clear();
+        PointProvider.POINT_CACHE.clear();
         CLIENT_REGISTRY.putAll(registry);
         if (isCutsceneRunning) CutsceneAPI.updateSalt();
     }

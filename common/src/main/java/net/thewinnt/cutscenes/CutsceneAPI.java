@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.thewinnt.cutscenes.path.point.PointProvider;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -48,6 +49,12 @@ public class CutsceneAPI {
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final Random RANDOM = new Random();
     public static final Gson GSON = new GsonBuilder().create();
+    /**
+     * A number representing the current format version. Increments whenever a breaking change happens.
+     * <p>
+     * Current version: {@code 0} (Cutscene API 1.x)
+     */
+    public static final int DATA_VERSION = 0;
     /** 
      * A salt value, updated each time a cutscene is started. Used for randomizing waypoint locations.
      * @see net.thewinnt.cutscenes.path.point.WaypointProvider#getPoint(Level, Vec3)
@@ -129,6 +136,7 @@ public class CutsceneAPI {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 CutsceneManager.REGISTRY.clear();
+                PointProvider.POINT_CACHE.clear();
                 AtomicInteger loaded = new AtomicInteger();
                 files.forEach((id, element) -> {
                     try {

@@ -49,8 +49,8 @@ public class Path implements PathLike {
 
     @Override
     public Vec3 getPoint(double delta, Level l, Vec3 s) {
-        if (delta <= 0) return this.getStart(l, s).getPoint(l, s);
-        if (delta >= 1) return this.getEnd(l, s).getPoint(l, s);
+        if (delta <= 0) return PointProvider.getPoint(this.getStart(l, s), l, s);
+        if (delta >= 1) return PointProvider.getPoint(this.getEnd(l, s), l, s);
         double val = delta * weightSum;
         int i; // define the variable outside the loop to use it later
         for (i = 0; i < this.segments.size() && val >= this.segments.get(i).getWeight(); i++) {
@@ -66,12 +66,12 @@ public class Path implements PathLike {
 
     @Override
     public PointProvider getStart(Level level, Vec3 cutsceneStart) {
-        return this.segments.get(0).getStart(level, cutsceneStart);
+        return this.segments.getFirst().getStart(level, cutsceneStart);
     }
 
     @Override
     public PointProvider getEnd(Level level, Vec3 cutsceneStart) {
-        return this.segments.get(this.segments.size() - 1).getEnd(level, cutsceneStart);
+        return this.segments.getLast().getEnd(level, cutsceneStart);
     }
 
     @Override
@@ -91,20 +91,32 @@ public class Path implements PathLike {
     }
 
     public PathLike last() {
-        return this.segments.get(this.segments.size() - 1);
+        return this.segments.getLast();
     }
 
     /** Literally makes it shorter */
-    private static StaticPointProvider s(Vec3 v) {
+    private static StaticPointProvider makeStatic(Vec3 v) {
         if (v == null) return null;
         return new StaticPointProvider(v);
     }
 
     public Path continueBezier(Vec3 control_b, Vec3 end, int weight) {
         if (this.last() instanceof BezierCurve bezier && bezier.getControlB() != null) {
-            this.segments.add(new BezierCurve(bezier.getEnd(null, null), new StaticPointProvider(bezier.getControlB().getPoint(null, null).lerp(bezier.getEnd(null, null).getPoint(null, null), 2)), s(control_b), s(end), weight));
+            this.segments.add(new BezierCurve(
+                bezier.getEnd(null, null),
+                new StaticPointProvider(PointProvider.getPoint(bezier.getControlB(), null, null).lerp(PointProvider.getPoint(bezier.getEnd(null, null), null, null), 2)),
+                makeStatic(control_b),
+                makeStatic(end),
+                weight
+            ));
         } else {
-            this.segments.add(new BezierCurve(this.last().getEnd(null, null), null, s(control_b), s(end), weight));
+            this.segments.add(new BezierCurve(
+                this.last().getEnd(null, null),
+                null,
+                makeStatic(control_b),
+                makeStatic(end),
+                weight
+            ));
         }
         this.weightSum += weight;
         return this;
@@ -115,7 +127,13 @@ public class Path implements PathLike {
     }
 
     public Path addBezier(Vec3 control_a, Vec3 control_b, Vec3 end, int weight) {
-        this.segments.add(new BezierCurve(this.last().getEnd(null, null), s(control_a), s(control_b), s(end), weight));
+        this.segments.add(new BezierCurve(
+            this.last().getEnd(null, null),
+            makeStatic(control_a),
+            makeStatic(control_b),
+            makeStatic(end),
+            weight
+        ));
         return this;
     }
 
@@ -124,7 +142,7 @@ public class Path implements PathLike {
     }
 
     public Path addLinear(Vec3 end, Easing easingX, Easing easingY, Easing easingZ, boolean isRotation, int weight) {
-        this.segments.add(new LineSegment(this.last().getEnd(null, null), s(end), easingX, easingY, easingZ, weight, isRotation));
+        this.segments.add(new LineSegment(this.last().getEnd(null, null), makeStatic(end), easingX, easingY, easingZ, weight, isRotation));
         return this;
     }
 
@@ -160,7 +178,7 @@ public class Path implements PathLike {
         for (int i = 0; i < length; i++) {
             ResourceLocation id = buf.readResourceLocation();
             if (CutsceneManager.getSegmentType(id) == null) {
-                throw new IllegalArgumentException("Unknown segment type: " + id.toString());
+                throw new IllegalArgumentException("Unknown segment type: " + id);
             }
             if (id.equals(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"))) {
                 // special handling - look_at_point needs a rotation path, while others need this path
@@ -224,6 +242,6 @@ public class Path implements PathLike {
             previousSum += this.segments.get(i).getWeight();
         }
         double rangeStart = previousSum / weightSum;
-        return new Pair<Double,Double>(rangeStart, rangeStart + (double)segment.getWeight() / weightSum);
+        return new Pair<>(rangeStart, rangeStart + (double) segment.getWeight() / weightSum);
     }
 }

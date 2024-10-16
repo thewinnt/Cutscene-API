@@ -64,22 +64,22 @@ public class BezierCurve implements PathLike {
 
     @Override
     public Vec3 getPoint(double t, Level l, Vec3 s) {
-        if (t == 0) return start.getPoint(l, s);
-        if (t == 1) return end.getPoint(l, s);
+        if (t == 0) return PointProvider.getPoint(start, l, s);
+        if (t == 1) return PointProvider.getPoint(end, l, s);
         if (control_a == null && control_b != null) { // only 2nd control point
-            return quad(start.getPoint(l, s), control_b.getPoint(l, s), end.getPoint(l, s), t);
+            return quad(PointProvider.getPoint(start, l, s), PointProvider.getPoint(control_b, l, s), PointProvider.getPoint(end, l, s), t);
         } else if (control_a != null && control_b == null) { // only 1st control point
-            return quad(start.getPoint(l, s), control_a.getPoint(l, s), end.getPoint(l, s), t);
-        } else if (control_a == null && control_b == null) { // no control points
-            return start.getPoint(l, s).lerp(end.getPoint(l, s), t);
+            return quad(PointProvider.getPoint(start, l, s), PointProvider.getPoint(control_a, l, s), PointProvider.getPoint(end, l, s), t);
+        } else if (control_a == null) { // no control points
+            return PointProvider.getPoint(start, l, s).lerp(PointProvider.getPoint(end, l, s), t);
         }
         if (cache_t != null && cache_t2 != null && cache_t3 != null) {
-            return start.getPoint(l, s).add(cache_t.scale(t)).add(cache_t2.scale(t * t)).add(cache_t3.scale(t * t * t));
+            return PointProvider.getPoint(start, l, s).add(cache_t.scale(t)).add(cache_t2.scale(t * t)).add(cache_t3.scale(t * t * t));
         } else {
-            Vec3 _t = start.getPoint(l, s).scale(-3).add(control_a.getPoint(l, s).scale(3));
-            Vec3 _t2 = start.getPoint(l, s).scale(3).add(control_a.getPoint(l, s).scale(-6)).add(control_b.getPoint(l, s).scale(3));
-            Vec3 _t3 = start.getPoint(l, s).reverse().add(control_a.getPoint(l, s).scale(3)).add(control_b.getPoint(l, s).scale(-3)).add(end.getPoint(l, s));
-            return start.getPoint(l, s).add(_t.scale(t)).add(_t2.scale(t * t)).add(_t3.scale(t * t * t));
+            Vec3 _t = PointProvider.getPoint(start, l, s).scale(-3).add(PointProvider.getPoint(control_a, l, s).scale(3));
+            Vec3 _t2 = PointProvider.getPoint(start, l, s).scale(3).add(PointProvider.getPoint(control_a, l, s).scale(-6)).add(PointProvider.getPoint(control_b, l, s).scale(3));
+            Vec3 _t3 = PointProvider.getPoint(start, l, s).reverse().add(PointProvider.getPoint(control_a, l, s).scale(3)).add(PointProvider.getPoint(control_b, l, s).scale(-3)).add(PointProvider.getPoint(end, l, s));
+            return PointProvider.getPoint(start, l, s).add(_t.scale(t)).add(_t2.scale(t * t)).add(_t3.scale(t * t * t));
         }
     }
 

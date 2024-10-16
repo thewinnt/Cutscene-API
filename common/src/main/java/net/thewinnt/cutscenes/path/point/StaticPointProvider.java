@@ -24,6 +24,12 @@ public record StaticPointProvider(Vec3 point) implements PointProvider {
         return CutsceneManager.STATIC;
     }
 
+    @Override
+    public boolean shouldCache() {
+        // it's actually faster to straight up return the value than to look it up in cache
+        return false;
+    }
+
     public static StaticPointProvider fromNetwork(FriendlyByteBuf buf) {
         return new StaticPointProvider(buf.readVec3());
     }

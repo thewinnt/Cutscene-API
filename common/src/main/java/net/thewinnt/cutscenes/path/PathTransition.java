@@ -56,12 +56,12 @@ public class PathTransition implements PathLike {
         if (previous instanceof LookAtPoint) {
             a = previous.getPoint(path.getSegmentRange(previous).getB() - 0.00000001, l, s);
         } else {
-            a = previous.getEnd(l, s).getPoint(l, s);
+            a = PointProvider.getPoint(previous.getEnd(l, s), l, s);
         }
         if (next instanceof LookAtPoint) {
             b = next.getPoint(path.getSegmentRange(next).getA() + 0.00000001, l, s);
         } else {
-            b = next.getStart(l, s).getPoint(l, s);
+            b = PointProvider.getPoint(next.getStart(l, s), l, s);
         }
         if (isRotation) {
             x = Mth.rotLerp((float)easingX.get(t), (float)a.x, (float)b.x);

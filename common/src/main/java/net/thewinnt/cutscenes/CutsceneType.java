@@ -161,6 +161,18 @@ public class CutsceneType {
 
     /** Reads a cutscene type from JSON. */
     public static CutsceneType fromJSON(JsonObject json) {
+        int dataVersion;
+        JsonElement dataVersionJson = json.get("version");
+        if (dataVersionJson != null) {
+            dataVersion = dataVersionJson.getAsInt();
+        } else {
+            dataVersion = 0;
+        }
+        if (dataVersion > CutsceneAPI.DATA_VERSION) {
+            CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is greater than the current one ({}). Things may break!", dataVersion, CutsceneAPI.DATA_VERSION);
+        } else if (dataVersion < CutsceneAPI.DATA_VERSION) {
+            CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is earlier than the current one ({}). The cutscene should be updated to the new format to make sure it shows up correctly!", dataVersion, CutsceneAPI.DATA_VERSION);
+        }
         int length = json.get("length").getAsInt();
         Path path = Path.fromJSON(JsonHelper.getNullableObject(json, "path"), null);
         Path rotation = Path.fromJSON(JsonHelper.getNullableObject(json, "rotation"), path);

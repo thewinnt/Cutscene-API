@@ -51,9 +51,9 @@ public class LookAtPoint implements PathLike {
         start = start.yRot((float)Math.toRadians(ClientCutsceneManager.startPathYaw));
         start = start.zRot((float)Math.toRadians(ClientCutsceneManager.startPathPitch));
         start = start.xRot((float)Math.toRadians(ClientCutsceneManager.startPathRoll));
-        double d0 = point.getPoint(l, s).x - start.x;
-        double d1 = point.getPoint(l, s).y - start.y;
-        double d2 = point.getPoint(l, s).z - start.z;
+        double d0 = PointProvider.getPoint(point, l, s).x - start.x;
+        double d1 = PointProvider.getPoint(point, l, s).y - start.y;
+        double d2 = PointProvider.getPoint(point, l, s).z - start.z;
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
         double xRot = Mth.wrapDegrees((-(Mth.atan2(d1, d3) * (180F / Math.PI))));
         double yRot = Mth.wrapDegrees((Mth.atan2(d2, d0) * (180F / Math.PI)) - 90.0F);

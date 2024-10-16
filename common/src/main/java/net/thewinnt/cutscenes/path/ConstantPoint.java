@@ -43,7 +43,7 @@ public class ConstantPoint implements PathLike {
 
     @Override
     public Vec3 getPoint(double t, Level l, Vec3 s) {
-        return point.getPoint(l, s);
+        return PointProvider.getPoint(point, l, s);
     }
 
     @Override

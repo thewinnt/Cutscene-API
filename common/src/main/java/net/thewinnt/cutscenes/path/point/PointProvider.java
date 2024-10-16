@@ -1,6 +1,5 @@
 package net.thewinnt.cutscenes.path.point;
 
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -21,8 +20,10 @@ public interface PointProvider {
      * @param level the level the point is being obtained in.
      * @param cutsceneStart the starting position of the cutscene
      * @return a point, relative to the starting position, or a rotation relative to the starting rotation
-     * @see net.thewinnt.cutscenes.path.PathLike#getPoint(double, Level, Vec3) 
+     * @deprecated use static {@link PointProvider#getPoint(PointProvider, Level, Vec3)} for better performance
+     * @see net.thewinnt.cutscenes.path.PathLike#getPoint(double, Level, Vec3)
      */
+    @Deprecated
     Vec3 getPoint(Level level, Vec3 cutsceneStart);
 
     /**
@@ -42,6 +43,21 @@ public interface PointProvider {
      */
     default boolean shouldCache() {
         return true;
+    }
+
+    /**
+     * Returns the point the given PointProvider represents.
+     * @param point the PointProvider to check
+     * @param level the level the point is being obtained in.
+     * @param startPosition the starting position of the cutscene
+     * @return a point, relative to the starting position, or a rotation relative to the starting rotation
+     * @implNote
+     */
+    static Vec3 getPoint(PointProvider point, Level level, Vec3 startPosition) {
+        if (point.shouldCache()) {
+            return POINT_CACHE.computeIfAbsent(point, p -> p.getPoint(level, startPosition));
+        }
+        return point.getPoint(level, startPosition);
     }
 
     /** An object that constructs point providers from JSON and network. */
@@ -66,13 +82,6 @@ public interface PointProvider {
          */
         T fromJSON(JsonObject json);
 
-        static Vec3 getPoint(PointProvider point, Level level, Vec3 startPosition) {
-            if (point.shouldCache()) {
-                return POINT_CACHE.computeIfAbsent(point, p -> p.getPoint(level, startPosition));
-            }
-            return point.getPoint(level, startPosition);
-        }
-
         /**
          * A helper method to create a segment serializer from 2 functions.
          * @param network a {@link #fromNetwork(FriendlyByteBuf)} implementation
@@ -83,7 +92,7 @@ public interface PointProvider {
          * @see net.thewinnt.cutscenes.path.PathLike.SegmentSerializer#of(BiFunction, BiFunction)
          */
         public static <T extends PointProvider> PointSerializer<T> of(Function<FriendlyByteBuf, T> network, Function<JsonObject, T> json) {
-            return new PointSerializer<T>() {
+            return new PointSerializer<>() {
                 @Override
                 public T fromNetwork(FriendlyByteBuf buf) {
                     return network.apply(buf);
