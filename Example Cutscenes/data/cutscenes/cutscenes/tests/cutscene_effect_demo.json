@@ -280,6 +280,16 @@
         "anchor": "before_center",
         "value": 50
       }
+    },
+    {
+      "type": "cutscenes:play_sound",
+      "start": 0,
+      "end": 69420,
+      "sound": "item.goat_horn.sound.5",
+      "source": "voice",
+      "volume": 0.5,
+      "pitch": 1.5,
+      "pos": [-6, 6, -6]
     }
   ]
 }

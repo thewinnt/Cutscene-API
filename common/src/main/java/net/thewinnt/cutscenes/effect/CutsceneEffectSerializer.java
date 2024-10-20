@@ -8,10 +8,12 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
 import net.thewinnt.cutscenes.effect.configuration.BlitConfiguration;
+import net.thewinnt.cutscenes.effect.configuration.PlaySoundConfiguration;
 import net.thewinnt.cutscenes.effect.configuration.RectangleConfiguration;
 import net.thewinnt.cutscenes.effect.configuration.TriangleStripConfiguration;
 import net.thewinnt.cutscenes.effect.serializer.AppearingTextSerializer;
 import net.thewinnt.cutscenes.effect.serializer.BlitSerializer;
+import net.thewinnt.cutscenes.effect.serializer.PlaySoundSerializer;
 import net.thewinnt.cutscenes.effect.serializer.RectangleSerializer;
 import net.thewinnt.cutscenes.effect.serializer.TriangleStripSerializer;
 
@@ -20,6 +22,7 @@ public interface CutsceneEffectSerializer<T> {
     CutsceneEffectSerializer<TriangleStripConfiguration> TRIANGLE_STRIP = register(ResourceLocation.parse("cutscenes:triangle_strip"), TriangleStripSerializer.INSTANCE);
     CutsceneEffectSerializer<RectangleConfiguration> RECTANGLE = register(ResourceLocation.parse("cutscenes:rectangle"), RectangleSerializer.INSTANCE);
     CutsceneEffectSerializer<BlitConfiguration> BLIT = register(ResourceLocation.parse("cutscenes:blit"), BlitSerializer.INSTANCE);
+    CutsceneEffectSerializer<PlaySoundConfiguration> PLAY_SOUND = register(ResourceLocation.parse("cutscenes:play_sound"), PlaySoundSerializer.INSTANCE);
 
     T fromNetwork(FriendlyByteBuf buf);
     T fromJSON(JsonObject json);
@@ -31,7 +34,7 @@ public interface CutsceneEffectSerializer<T> {
     }
 
     @FunctionalInterface
-    public interface CutsceneEffectFactory<T> {
+    interface CutsceneEffectFactory<T> {
         CutsceneEffect<T> create(double startTime, double endTime, T config);
 
         @SuppressWarnings("unchecked")

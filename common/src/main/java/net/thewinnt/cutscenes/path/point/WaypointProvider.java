@@ -51,6 +51,7 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
         buf.writeUtf(name);
         buf.writeInt(searchRadius);
         buf.writeEnum(sorting);
+        buf.writeVec3(searchOffset);
         buf.writeVec3(offset);
         buf.writeOptional(fallback, CutsceneNetworkHandler::writePointProvider);
     }
