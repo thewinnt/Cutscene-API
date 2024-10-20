@@ -16,18 +16,19 @@ import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.util.JsonHelper;
 import net.thewinnt.cutscenes.util.MathHelper;
 
-public record WaypointProvider(String name, int searchRadius, SortType sorting, Vec3 offset, Optional<PointProvider> fallback) implements PointProvider {
+public record WaypointProvider(String name, int searchRadius, SortType sorting, Vec3 searchOffset, Vec3 offset, Optional<PointProvider> fallback) implements PointProvider {
 
     @Override
     public Vec3 getPoint(Level level, Vec3 cutsceneStart) {
-        List<WaypointEntity> entities = level.getEntitiesOfClass(WaypointEntity.class, new AABB(cutsceneStart, cutsceneStart).inflate(searchRadius), e -> e.getWaypointName().equals(name));
+        Vec3 searchPos = offset.equals(Vec3.ZERO) ? cutsceneStart : cutsceneStart.add(offset);
+        List<WaypointEntity> entities = level.getEntitiesOfClass(WaypointEntity.class, new AABB(searchPos, searchPos).inflate(searchRadius), e -> e.getWaypointName().equals(name));
         if (!entities.isEmpty()) {
             switch (sorting) {
                 case NEAREST:
-                    entities.sort((a, b) -> (int)(a.distanceToSqr(cutsceneStart) - b.distanceToSqr(cutsceneStart)));
+                    entities.sort((a, b) -> (int)(a.distanceToSqr(searchPos) - b.distanceToSqr(searchPos)));
                     break;
                 case FURTHEST:
-                    entities.sort((a, b) -> (int)(b.distanceToSqr(cutsceneStart) - a.distanceToSqr(cutsceneStart)));
+                    entities.sort((a, b) -> (int)(b.distanceToSqr(searchPos) - a.distanceToSqr(searchPos)));
                     break;
                 case RANDOM:
                     Collections.shuffle(entities, new Random(MathHelper.hash(entities.hashCode(), CutsceneAPI.getWaypointSalt(), System.identityHashCode(this))));
@@ -68,9 +69,10 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
         String name = buf.readUtf();
         int searchRadius = buf.readInt();
         SortType sortType = buf.readEnum(SortType.class);
+        Vec3 searchOffset = buf.readVec3();
         Vec3 offset = buf.readVec3();
         Optional<PointProvider> fallback = buf.readOptional(CutsceneNetworkHandler::readPointProvider);
-        return new WaypointProvider(name, searchRadius, sortType, offset, fallback);
+        return new WaypointProvider(name, searchRadius, sortType, searchOffset, offset, fallback);
     }
 
     public static WaypointProvider fromJSON(JsonObject obj) {
@@ -82,9 +84,10 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
         } catch (IllegalArgumentException e) {
             sortType = SortType.NEAREST;
         }
+        Vec3 searchOffset = Objects.requireNonNullElse(JsonHelper.vec3FromJson(obj, "search_offset"), Vec3.ZERO);
         Vec3 offset = Objects.requireNonNullElse(JsonHelper.vec3FromJson(obj, "offset"), Vec3.ZERO);
         PointProvider fallback = JsonHelper.pointFromJson(obj, "fallback");
-        return new WaypointProvider(name, searchRadius, sortType, offset, Optional.ofNullable(fallback));
+        return new WaypointProvider(name, searchRadius, sortType, searchOffset, offset, Optional.ofNullable(fallback));
     }
 
     public static enum SortType {
