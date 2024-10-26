@@ -166,7 +166,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
         if (!cutscene.cutscene.blockMovement) return minecraft.player.getPosition(partialTick);
         if (cutscene.cutscene.path == null) return startPos;
 
-        double progress = (cutscene.getTime() - cutscene.cutscene.startTransition.getOffCutsceneTime()) / (double)cutscene.cutscene.length;
+        double progress = (cutscene.getTime() - cutscene.cutscene.startTransition.getOffCutsceneTime()) / (double)cutscene.cutscene.length.length();
         Vec3 position = cutscene.cutscene.getPathPoint(progress, clientLevel, startPos);
         return position.yRot(pathYaw).zRot(pathPitch).xRot(pathRoll).add(startPos);
     }
@@ -190,7 +190,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
         if (!cutscene.cutscene.blockCameraRotation) return minecraft.player.getViewXRot(partialTick);
         if (cutscene.cutscene.rotationProvider == null) return camStartPitch;
 
-        double progress = (cutscene.getTime() - cutscene.cutscene.startTransition.getOffCutsceneTime()) / (double)cutscene.cutscene.length;
+        double progress = (cutscene.getTime() - cutscene.cutscene.startTransition.getOffCutsceneTime()) / (double)cutscene.cutscene.length.length();
         return (float)cutscene.cutscene.getRotationAt(progress, clientLevel, startPos).y + camStartPitch;
     }
 
@@ -208,7 +208,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
         if (!cutscene.cutscene.blockCameraRotation) return minecraft.player.getViewYRot(partialTick);
         if (cutscene.cutscene.rotationProvider == null) return camStartYaw;
 
-        double progress = (cutscene.getTime() - cutscene.cutscene.startTransition.getOffCutsceneTime()) / (double)cutscene.cutscene.length;
+        double progress = (cutscene.getTime() - cutscene.cutscene.startTransition.getOffCutsceneTime()) / (double)cutscene.cutscene.length.length();
         return (float)cutscene.cutscene.getRotationAt(progress, clientLevel, startPos).x + camStartYaw;
     }
 

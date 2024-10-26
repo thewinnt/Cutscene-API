@@ -1,0 +1,42 @@
+{
+  "length": {
+    "type": "seconds",
+    "length": 30
+  },
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:calculated",
+        "x": {
+          "type": "cutscenes:mul",
+          "arg1": {
+            "type": "cutscenes:chain",
+            "argument": "cutscenes:30_pi_t",
+            "easing": {
+              "type": "cutscenes:sin",
+              "arg": "t"
+            }
+          },
+          "arg2": 5
+        },
+        "y": {
+          "type": "cutscenes:lerp",
+          "from": 0,
+          "to": 10
+        },
+        "z": {
+          "type": "cutscenes:mul",
+          "arg1": {
+            "type": "cutscenes:chain",
+            "argument": "cutscenes:30_pi_t",
+            "easing": {
+              "type": "cutscenes:cos",
+              "arg": "t"
+            }
+          },
+          "arg2": 5
+        }
+      }
+    ]
+  }
+}

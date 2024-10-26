@@ -61,7 +61,7 @@ public class SmoothEaseTransition implements Transition {
     public Vec3 getPos(double progress, Level level, Vec3 startPos, Vec3 pathRot, Vec3 initCamPos, CutsceneType cutscene) {
         double cutsceneProgress;
         if (countTowardsCutsceneTime) {
-            cutsceneProgress = progress * this.length / cutscene.length;
+            cutsceneProgress = progress * this.length / cutscene.length.length();
         } else {
             cutsceneProgress = isStart ? 0 : 1;
         }
@@ -88,7 +88,7 @@ public class SmoothEaseTransition implements Transition {
 
     @Override
     public Vec3 getRot(double progress, Level level, Vec3 startPos, Vec3 startRot, Vec3 initCamRot, CutsceneType cutscene) {
-        double cutsceneProgress = progress * this.length / cutscene.length;
+        double cutsceneProgress = progress * this.length / cutscene.length.length();
         Vec3 rotation = cutscene.getRotationAt(cutsceneProgress, level, startPos);
         if (rotation == null) {
             rotation = initCamRot;

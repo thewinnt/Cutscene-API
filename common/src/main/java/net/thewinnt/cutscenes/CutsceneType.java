@@ -3,6 +3,8 @@ package net.thewinnt.cutscenes;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.thewinnt.cutscenes.time.CutsceneLength;
+import net.thewinnt.cutscenes.time.GameTickManager;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonArray;
@@ -29,7 +31,7 @@ import net.thewinnt.cutscenes.util.JsonHelper;
  * rotated by some amount.
  */
 public class CutsceneType {
-    public final int length;
+    public final CutsceneLength length;
     public final @Nullable Path path;
     public final @Nullable Path rotationProvider;
     public final Transition startTransition;
@@ -43,8 +45,8 @@ public class CutsceneType {
     public final List<CutsceneEffect<?>> effects;
 
     /** Constructs a cutscene type with all parameters specified. */
-    @SuppressWarnings("deprecated")
-    public CutsceneType(PathLike path, Path rotationProvider, int length, Transition start, Transition end, boolean blockMovement, boolean blockCameraRotation, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects) {
+    @SuppressWarnings("deprecation")
+    public CutsceneType(PathLike path, Path rotationProvider, CutsceneLength length, Transition start, Transition end, boolean blockMovement, boolean blockCameraRotation, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects) {
         if (path instanceof Path pth) {
             this.path = pth;
         } else if (path != null) {
@@ -75,7 +77,7 @@ public class CutsceneType {
             this.path = null;
         }
         this.rotationProvider = rotationProvider;
-        this.length = length;
+        this.length = new CutsceneLength(length, new GameTickManager());
         this.startTransition = new SmoothEaseTransition(40, true, true);
         this.endTransition = new SmoothEaseTransition(40, false, false);
         this.blockMovement = true;
@@ -117,7 +119,7 @@ public class CutsceneType {
 
     /** Serializes this cutscene type to network, to fully reconstruct it later on the client side. */
     public void toNetwork(FriendlyByteBuf buf) {
-        buf.writeInt(length);
+        length.toNetwork(buf);
         buf.writeBoolean(path == null);
         if (path != null) path.toNetwork(buf);
         buf.writeBoolean(rotationProvider == null);
@@ -136,7 +138,7 @@ public class CutsceneType {
 
     /** Reads a cutscene type from network. */
     public static CutsceneType fromNetwork(FriendlyByteBuf buf) {
-        int length = buf.readInt();
+        CutsceneLength length = CutsceneLength.fromNetwork(buf);
         Path path, rotationProvider;
         if (!buf.readBoolean()) {
             path = Path.fromNetwork(buf, null);
@@ -173,7 +175,7 @@ public class CutsceneType {
         } else if (dataVersion < CutsceneAPI.DATA_VERSION) {
             CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is earlier than the current one ({}). The cutscene should be updated to the new format to make sure it shows up correctly!", dataVersion, CutsceneAPI.DATA_VERSION);
         }
-        int length = json.get("length").getAsInt();
+        CutsceneLength length = CutsceneLength.fromJson(json.get("length"));
         Path path = Path.fromJSON(JsonHelper.getNullableObject(json, "path"), null);
         Path rotation = Path.fromJSON(JsonHelper.getNullableObject(json, "rotation"), path);
         Transition start = Transition.fromJSON(JsonHelper.getNullableObject(json, "start_transition"), new SmoothEaseTransition(40, true, true));

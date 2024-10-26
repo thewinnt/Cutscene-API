@@ -67,8 +67,8 @@ public class CutsceneCommand {
                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                 Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
                 double rotZ = DoubleArgumentType.getDouble(arg, "camera_rotation_z");
-                double xRot = rot.x < -180 || rot.x > 180 ? Double.NaN : rot.x;
-                double yRot = rot.y < -90 || rot.y > 90 ? Double.NaN : rot.y;
+                double xRot = rot.y < -180 || rot.y > 180 ? Double.NaN : rot.y;
+                double yRot = rot.x < -90 || rot.x > 90 ? Double.NaN : rot.x;
                 double zRot = rotZ < -180 || rotZ > 180 ? Double.NaN : rotZ;
                 if (CutsceneManager.getPreviewedCutscene() != null && type != CutsceneManager.REGISTRY.inverse().get(CutsceneManager.getPreviewedCutscene())) {
                     arg.getSource().sendSuccess(() -> Component.translatable("commands.cutscene.warning.cutscene_mismatch").withStyle(ChatFormatting.GOLD), false);
@@ -95,8 +95,8 @@ public class CutsceneCommand {
                     Vec3 pos = Vec3Argument.getVec3(arg, "start_pos");
                     Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
                     double rotZ = DoubleArgumentType.getDouble(arg, "camera_rotation_z");
-                    double xRot = rot.x < -180 || rot.x > 180 ? Double.NaN : rot.x;
-                    double yRot = rot.y < -90 || rot.y > 90 ? Double.NaN : rot.y;
+                    double xRot = rot.y < -180 || rot.y > 180 ? Double.NaN : rot.y;
+                    double yRot = rot.x < -90 || rot.x > 90 ? Double.NaN : rot.x;
                     double zRot = rotZ < -180 || rotZ > 180 ? Double.NaN : rotZ;
                     if (CutsceneManager.getPreviewedCutscene() != null && !type.equals(CutsceneManager.REGISTRY.inverse().get(CutsceneManager.getPreviewedCutscene()))) {
                         arg.getSource().sendSuccess(() -> Component.translatable("commands.cutscene.warning.cutscene_mismatch").withStyle(ChatFormatting.GOLD), false);
@@ -112,8 +112,8 @@ public class CutsceneCommand {
                         Vec3 pos = Vec3Argument.getVec3(arg, "start_pos");
                         Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
                         double rotZ = DoubleArgumentType.getDouble(arg, "camera_rotation_z");
-                        double xRot = rot.x < -180 || rot.x > 180 ? Double.NaN : rot.x;
-                        double yRot = rot.y < -90 || rot.y > 90 ? Double.NaN : rot.y;
+                        double xRot = rot.y < -180 || rot.y > 180 ? Double.NaN : rot.y;
+                        double yRot = rot.x < -90 || rot.x > 90 ? Double.NaN : rot.x;
                         double zRot = rotZ < -180 || rotZ > 180 ? Double.NaN : rotZ;
                         Vec2 pathRotXY = RotationArgument.getRotation(arg, "path_rotation_xy").getRotation(source);
                         double pathRotZ = DoubleArgumentType.getDouble(arg, "path_rotation_z");
@@ -201,8 +201,10 @@ public class CutsceneCommand {
         }
         CutsceneType type = CutsceneManager.REGISTRY.get(id);
         CutsceneAPI.platform().sendPacketToPlayer(new StartCutscenePacket(id, pos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), player);
-        ((ServerPlayerExt)player).csapi$setCutsceneTicks(type.length);
-        ((ServerPlayerExt)player).csapi$setRunningCutscene(type);
+        if (type.length.manager().isServerSynched()) {
+            ((ServerPlayerExt) player).csapi$setCutsceneTicks(type.length.length());
+            ((ServerPlayerExt) player).csapi$setRunningCutscene(type);
+        }
         source.sendSuccess(() -> Component.translatable("commands.cutscene.showing", id.toString(), player.getDisplayName()), true);
         return 1;
     }

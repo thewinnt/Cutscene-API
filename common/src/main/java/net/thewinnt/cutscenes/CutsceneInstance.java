@@ -1,17 +1,24 @@
 package net.thewinnt.cutscenes;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.effect.CutsceneEffect;
+import net.thewinnt.cutscenes.time.TimeManager;
 import net.thewinnt.cutscenes.transition.Transition;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CutsceneInstance {
+    private static final Logger LOGGER = LogUtils.getLogger();
     public final CutsceneType cutscene;
-    public final double startTime;
-    private double lastTick;
+    private final TimeManager timeManager;
+    private final int length;
+    private double time = 0;
+    private boolean initialized = false;
     private int phase = 0;
     private final List<CutsceneEffect<?>> startedEffects = new ArrayList<>();
     private final List<CutsceneEffect<?>> endedEffects = new ArrayList<>();
@@ -20,21 +27,30 @@ public class CutsceneInstance {
 
     public CutsceneInstance(CutsceneType cutscene) {
         this.cutscene = cutscene;
-        this.startTime = Minecraft.getInstance().level.getGameTime() + CutsceneAPI.platform().getPartialTick();
-        this.lastTick = startTime;
+        this.timeManager = cutscene.length.manager();
+        this.length = cutscene.length.length();
     }
 
     /**
      * Ticks the cutscene logic, mainly the {@code onStart}/{@code onFrame}/{@code onEnd} methods
      * of {@linkplain Transition transitions} and {@linkplain CutsceneEffect cutscene effects}
+     * @return {@code true} if the cutscene should continue
      */
-    public void tick(double time) {
-        if (time < lastTick) time = lastTick;
-        lastTick = time;
-        double localTime = getTime();
+    public boolean tick() {
+        if (!initialized) {
+            this.timeManager.start();
+            this.initialized = true;
+        }
+        this.time = this.timeManager.tick();
+        if (this.time < 0) {
+            LOGGER.warn("Negative time: {}", this.time);
+            this.time = 0;
+        } else if (this.time > this.getEndTime()) {
+            LOGGER.warn("Suspicious time: {}", this.time);
+        }
         if (isTimeForStart()) {
             Transition transition = cutscene.startTransition;
-            double progress = localTime / (double)transition.getLength();
+            double progress = time / (double)transition.getLength();
             if (phase == 0) {
                 phase++;
                 transition.onStart(cutscene);
@@ -76,32 +92,32 @@ public class CutsceneInstance {
             }
         }
         for (CutsceneEffect<?> i : cutscene.effects) {
-            if (localTime >= i.startTime) {
+            if (time >= i.startTime) {
                 if (!startedEffects.contains(i)) {
                     i.onStart(Minecraft.getInstance().level, cutscene);
                     startedEffects.add(i);
                 }
-                if (localTime < i.endTime) {
-                    i.onFrame(localTime - i.startTime, Minecraft.getInstance().level, cutscene);
+                if (time < i.endTime) {
+                    i.onFrame(time - i.startTime, Minecraft.getInstance().level, cutscene);
                 } else if (!endedEffects.contains(i)) {
                     i.onEnd(Minecraft.getInstance().level, cutscene);
                     endedEffects.add(i);
                 }
             }
-
         }
+        return !endedEndTransition; // this effectively means "is cutscene over?"
     }
 
     public double getTime() {
-        return lastTick - startTime;
+        return time;
     }
 
-    public double getLastTime() {
-        return lastTick;
+    public TimeManager getTimeManager() {
+        return timeManager;
     }
 
     public double getEndTime() {
-        double output = startTime + cutscene.length;
+        double output = length;
         output += cutscene.startTransition.getOffCutsceneTime();
         output += cutscene.endTransition.getOffCutsceneTime();
         return output;
@@ -113,12 +129,12 @@ public class CutsceneInstance {
 
     public boolean isTimeForEnd() {
         double endTime = getEndTime();
-        return endTime - lastTick < cutscene.endTransition.getLength();
+        return endTime - time < cutscene.endTransition.getLength();
     }
 
     public double getEndProress() {
         double endTime = getEndTime();
-        return (cutscene.endTransition.getLength() - (endTime - lastTick)) / (double)cutscene.endTransition.getLength();
+        return (cutscene.endTransition.getLength() - (endTime - time)) / (double)cutscene.endTransition.getLength();
     }
 
     public boolean endedStartTransition() {

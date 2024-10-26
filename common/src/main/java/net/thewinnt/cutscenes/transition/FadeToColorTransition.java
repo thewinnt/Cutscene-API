@@ -82,7 +82,7 @@ public class FadeToColorTransition implements Transition {
             } else if (cutscene.path == null) {
                 return Minecraft.getInstance().player.getPosition((float) (progress * getLength() % 1));
             } else {
-                double cutsceneProgress = (progress - progressLengthA) / progressLengthA * lengthA / cutscene.length;
+                double cutsceneProgress = (progress - progressLengthA) / progressLengthA * lengthA / cutscene.length.length();
                 return cutscene.getPathPoint(cutsceneProgress, level, startPos).yRot((float)pathRot.y).zRot((float)pathRot.z).xRot((float)pathRot.x).add(startPos);
             }
         } else {
@@ -91,7 +91,7 @@ public class FadeToColorTransition implements Transition {
             } else if (cutscene.path == null) {
                 return startPos;
             } else {
-                double cutsceneProgress = (cutscene.length - lengthA + lengthA * (progress / progressLengthA)) / cutscene.length;
+                double cutsceneProgress = (cutscene.length.length() - lengthA + lengthA * (progress / progressLengthA)) / cutscene.length.length();
                 return cutscene.getPathPoint(cutsceneProgress, level, startPos).yRot((float)pathRot.y).zRot((float)pathRot.z).xRot((float)pathRot.x).add(startPos);
             }
         }
@@ -105,7 +105,7 @@ public class FadeToColorTransition implements Transition {
             } else if (cutscene.rotationProvider == null) {
                 return ClientCutsceneManager.camera.getPlayerCamRot();
             } else {
-                double cutsceneProgress = (progress - progressLengthA) / progressLengthA * lengthA / cutscene.length;
+                double cutsceneProgress = (progress - progressLengthA) / progressLengthA * lengthA / cutscene.length.length();
                 return cutscene.getRotationAt(cutsceneProgress, level, startPos).add(startRot);
             }
         } else {
@@ -114,7 +114,7 @@ public class FadeToColorTransition implements Transition {
             } else if (cutscene.rotationProvider == null) {
                 return startRot;
             } else {
-                double cutsceneProgress = (cutscene.length - lengthA + lengthA * (progress / progressLengthA)) / cutscene.length;
+                double cutsceneProgress = (cutscene.length.length() - lengthA + lengthA * (progress / progressLengthA)) / cutscene.length.length();
                 return cutscene.getRotationAt(cutsceneProgress, level, startPos).add(startRot);
             }
         }

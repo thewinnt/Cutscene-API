@@ -30,6 +30,7 @@ public class ClientCutsceneManager {
     private static boolean isCutsceneRunning = false;
     public static CutsceneInstance runningCutscene;
     private static Vec3 startPosition;
+    private static long startGameTime;
     public static float startCameraYaw; // x
     public static float startCameraPitch; // y
     public static float startCameraRoll; // z
@@ -49,7 +50,7 @@ public class ClientCutsceneManager {
     public static float initCameraRoll;
     
     @Environment(EnvType.CLIENT)
-    public static void startCutscene(CutsceneType type, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll) {
+    public static void startCutscene(CutsceneType type, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll, long gameTime) {
         CutsceneAPI.updateSalt();
         stopCutsceneImmediate();
         // if the specified rotation value is NaN, use the initial values
@@ -59,8 +60,8 @@ public class ClientCutsceneManager {
         startPathYaw = pathYaw;
         startPathPitch = pathPitch;
         startPathRoll = pathRoll;
+        startGameTime = gameTime;
         runningCutscene = new CutsceneInstance(type);
-
         // initialize minecraft
         Minecraft minecraft = Minecraft.getInstance();
         if (runningCutscene.cutscene.hideHand) {
@@ -74,6 +75,7 @@ public class ClientCutsceneManager {
             camera.spawn();
             minecraft.setCameraEntity(camera);
         }
+        PointProvider.POINT_CACHE.clear();
 
         isCutsceneRunning = true;
         startPosition = startPos;
@@ -81,7 +83,6 @@ public class ClientCutsceneManager {
 
     public static void updateRegistry(Map<ResourceLocation, CutsceneType> registry) {
         CLIENT_REGISTRY.clear();
-        PointProvider.POINT_CACHE.clear();
         CLIENT_REGISTRY.putAll(registry);
         if (isCutsceneRunning) CutsceneAPI.updateSalt();
     }
@@ -146,39 +147,38 @@ public class ClientCutsceneManager {
                 stopCutsceneImmediate();
                 return;
             }
-            long currentTime = Minecraft.getInstance().level.getGameTime();
-            float partialTick = CutsceneAPI.platform().getPartialTick();
             Level level = Minecraft.getInstance().level;
-            Minecraft.getInstance().getProfiler().push("cutscene_rotation");
-            Vec3 startRot = new Vec3(startCameraYaw, startCameraPitch, startCameraRoll);
-            Vec3 initCamRot = new Vec3(initCameraYaw, initCameraPitch, initCameraRoll);
-
-            if (runningCutscene.isTimeForStart()) {
-                double progress = runningCutscene.getTime() / (double)runningCutscene.cutscene.startTransition.getLength();
-                event.setRoll((float)runningCutscene.cutscene.startTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene.cutscene).z);
-                if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
-                    // if the player can move but can't rotate, the camera won't update their rotation,
-                    // so we do it here
-                    event.setPitch(camera.getViewXRot(partialTick));
-                    event.setYaw(camera.getViewYRot(partialTick));
-                }
-            } else if (runningCutscene.isTimeForEnd()) {
-                double progress = runningCutscene.getEndProress();
-                event.setRoll((float)runningCutscene.cutscene.endTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene.cutscene).z);
-                if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
-                    event.setPitch(camera.getViewXRot(partialTick));
-                    event.setYaw(camera.getViewYRot(partialTick));
-                }
-            } else if (runningCutscene.cutscene.rotationProvider != null) {
-                double progress = runningCutscene.getTime() / runningCutscene.cutscene.length;
-                event.setRoll((float)runningCutscene.cutscene.getRotationAt(progress, level, startPosition).z + startCameraRoll);
-                if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
-                    event.setPitch(camera.getViewXRot(partialTick));
-                    event.setYaw(camera.getViewYRot(partialTick));
+            Minecraft.getInstance().getProfiler().push("cutscene_tick");
+            if (runningCutscene.tick()) {
+                float partialTick = (float) (runningCutscene.getTime() % 1f);
+                Minecraft.getInstance().getProfiler().popPush("cutscene_rotation");
+                Vec3 startRot = new Vec3(startCameraYaw, startCameraPitch, startCameraRoll);
+                Vec3 initCamRot = new Vec3(initCameraYaw, initCameraPitch, initCameraRoll);
+                if (runningCutscene.isTimeForStart()) {
+                    double progress = runningCutscene.getTime() / (double) runningCutscene.cutscene.startTransition.getLength();
+                    event.setRoll((float) runningCutscene.cutscene.startTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene.cutscene).z);
+                    if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
+                        // if the player can move but can't rotate, the camera won't update its rotation,
+                        // so we do it here
+                        event.setPitch(camera.getViewXRot(partialTick));
+                        event.setYaw(camera.getViewYRot(partialTick));
+                    }
+                } else if (runningCutscene.isTimeForEnd()) {
+                    double progress = runningCutscene.getEndProress();
+                    event.setRoll((float) runningCutscene.cutscene.endTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene.cutscene).z);
+                    if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
+                        event.setPitch(camera.getViewXRot(partialTick));
+                        event.setYaw(camera.getViewYRot(partialTick));
+                    }
+                } else if (runningCutscene.cutscene.rotationProvider != null) {
+                    double progress = runningCutscene.getTime() / runningCutscene.cutscene.length.length();
+                    event.setRoll((float) runningCutscene.cutscene.getRotationAt(progress, level, startPosition).z + startCameraRoll);
+                    if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
+                        event.setPitch(camera.getViewXRot(partialTick));
+                        event.setYaw(camera.getViewYRot(partialTick));
+                    }
                 }
             }
-            Minecraft.getInstance().getProfiler().popPush("cutscene_tick");
-            runningCutscene.tick(currentTime + partialTick);
             Minecraft.getInstance().getProfiler().pop();
         } else {
             initCameraYaw = event.getYaw();
@@ -210,5 +210,9 @@ public class ClientCutsceneManager {
 
     public static boolean isCutsceneRunning() {
         return isCutsceneRunning;
+    }
+
+    public static long getStartGameTime() {
+        return startGameTime;
     }
 }

@@ -278,8 +278,10 @@ public class CutsceneManager {
      * @see CutsceneManager#KEEP_ROTATION
      */
     public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
-        ((ServerPlayerExt)player).csapi$setCutsceneTicks(REGISTRY.get(id).length);
-        ((ServerPlayerExt)player).csapi$setRunningCutscene(REGISTRY.get(id));
+        if (REGISTRY.get(id).length.manager().isServerSynched()) {
+            ((ServerPlayerExt) player).csapi$setCutsceneTicks(REGISTRY.get(id).length.length());
+            ((ServerPlayerExt) player).csapi$setRunningCutscene(REGISTRY.get(id));
+        }
         player.setCamera(null);
         CutsceneAPI.platform().sendPacketToPlayer(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), player);
     }
