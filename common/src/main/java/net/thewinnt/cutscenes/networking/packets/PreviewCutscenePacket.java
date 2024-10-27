@@ -5,9 +5,10 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
+import net.thewinnt.cutscenes.platform.AbstractClientboundPacket;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 
-public class PreviewCutscenePacket implements AbstractPacket {
+public class PreviewCutscenePacket implements AbstractClientboundPacket {
     public static final Type<PreviewCutscenePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("cutscenes", "preview_cutscene"));
     public final ResourceLocation type;
     public final Vec3 startPos;

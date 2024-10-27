@@ -2,6 +2,7 @@ package net.thewinnt.cutscenes.fabric;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
@@ -73,6 +74,12 @@ public final class CutsceneAPIFabric implements ModInitializer {
         CutsceneEffectSerializer.init();
         DelayProviderSerializer.init();
 
-        PLATFORM.packets.forEach(FabricPlatform::registerPacket);
+        PLATFORM.clientboundPackets.forEach(FabricPlatform::registerClientboundPacket);
+        PLATFORM.serverboundPackets.forEach(FabricPlatform::registerServerboundPacket);
+        PLATFORM.serverboundPackets.forEach(type -> {
+            ServerPlayNetworking.registerGlobalReceiver(type.type(), (packet, context) -> {
+                context.server().execute(() -> packet.execute(context.player()));
+            });
+        });
     }
 }

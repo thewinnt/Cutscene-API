@@ -8,15 +8,15 @@ import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import org.slf4j.Logger;
 
-public record CutsceneLength(int length, TimeManager manager) {
+public record CutsceneLength(double length, TimeManager manager) {
     private static final Logger LOGGER = LogUtils.getLogger();
     public void toNetwork(FriendlyByteBuf buf) {
-        buf.writeVarInt(length);
+        buf.writeDouble(length);
         buf.writeUtf(manager.type());
     }
 
     public static CutsceneLength fromNetwork(FriendlyByteBuf buf) {
-        int length = buf.readVarInt();
+        double length = buf.readDouble();
         TimeManager manager = TimeManager.REGISTRY.get(buf.readUtf()).get();
         return new CutsceneLength(length, manager);
     }
@@ -32,7 +32,7 @@ public record CutsceneLength(int length, TimeManager manager) {
             LOGGER.warn("Unknown time manager type: {}", type);
             manager = new GameTickManager();
         }
-        int length = GsonHelper.getAsInt(obj, "length");
+        double length = GsonHelper.getAsDouble(obj, "length");
         return new CutsceneLength(length, manager);
     }
 }

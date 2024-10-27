@@ -21,20 +21,24 @@ import net.thewinnt.cutscenes.entity.WaypointEntity;
  * I'm doing this instead of using Architectury API, because
  * a) I don't want this mod to have many dependencies, and
  * b) Architectury API doesn't implement everything I need anyway
+ * <p>
+ * <b>Warning:</b> an instance of this may not exist during mod initialization if your mod loads before
+ * Cutscene API.
  */
 public interface PlatformAbstractions {
     // reload listeners
     void registerReloadListener(PreparableReloadListener listener, ResourceLocation id);
 
     // networking
-    <T extends AbstractPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader, Consumer<T> handler);
-    void sendPacketToPlayer(AbstractPacket packet, ServerPlayer player);
-    default void sendPacketToPlayers(AbstractPacket packet, Collection<ServerPlayer> players) {
+    <T extends AbstractClientboundPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader);
+    void sendPacketToPlayer(AbstractClientboundPacket packet, ServerPlayer player);
+    <T extends AbstractServerboundPacket> void registerServerboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader);
+    void sendPacketFromPlayer(AbstractServerboundPacket packet);
+    default void sendPacketToPlayers(AbstractClientboundPacket packet, Collection<ServerPlayer> players) {
         players.forEach(player -> sendPacketToPlayer(packet, player));
     }
 
     // utilities
-    float getPartialTick();
     MinecraftServer getServer();
 
     // events
@@ -43,5 +47,6 @@ public interface PlatformAbstractions {
     void submitOnClientTick(Runnable runnable);
     void submitOnRegisterCommand(Consumer<CommandDispatcher<CommandSourceStack>> command);
 
+    // user-facing
     EntityType<WaypointEntity> getWaypointEntityType();
 }

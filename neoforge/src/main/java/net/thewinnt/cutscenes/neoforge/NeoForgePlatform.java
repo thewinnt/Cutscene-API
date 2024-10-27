@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 
 import com.mojang.brigadier.CommandDispatcher;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +15,6 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -29,7 +27,9 @@ import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
+import net.thewinnt.cutscenes.platform.AbstractClientboundPacket;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
+import net.thewinnt.cutscenes.platform.AbstractServerboundPacket;
 import net.thewinnt.cutscenes.platform.CameraAngleSetter;
 import net.thewinnt.cutscenes.platform.PacketType;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
@@ -41,7 +41,8 @@ public class NeoForgePlatform implements PlatformAbstractions {
     private final List<Consumer<CommandDispatcher<CommandSourceStack>>> commandMakers = new ArrayList<>();
     public final List<Runnable> onLogout = new ArrayList<>();
     protected final List<Runnable> clientTick = new ArrayList<>();
-    public List<PacketType<?>> packets = new ArrayList<>();
+    public List<PacketType<? extends AbstractClientboundPacket>> clientboundPackets = new ArrayList<>();
+    public List<PacketType<? extends AbstractServerboundPacket>> serverboundPackets = new ArrayList<>();
 
     @Override
     public void registerReloadListener(PreparableReloadListener listener, ResourceLocation id) {
@@ -55,21 +56,29 @@ public class NeoForgePlatform implements PlatformAbstractions {
     }
 
     @Override
-    public <T extends AbstractPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader, Consumer<T> handler) {
-        if (packets == null) {
+    public <T extends AbstractClientboundPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader) {
+        if (clientboundPackets == null) {
             throw new IllegalStateException("Too late! Clientbound packets should be registered during mod initialization");
         }
-        packets.add(new PacketType<>(type, reader, handler));
+        clientboundPackets.add(new PacketType<>(type, reader));
     }
 
     @Override
-    public void sendPacketToPlayer(AbstractPacket packet, ServerPlayer player) {
+    public void sendPacketToPlayer(AbstractClientboundPacket packet, ServerPlayer player) {
         PacketDistributor.sendToPlayer(player, packet);
     }
 
     @Override
-    public float getPartialTick() {
-        return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+    public <T extends AbstractServerboundPacket> void registerServerboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader) {
+        if (serverboundPackets == null) {
+            throw new IllegalStateException("Too late! Serverbound packets should be registered during mod initialization");
+        }
+        serverboundPackets.add(new PacketType<>(type, reader));
+    }
+
+    @Override
+    public void sendPacketFromPlayer(AbstractServerboundPacket packet) {
+        PacketDistributor.sendToServer(packet);
     }
 
     @Override
@@ -102,12 +111,20 @@ public class NeoForgePlatform implements PlatformAbstractions {
         return CutsceneAPIEntities.WAYPOINT.value();
     }
 
-    public static <T extends AbstractPacket> IPayloadHandler<T> createHandler(PacketType<T> type) {
-        return (payload, context) -> context.enqueueWork(() -> type.handler().accept(payload));
+    public static <T extends AbstractClientboundPacket> IPayloadHandler<T> createClientboundHandler(PacketType<T> type) {
+        return (payload, context) -> context.enqueueWork(payload::execute);
     }
 
-    public static <T extends AbstractPacket> void registerPacket(PayloadRegistrar registrar, PacketType<T> type) {
-        registrar.playToClient(type.type(), type.codec(), createHandler(type));
+    public static <T extends AbstractServerboundPacket> IPayloadHandler<T> createServerboundHandler(PacketType<T> type) {
+        return (payload, context) -> context.enqueueWork(() -> payload.execute(((ServerPlayer) context.player())));
+    }
+
+    public static <T extends AbstractClientboundPacket> void registerClientboundPacket(PayloadRegistrar registrar, PacketType<T> type) {
+        registrar.playToClient(type.type(), type.codec(), createClientboundHandler(type));
+    }
+
+    public static <T extends AbstractServerboundPacket> void registerServerboundPacket(PayloadRegistrar registrar, PacketType<T> type) {
+        registrar.playToServer(type.type(), type.codec(), createServerboundHandler(type));
     }
 
     // --- EVENT LISTENERS ---

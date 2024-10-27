@@ -17,21 +17,21 @@ import net.thewinnt.cutscenes.CutsceneType;
  */
 public interface Transition {
     /** @return the total length of this transition. */
-    int getLength();
+    double getLength();
 
     /**
      * Returns the time that will be added to the total cutscene time as a result of this transition running.
      * Should not change during a cutscene.
      * @return the time spent outside the cutscene's length
      */
-    int getOffCutsceneTime();
+    double getOffCutsceneTime();
 
     /**
      * Returns the time of this transition that will be taken from the cutscene's time. This means that the
      * cutscene itself will be running, so a path will be shown.
      * @return the time spent inside the cutscene's length
      */
-    int getOnCutsceneTime();
+    double getOnCutsceneTime();
 
     /**
      * Returns the camera position at the specified moment

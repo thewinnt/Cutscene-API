@@ -15,6 +15,8 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneInstance;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.entity.CutsceneCameraEntity;
+import net.thewinnt.cutscenes.event.CutsceneEvents;
+import net.thewinnt.cutscenes.event.EndingReason;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.platform.CameraAngleSetter;
 import net.thewinnt.cutscenes.util.ActionToggles;
@@ -52,7 +54,7 @@ public class ClientCutsceneManager {
     @Environment(EnvType.CLIENT)
     public static void startCutscene(CutsceneType type, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll, long gameTime) {
         CutsceneAPI.updateSalt();
-        stopCutsceneImmediate();
+        stopCutsceneImmediate(EndingReason.INTERRUPT);
         // if the specified rotation value is NaN, use the initial values
         startCameraYaw = Float.isNaN(cameraYaw) ? initCameraYaw : cameraYaw;
         startCameraPitch = Float.isNaN(cameraPitch) ? initCameraPitch : cameraPitch;
@@ -91,7 +93,7 @@ public class ClientCutsceneManager {
         CLIENT_REGISTRY.put(id, type);
     }
 
-    public static void stopCutsceneImmediate() {
+    public static void stopCutsceneImmediate(EndingReason reason) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.gameRenderer.setRenderHand(true);
         minecraft.setCameraEntity(minecraft.player);
@@ -110,6 +112,9 @@ public class ClientCutsceneManager {
             minecraft.player.input = new KeyboardInput(minecraft.options);
         }
         isCutsceneRunning = false;
+        if (runningCutscene != null) {
+            CutsceneEvents.CUTSCENE_OVER_CLIENT.invoke(listener -> listener.accept(runningCutscene.cutscene, CLIENT_REGISTRY.inverse().get(runningCutscene.cutscene), minecraft.player, reason));
+        }
         runningCutscene = null;
         CutsceneOverlayManager.clearOverlays();
     }
@@ -139,12 +144,12 @@ public class ClientCutsceneManager {
         if (isCutsceneRunning) {
             if (camera == null) {
                 LOGGER.warn("Found ourselves running a cutscene despite the camera being null. Is this normal?");
-                stopCutsceneImmediate();
+                stopCutsceneImmediate(EndingReason.ERROR);
                 return;
             }
             if (runningCutscene == null) {
                 LOGGER.error("Attempted to run an invalid cutscene!");
-                stopCutsceneImmediate();
+                stopCutsceneImmediate(EndingReason.ERROR);
                 return;
             }
             Level level = Minecraft.getInstance().level;
@@ -155,7 +160,7 @@ public class ClientCutsceneManager {
                 Vec3 startRot = new Vec3(startCameraYaw, startCameraPitch, startCameraRoll);
                 Vec3 initCamRot = new Vec3(initCameraYaw, initCameraPitch, initCameraRoll);
                 if (runningCutscene.isTimeForStart()) {
-                    double progress = runningCutscene.getTime() / (double) runningCutscene.cutscene.startTransition.getLength();
+                    double progress = runningCutscene.getTime() / runningCutscene.cutscene.startTransition.getLength();
                     event.setRoll((float) runningCutscene.cutscene.startTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene.cutscene).z);
                     if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
                         // if the player can move but can't rotate, the camera won't update its rotation,
@@ -188,7 +193,7 @@ public class ClientCutsceneManager {
     }
 
     public static void onLogout() {
-        stopCutsceneImmediate();
+        stopCutsceneImmediate(EndingReason.INTERRUPT);
         previewedCutscene = null;
     }
 

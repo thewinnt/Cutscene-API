@@ -25,6 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.event.EndingReason;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
 import net.thewinnt.cutscenes.util.ServerPlayerExt;
 
@@ -127,7 +128,7 @@ public class CutsceneCommand {
                 .executes(context -> {
                     CommandSourceStack source = context.getSource();
                     ServerPlayer player = source.getPlayerOrException();
-                    CutsceneManager.stopCutscene(player);
+                    CutsceneManager.stopCutscene(player, EndingReason.COMMAND);
                     source.sendSuccess(() -> Component.translatable("commands.cutscene.stopped", player.getDisplayName()), true);
                     return 1;
                 })
@@ -135,7 +136,7 @@ public class CutsceneCommand {
             .executes(arg -> {
                 CommandSourceStack source = arg.getSource();
                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
-                CutsceneManager.stopCutscene(player);
+                CutsceneManager.stopCutscene(player, EndingReason.COMMAND);
                 source.sendSuccess(() -> Component.translatable("commands.cutscene.stopped", player.getDisplayName()), true);
                 return 1;
             })))
@@ -199,12 +200,7 @@ public class CutsceneCommand {
         if (!CutsceneManager.REGISTRY.containsKey(id)) {
             throw NO_CUTSCENE.create(id.toString());
         }
-        CutsceneType type = CutsceneManager.REGISTRY.get(id);
-        CutsceneAPI.platform().sendPacketToPlayer(new StartCutscenePacket(id, pos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), player);
-        if (type.length.manager().isServerSynched()) {
-            ((ServerPlayerExt) player).csapi$setCutsceneTicks(type.length.length());
-            ((ServerPlayerExt) player).csapi$setRunningCutscene(type);
-        }
+        CutsceneManager.startCutscene(id, pos, camRot, pathRot, player);
         source.sendSuccess(() -> Component.translatable("commands.cutscene.showing", id.toString(), player.getDisplayName()), true);
         return 1;
     }

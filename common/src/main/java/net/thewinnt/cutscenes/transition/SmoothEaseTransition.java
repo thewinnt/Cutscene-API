@@ -14,7 +14,7 @@ import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 
 public class SmoothEaseTransition implements Transition {
-    private final int length;
+    private final double length;
     private final boolean countTowardsCutsceneTime;
     private final boolean isStart;
     private final Easing easingX;
@@ -24,11 +24,11 @@ public class SmoothEaseTransition implements Transition {
     private final Easing easingRotY;
     private final Easing easingRotZ;
 
-    public SmoothEaseTransition(int length, boolean countTowardsCutsceneTime, boolean isStart) {
+    public SmoothEaseTransition(double length, boolean countTowardsCutsceneTime, boolean isStart) {
         this(length, countTowardsCutsceneTime, isStart, SimpleEasing.OUT_QUINT, SimpleEasing.OUT_QUINT, SimpleEasing.OUT_QUINT, SimpleEasing.OUT_QUINT, SimpleEasing.OUT_QUINT, SimpleEasing.OUT_QUINT);
     }
 
-    public SmoothEaseTransition(int length, boolean countTowardsCutsceneTime, boolean isStart, Easing easingX,
+    public SmoothEaseTransition(double length, boolean countTowardsCutsceneTime, boolean isStart, Easing easingX,
             Easing easingY, Easing easingZ, Easing easingRotX, Easing easingRotY,
             Easing easingRotZ) {
         this.length = length;
@@ -43,17 +43,17 @@ public class SmoothEaseTransition implements Transition {
     }
 
     @Override
-    public int getLength() {
+    public double getLength() {
         return length;
     }
     
     @Override
-    public int getOffCutsceneTime() {
+    public double getOffCutsceneTime() {
         return countTowardsCutsceneTime ? 0 : length;
     }
 
     @Override
-    public int getOnCutsceneTime() {
+    public double getOnCutsceneTime() {
         return countTowardsCutsceneTime ? length : 0;
     }
 
@@ -164,7 +164,7 @@ public class SmoothEaseTransition implements Transition {
 
     @Override
     public void toNetwork(FriendlyByteBuf buf) {
-        buf.writeInt(length);
+        buf.writeDouble(length);
         buf.writeBoolean(countTowardsCutsceneTime);
         buf.writeBoolean(isStart);
         Easing.toNetwork(easingX, buf);
@@ -181,7 +181,7 @@ public class SmoothEaseTransition implements Transition {
     }
 
     public static SmoothEaseTransition fromNetwork(FriendlyByteBuf buf) {
-        int length = buf.readInt();
+        double length = buf.readDouble();
         boolean countTowardsCutsceneTime = buf.readBoolean();
         boolean easeIn = buf.readBoolean();
         Easing easingX = CutsceneAPI.EASING_SERIALIZERS.byId(buf.readInt()).fromNetwork(buf);
@@ -194,7 +194,7 @@ public class SmoothEaseTransition implements Transition {
     }
 
     public static SmoothEaseTransition fromJSON(JsonObject json) {
-        int length = GsonHelper.getAsInt(json, "length", 40);
+        double length = GsonHelper.getAsDouble(json, "length", 40);
         boolean isStart = GsonHelper.getAsBoolean(json, "is_start");
         boolean countTowardsCutsceneTime = GsonHelper.getAsBoolean(json, "count_towards_cutscene_time", isStart);
         Easing easingX = Easing.fromJSON(json.get("easing_x"), SimpleEasing.OUT_QUINT);

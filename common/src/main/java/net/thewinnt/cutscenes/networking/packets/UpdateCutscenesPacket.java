@@ -7,9 +7,10 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
+import net.thewinnt.cutscenes.platform.AbstractClientboundPacket;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 
-public class UpdateCutscenesPacket implements AbstractPacket {
+public class UpdateCutscenesPacket implements AbstractClientboundPacket {
     public static final Type<UpdateCutscenesPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("cutscenes", "update_cutscenes"));
     private final Map<ResourceLocation, CutsceneType> registry;
     

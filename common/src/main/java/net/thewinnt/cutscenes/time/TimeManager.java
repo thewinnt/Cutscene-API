@@ -1,6 +1,9 @@
 package net.thewinnt.cutscenes.time;
 
+import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import net.minecraft.Util;
+import net.thewinnt.cutscenes.transition.SmoothEaseTransition;
+import net.thewinnt.cutscenes.transition.Transition;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +14,21 @@ import java.util.function.Supplier;
  * may differ in each implementation. It's usually seconds or game ticks.
  */
 public interface TimeManager {
+    /**
+     * The registry of time managers. I don't expect anyone to ever use this, so it's just a simple
+     * mutable map.
+     */
     Map<String, Supplier<TimeManager>> REGISTRY = Util.make(new HashMap<>(), map -> {
         map.put("seconds", RealTimeManager::new);
         map.put("ticks", GameTickManager::new);
+    });
+    /**
+     * The registry of default transitions for time managers. This is because with different units come
+     * different scales that may or may not be very compatible with each other.
+     */
+    Map<String, Boolean2ObjectFunction<Transition>> DEFAULT_TRANSITIONS = Util.make(new HashMap<>(), map -> {
+        map.put("seconds", isStart -> new SmoothEaseTransition(2, isStart, isStart));
+        map.put("ticks", isStart -> new SmoothEaseTransition(40, isStart, isStart));
     });
 
     /**
@@ -42,9 +57,9 @@ public interface TimeManager {
     void syncGameTime(long gameTime);
 
     /**
-     * If {@code true}, the server player tracks the currently watched cutscene of a player
-     * @return whether to track the player cutscene server-side
-     * @apiNote meaning and behavior may be changed in the future
+     * If this returns {@code true}, it means that cutscene length is synchronized with the server tickrate
+     * and can, therefore, be defined in ticks
+     * @return whether the length of the cutscene is related to server tickrate
      */
     boolean isServerSynched();
 
@@ -55,11 +70,9 @@ public interface TimeManager {
     String type();
 
     /**
-     * Returns the amount of 1/60ths of a second (one frame on an average monitor) in one unit
-     * under typical circumstances (e.g. 20 TPS). Don't think too hard on this one.
-     * <p>
-     * Used in PathPreviewRenderer to draw reasonably precise previews.
-     * @return (unit length) / (1/60)
+     * Returns the amount of 1/20ths of a second (one game tick) in one unit
+     * under typical circumstances (e.g. 20 TPS).
+     * @return (unit length in seconds) * 20
      */
-    double framesPerUnit();
+    double ticksPerUnit();
 }

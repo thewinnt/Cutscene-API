@@ -1,6 +1,7 @@
 package net.thewinnt.cutscenes.util;
 
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.event.EndingReason;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -30,4 +31,6 @@ public interface ServerPlayerExt {
      * @param type the cutscene to start watching
      */
     void csapi$setRunningCutscene(CutsceneType type);
+
+    void csapi$finishCutscene(EndingReason reason);
 }

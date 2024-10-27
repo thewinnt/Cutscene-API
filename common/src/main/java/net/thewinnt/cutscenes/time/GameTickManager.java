@@ -74,7 +74,7 @@ public class GameTickManager implements TimeManager {
     }
 
     @Override
-    public double framesPerUnit() {
-        return 3;
+    public double ticksPerUnit() {
+        return 1;
     }
 }

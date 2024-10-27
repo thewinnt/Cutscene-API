@@ -9,13 +9,13 @@ import java.util.function.Consumer;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -28,13 +28,16 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
+import net.thewinnt.cutscenes.platform.AbstractClientboundPacket;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
+import net.thewinnt.cutscenes.platform.AbstractServerboundPacket;
 import net.thewinnt.cutscenes.platform.CameraAngleSetter;
 import net.thewinnt.cutscenes.platform.PacketType;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 
 public class FabricPlatform implements PlatformAbstractions {
-    public List<PacketType<?>> packets = new ArrayList<>();
+    public List<PacketType<? extends AbstractClientboundPacket>> clientboundPackets = new ArrayList<>();
+    public List<PacketType<? extends AbstractServerboundPacket>> serverboundPackets = new ArrayList<>();
     public final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();
     public final List<Runnable> onLogout = new ArrayList<>();
     public MinecraftServer server;
@@ -55,23 +58,33 @@ public class FabricPlatform implements PlatformAbstractions {
     }
 
     @Override
-    public <T extends AbstractPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader, Consumer<T> handler) {
-        if (packets == null) {
+    public <T extends AbstractClientboundPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader) {
+        if (clientboundPackets == null) {
             throw new IllegalStateException("Too late! Clientbound packets should be registered during mod initialization");
         }
-        packets.add(new PacketType<>(type, reader, handler));
+        clientboundPackets.add(new PacketType<>(type, reader));
     }
 
     @Override
-    public void sendPacketToPlayer(AbstractPacket packet, ServerPlayer player) {
+    public void sendPacketToPlayer(AbstractClientboundPacket packet, ServerPlayer player) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         packet.write(buf);
         ServerPlayNetworking.send(player, packet);
     }
 
     @Override
-    public float getPartialTick() {
-        return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+    public <T extends AbstractServerboundPacket> void registerServerboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader) {
+        if (serverboundPackets == null) {
+            throw new IllegalStateException("Too late! Serverbound packets should be registered during mod initialization");
+        }
+        serverboundPackets.add(new PacketType<>(type, reader));
+    }
+
+    @Override
+    public void sendPacketFromPlayer(AbstractServerboundPacket packet) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        packet.write(buf);
+        ClientPlayNetworking.send(packet);
     }
 
     @Override
@@ -108,7 +121,11 @@ public class FabricPlatform implements PlatformAbstractions {
         this.server = server;
     }
 
-    public static <T extends AbstractPacket> void registerPacket(PacketType<T> type) {
+    public static <T extends AbstractClientboundPacket> void registerClientboundPacket(PacketType<T> type) {
         PayloadTypeRegistry.playS2C().register(type.type(), type.codec());
+    }
+
+    public static <T extends AbstractServerboundPacket> void registerServerboundPacket(PacketType<T> type) {
+        PayloadTypeRegistry.playC2S().register(type.type(), type.codec());
     }
 }

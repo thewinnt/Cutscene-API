@@ -1,7 +1,10 @@
 package net.thewinnt.cutscenes.mixin;
 
 import net.minecraft.world.damagesource.DamageSource;
+import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.event.CutsceneEvents;
+import net.thewinnt.cutscenes.event.EndingReason;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -39,12 +42,22 @@ public class ServerPlayerMixin implements ServerPlayerExt {
         cutscenes$running = type;
     }
 
+    @Override
+    public void csapi$finishCutscene(EndingReason reason) {
+        if (cutscenes$running != null) {
+            CutsceneEvents.CUTSCENE_OVER_SERVER.invoke(listener -> listener.accept(cutscenes$running, CutsceneManager.REGISTRY.inverse().get(cutscenes$running), ((ServerPlayer) (Object) this), reason));
+            cutscenes$running = null;
+            cutscenes$ticksRemaining = 0;
+        }
+    }
+
     @Inject(method = "tick", at = @At("HEAD"))
     public void tick(CallbackInfo callback) {
         if (cutscenes$ticksRemaining > 0) {
             cutscenes$ticksRemaining--;
-        } else {
-            cutscenes$running = null;
+            if (cutscenes$ticksRemaining == 0) {
+                this.csapi$finishCutscene(EndingReason.FINISH);
+            }
         }
     }
 

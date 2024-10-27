@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
+import net.thewinnt.cutscenes.event.EndingReason;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StopCutscenePacket;
@@ -278,10 +279,16 @@ public class CutsceneManager {
      * @see CutsceneManager#KEEP_ROTATION
      */
     public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
-        if (REGISTRY.get(id).length.manager().isServerSynched()) {
-            ((ServerPlayerExt) player).csapi$setCutsceneTicks(REGISTRY.get(id).length.length());
-            ((ServerPlayerExt) player).csapi$setRunningCutscene(REGISTRY.get(id));
+        CutsceneType type = REGISTRY.get(id);
+        ServerPlayerExt ext = (ServerPlayerExt) player;
+        ext.csapi$finishCutscene(EndingReason.INTERRUPT);
+        if (type.length.manager().isServerSynched()) {
+            double lengthUnits = type.length.length() + type.startTransition.getOffCutsceneTime() + type.endTransition.getOffCutsceneTime();
+            ext.csapi$setCutsceneTicks((int)(lengthUnits * type.length.manager().ticksPerUnit()));
+        } else {
+            ext.csapi$setCutsceneTicks(Integer.MAX_VALUE);
         }
+        ext.csapi$setRunningCutscene(type);
         player.setCamera(null);
         CutsceneAPI.platform().sendPacketToPlayer(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), player);
     }
@@ -289,10 +296,19 @@ public class CutsceneManager {
     /**
      * Stops a cutscene for a player, regardless of whether they were actually watching it or not.
      * @param player The player to stop the cutscene for
+     * @param reason The reason why the cutscene is stopped
+     */
+    public static void stopCutscene(ServerPlayer player, EndingReason reason) {
+        ((ServerPlayerExt)player).csapi$finishCutscene(reason);
+        CutsceneAPI.platform().sendPacketToPlayer(new StopCutscenePacket(reason), player);
+    }
+
+    /**
+     * Stops a cutscene for a player, regardless of whether they were actually watching it or not.
+     * Calls {@link #stopCutscene(ServerPlayer, EndingReason)} with {@link EndingReason#INTERRUPT}.
+     * @param player The player to stop the cutscene for
      */
     public static void stopCutscene(ServerPlayer player) {
-        ((ServerPlayerExt)player).csapi$setCutsceneTicks(0);
-        ((ServerPlayerExt)player).csapi$setRunningCutscene(null);
-        CutsceneAPI.platform().sendPacketToPlayer(new StopCutscenePacket(), player);
+        stopCutscene(player, EndingReason.INTERRUPT);
     }
 }

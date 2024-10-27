@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.thewinnt.cutscenes.event.CutsceneEvents;
+import net.thewinnt.cutscenes.networking.packets.CutsceneOverPacket;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -38,7 +40,6 @@ import net.thewinnt.cutscenes.networking.packets.StopCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
 import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
-import net.thewinnt.cutscenes.platform.AbstractPacket;
 import net.thewinnt.cutscenes.platform.ClientPlatformAbstractions;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
@@ -83,10 +84,11 @@ public class CutsceneAPI {
         CutsceneAPI.PLATFORM = abstractions;
 
         // networking
-        abstractions.registerClientboundPacket(PreviewCutscenePacket.TYPE, PreviewCutscenePacket::read, AbstractPacket::execute);
-        abstractions.registerClientboundPacket(StartCutscenePacket.TYPE, StartCutscenePacket::read, AbstractPacket::execute);
-        abstractions.registerClientboundPacket(StopCutscenePacket.TYPE, buf -> new StopCutscenePacket(), AbstractPacket::execute);
-        abstractions.registerClientboundPacket(UpdateCutscenesPacket.TYPE, UpdateCutscenesPacket::read, AbstractPacket::execute);
+        abstractions.registerClientboundPacket(PreviewCutscenePacket.TYPE, PreviewCutscenePacket::read);
+        abstractions.registerClientboundPacket(StartCutscenePacket.TYPE, StartCutscenePacket::read);
+        abstractions.registerClientboundPacket(StopCutscenePacket.TYPE, StopCutscenePacket::read);
+        abstractions.registerClientboundPacket(UpdateCutscenesPacket.TYPE, UpdateCutscenesPacket::read);
+        abstractions.registerServerboundPacket(CutsceneOverPacket.TYPE, buf -> new CutsceneOverPacket());
 
         // other stuff
         addReloadListeners(abstractions);

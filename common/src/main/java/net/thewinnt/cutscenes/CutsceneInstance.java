@@ -2,9 +2,10 @@ package net.thewinnt.cutscenes;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Mth;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.effect.CutsceneEffect;
+import net.thewinnt.cutscenes.event.EndingReason;
+import net.thewinnt.cutscenes.networking.packets.CutsceneOverPacket;
 import net.thewinnt.cutscenes.time.TimeManager;
 import net.thewinnt.cutscenes.transition.Transition;
 import org.slf4j.Logger;
@@ -16,7 +17,7 @@ public class CutsceneInstance {
     private static final Logger LOGGER = LogUtils.getLogger();
     public final CutsceneType cutscene;
     private final TimeManager timeManager;
-    private final int length;
+    private final double length;
     private double time = 0;
     private boolean initialized = false;
     private int phase = 0;
@@ -50,7 +51,7 @@ public class CutsceneInstance {
         }
         if (isTimeForStart()) {
             Transition transition = cutscene.startTransition;
-            double progress = time / (double)transition.getLength();
+            double progress = time / transition.getLength();
             if (phase == 0) {
                 phase++;
                 transition.onStart(cutscene);
@@ -75,7 +76,10 @@ public class CutsceneInstance {
             }
             transition.onFrame(progress, cutscene);
             if (progress >= 1) {
-                ClientCutsceneManager.stopCutsceneImmediate();
+                ClientCutsceneManager.stopCutsceneImmediate(EndingReason.FINISH);
+                if (!timeManager.isServerSynched()) {
+                    CutsceneAPI.platform().sendPacketFromPlayer(new CutsceneOverPacket());
+                }
                 cutscene.endTransition.onEnd(cutscene);
                 endedEndTransition = true;
             }

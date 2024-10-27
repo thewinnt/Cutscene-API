@@ -3,15 +3,13 @@ package net.thewinnt.cutscenes.networking.packets;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
+import net.thewinnt.cutscenes.platform.AbstractClientboundPacket;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 
-import java.util.Objects;
-
-public final class StartCutscenePacket implements AbstractPacket {
+public final class StartCutscenePacket implements AbstractClientboundPacket {
     public static final Type<StartCutscenePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("cutscenes", "start_cutscene"));
     private final ResourceLocation cutscene;
     private final Vec3 startPos;

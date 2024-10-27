@@ -18,7 +18,7 @@ public class ModEventListener {
     @SubscribeEvent
     public static void registerNetwork(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("cutscenes").versioned("1.5.2");
-        CutsceneAPINeoForge.PLATFORM.packets.forEach(type -> NeoForgePlatform.registerPacket(registrar, type));
+        CutsceneAPINeoForge.PLATFORM.clientboundPackets.forEach(type -> NeoForgePlatform.registerClientboundPacket(registrar, type));
     }
 
     @SubscribeEvent

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Gui.class)
 public class GuiMixin {
-    @Shadow @Final protected Minecraft minecraft;
+    @Shadow @Final private Minecraft minecraft;
 
     @Redirect(method = "renderHealthLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;getCameraPlayer()Lnet/minecraft/world/entity/player/Player;"))
     public Player csapi$renderHealth(Gui instance) {

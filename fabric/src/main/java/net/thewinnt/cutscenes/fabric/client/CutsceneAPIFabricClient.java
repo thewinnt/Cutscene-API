@@ -8,7 +8,6 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.fabric.CutsceneAPIFabric;
 import net.thewinnt.cutscenes.fabric.FabricClientPlatform;
 import net.thewinnt.cutscenes.fabric.FabricPlatform;
-import net.thewinnt.cutscenes.platform.AbstractPacket;
 
 public final class CutsceneAPIFabricClient implements ClientModInitializer {
     public static final FabricClientPlatform CLIENT_PLATFORM = new FabricClientPlatform();
@@ -17,7 +16,7 @@ public final class CutsceneAPIFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         // This entrypoint is suitable for setting up client-specific logic, such as rendering.
         FabricPlatform platform = CutsceneAPIFabric.PLATFORM;
-        platform.packets.forEach(type -> {
+        platform.clientboundPackets.forEach(type -> {
             ClientPlayNetworking.registerGlobalReceiver(type.type(), (packet, context) -> {
                 context.client().execute(packet::execute);
             });

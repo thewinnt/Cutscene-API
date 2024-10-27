@@ -10,7 +10,7 @@ import net.thewinnt.cutscenes.CutsceneType;
 
 public class NoopTransition implements Transition {
     @Override
-    public int getLength() {
+    public double getLength() {
         return 0;
     }
 
@@ -35,12 +35,12 @@ public class NoopTransition implements Transition {
     }
     
     @Override
-    public int getOffCutsceneTime() {
+    public double getOffCutsceneTime() {
         return 0;
     }
 
     @Override
-    public int getOnCutsceneTime() {
+    public double getOnCutsceneTime() {
         return 0;
     }
 
