@@ -138,6 +138,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
 
     public Vec3 getProperPosition(float partialTick) {
         Vec3 output = doGetPosition(partialTick);
+        this.setPosRaw(output.x, output.y, output.z);
         BlockPos pos = BlockPos.containing(output.x, output.y, output.z);
         Level level = level();
         minecraft.smartCull = !level.getBlockState(pos).isSolidRender(level, pos);

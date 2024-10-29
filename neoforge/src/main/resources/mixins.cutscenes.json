@@ -5,10 +5,12 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [],
   "client": [
+    "ClientPayloadHandlerMixin",
     "GuiMixin",
     "RenderStateShardAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "refmap": ""
 }

@@ -187,6 +187,8 @@ public class ClientCutsceneManager {
                 } else {
                     finalRot = runningCutscene.cutscene.rotationHandler.apply(initCamRot, startRot, playerRot, Vec3.ZERO, dt).toVector3f();
                 }
+                camera.setYRot(finalRot.x);
+                camera.setXRot(finalRot.y);
                 event.setYaw(finalRot.x);
                 event.setPitch(finalRot.y);
                 event.setRoll(finalRot.z);

@@ -23,6 +23,6 @@
   },
   "rotation_handler": {
     "type": "cutscenes:ease_back",
-    "decay": 1
+    "decay": 10
   }
 }

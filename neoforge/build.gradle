@@ -16,6 +16,11 @@ loom {
             property "mixin.env.disableRefMap", "true"
         }
     }
+
+    mixin {
+        useLegacyMixinAp = true
+        defaultRefmapName = ""
+    }
 }
 
 configurations {
@@ -62,8 +67,6 @@ processResources {
     filesMatching(['META-INF/neoforge.mods.toml']) {
         expand replaceProperties + [project: project]
     }
-
-    exclude "cutscene_api-common-common-refmap.json"
 }
 
 shadowJar {
@@ -86,4 +89,10 @@ javadocJar {
     def commonSources = project(":common").javadocJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
+}
+
+build {
+    // how the FUCK do i get rid of the refmap file on neoforge???
+    // it causes the game to crash
+    project.delete(project.fileTree("cutscene_api.common.refmap.json"))
 }

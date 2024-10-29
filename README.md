@@ -30,5 +30,5 @@ Run `./gradlew build` in your terminal of choice (without `./` in Windows CMD).
 
 Output files will be in `fabric/build/libs` and `neoforge/build/libs`.
 
-On NeoForge, you will have to remove `cutscene_api.common.refmap.json` and `cutscene_api.neoforge.refmap.json`
-from the built JAR file manually in order for the mod to work. You can use any archiver for this.
+On NeoForge, you will have to remove `cutscene_api.common.refmap.json` from the built JAR file manually
+in order for the mod to work. You can use any archiver for this.
