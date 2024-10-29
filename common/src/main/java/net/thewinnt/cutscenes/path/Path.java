@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.client.preview.PathPreviewRenderer.Line;
 import net.thewinnt.cutscenes.easing.Easing;
@@ -180,11 +181,16 @@ public class Path implements PathLike {
             if (CutsceneManager.getSegmentType(id) == null) {
                 throw new IllegalArgumentException("Unknown segment type: " + id);
             }
-            if (id.equals(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"))) {
-                // special handling - look_at_point needs a rotation path, while others need this path
-                output.add(CutsceneManager.LOOK_AT_POINT.fromNetwork(buf, path));
-            } else {
-                output.add(CutsceneManager.getSegmentType(id).fromNetwork(buf, output));
+            try {
+                if (id.equals(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"))) {
+                    // special handling - look_at_point needs a rotation path, while others need this path
+                    output.add(CutsceneManager.LOOK_AT_POINT.fromNetwork(buf, path));
+                } else {
+                    output.add(CutsceneManager.getSegmentType(id).fromNetwork(buf, output));
+                }
+            } catch (Exception e) {
+                CutsceneAPI.LOGGER.error("Error loading element: {}", id);
+                throw new IllegalStateException("Error loading path", e);
             }
         }
         return output;

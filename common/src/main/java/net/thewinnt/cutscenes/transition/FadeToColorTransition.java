@@ -106,7 +106,7 @@ public class FadeToColorTransition implements Transition {
                 return ClientCutsceneManager.camera.getPlayerCamRot();
             } else {
                 double cutsceneProgress = (progress - progressLengthA) / progressLengthA * lengthA / cutscene.length.length();
-                return cutscene.getRotationAt(cutsceneProgress, level, startPos).add(startRot);
+                return cutscene.getTransformedRotation(cutsceneProgress, level, startPos, initCamRot, startRot, ClientCutsceneManager.camera.getPlayerCamRot(), ClientCutsceneManager.dt()).add(startRot);
             }
         } else {
             if (progress > progressLengthA) {
@@ -115,7 +115,7 @@ public class FadeToColorTransition implements Transition {
                 return startRot;
             } else {
                 double cutsceneProgress = (cutscene.length.length() - lengthA + lengthA * (progress / progressLengthA)) / cutscene.length.length();
-                return cutscene.getRotationAt(cutsceneProgress, level, startPos).add(startRot);
+                return cutscene.getTransformedRotation(cutsceneProgress, level, startPos, initCamRot, startRot, ClientCutsceneManager.camera.getPlayerCamRot(), ClientCutsceneManager.dt()).add(startRot);
             }
         }
     }

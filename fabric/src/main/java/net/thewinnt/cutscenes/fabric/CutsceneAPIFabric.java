@@ -18,6 +18,7 @@ import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
+import net.thewinnt.cutscenes.rotation.RotationSerializer;
 
 public final class CutsceneAPIFabric implements ModInitializer {
     public static final FabricPlatform PLATFORM = new FabricPlatform();
@@ -51,6 +52,7 @@ public final class CutsceneAPIFabric implements ModInitializer {
         ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.POINT_TYPE_KEY, CutsceneAPI.POINT_TYPES, RegistrationInfo.BUILT_IN);
         ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.TRANSITION_TYPE_KEY, CutsceneAPI.TRANSITION_TYPES, RegistrationInfo.BUILT_IN);
         ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.DELAY_PROVIDER_KEY, CutsceneAPI.DELAY_PROVIDERS, RegistrationInfo.BUILT_IN);
+        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.ROTATION_HANDLER_KEY, CutsceneAPI.ROTATION_HANDLERS, RegistrationInfo.BUILT_IN);
         Registry.register(BuiltInRegistries.ENTITY_TYPE, "cutscenes:waypoint", WAYPOINT);
 
         CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "line"), CutsceneManager.LINE);
@@ -73,6 +75,7 @@ public final class CutsceneAPIFabric implements ModInitializer {
         EasingSerializer.init();
         CutsceneEffectSerializer.init();
         DelayProviderSerializer.init();
+        RotationSerializer.init();
 
         PLATFORM.clientboundPackets.forEach(FabricPlatform::registerClientboundPacket);
         PLATFORM.serverboundPackets.forEach(FabricPlatform::registerServerboundPacket);

@@ -1,7 +1,11 @@
 package net.thewinnt.cutscenes;
 
 import com.mojang.logging.LogUtils;
+import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.effect.CutsceneEffect;
 import net.thewinnt.cutscenes.event.EndingReason;
@@ -25,6 +29,8 @@ public class CutsceneInstance {
     private final List<CutsceneEffect<?>> endedEffects = new ArrayList<>();
     private boolean endedStartTransition;
     private boolean endedEndTransition;
+    private Vec3 rotation;
+    private Vec3 position;
 
     public CutsceneInstance(CutsceneType cutscene) {
         this.cutscene = cutscene;
@@ -38,6 +44,7 @@ public class CutsceneInstance {
      * @return {@code true} if the cutscene should continue
      */
     public boolean tick() {
+        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
         if (!initialized) {
             this.timeManager.start();
             this.initialized = true;
@@ -49,6 +56,7 @@ public class CutsceneInstance {
         } else if (this.time > this.getEndTime()) {
             LOGGER.warn("Suspicious time: {}", this.time);
         }
+        profiler.push("transition");
         if (isTimeForStart()) {
             Transition transition = cutscene.startTransition;
             double progress = time / transition.getLength();
@@ -95,6 +103,7 @@ public class CutsceneInstance {
                 endedStartTransition = true;
             }
         }
+        profiler.popPush("effects");
         for (CutsceneEffect<?> i : cutscene.effects) {
             if (time >= i.startTime) {
                 if (!startedEffects.contains(i)) {
@@ -138,7 +147,7 @@ public class CutsceneInstance {
 
     public double getEndProress() {
         double endTime = getEndTime();
-        return (cutscene.endTransition.getLength() - (endTime - time)) / (double)cutscene.endTransition.getLength();
+        return (cutscene.endTransition.getLength() - (endTime - time)) / cutscene.endTransition.getLength();
     }
 
     public boolean endedStartTransition() {
@@ -147,5 +156,9 @@ public class CutsceneInstance {
 
     public boolean endedEndTransition() {
         return endedEndTransition;
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 }

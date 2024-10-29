@@ -10,6 +10,7 @@ import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 
@@ -89,7 +90,7 @@ public class SmoothEaseTransition implements Transition {
     @Override
     public Vec3 getRot(double progress, Level level, Vec3 startPos, Vec3 startRot, Vec3 initCamRot, CutsceneType cutscene) {
         double cutsceneProgress = progress * this.length / cutscene.length.length();
-        Vec3 rotation = cutscene.getRotationAt(cutsceneProgress, level, startPos);
+        Vec3 rotation = cutscene.getTransformedRotation(cutsceneProgress, level, startPos, initCamRot, startRot, ClientCutsceneManager.camera.getPlayerCamRot(), ClientCutsceneManager.dt());
         if (rotation == null) {
             rotation = initCamRot;
         }
@@ -100,7 +101,7 @@ public class SmoothEaseTransition implements Transition {
         double y = initCamRot.y;
         double z = initCamRot.z;
         if (countTowardsCutsceneTime && isStart) {
-            Vec3 rot0 = cutscene.getRotationAt(0, level, startPos);
+            Vec3 rot0 = cutscene.getTransformedRotation(0, level, startPos, initCamRot, startRot, ClientCutsceneManager.camera.getPlayerCamRot(), ClientCutsceneManager.dt());
             if (rot0 == null) {
                 rot0 = startRot;
             }
@@ -115,7 +116,7 @@ public class SmoothEaseTransition implements Transition {
             }
             return new Vec3(x, y, z);
         } else if (countTowardsCutsceneTime && !isStart) {
-            Vec3 rot1 = cutscene.getRotationAt(1, level, startPos);
+            Vec3 rot1 = cutscene.getTransformedRotation(1, level, startPos, initCamRot, startRot, ClientCutsceneManager.camera.getPlayerCamRot(), ClientCutsceneManager.dt());
             if (rot1 == null) {
                 rot1 = startRot;
             }
@@ -130,7 +131,7 @@ public class SmoothEaseTransition implements Transition {
             }
             return new Vec3(x, y, z);
         } else if (!countTowardsCutsceneTime && isStart) {
-            Vec3 rot0 = cutscene.getRotationAt(0, level, startPos);
+            Vec3 rot0 = cutscene.getTransformedRotation(0, level, startPos, initCamRot, startRot, ClientCutsceneManager.camera.getPlayerCamRot(), ClientCutsceneManager.dt());
             if (rot0 == null) {
                 rot0 = startRot;
             }
@@ -145,7 +146,7 @@ public class SmoothEaseTransition implements Transition {
             }
             return new Vec3(x, y, z);
         } else {
-            Vec3 rot1 = cutscene.getRotationAt(1, level, startPos);
+            Vec3 rot1 = cutscene.getTransformedRotation(1, level, startPos, initCamRot, startRot, ClientCutsceneManager.camera.getPlayerCamRot(), ClientCutsceneManager.dt());
             if (rot1 == null) {
                 rot1 = startRot;
             }

@@ -1,0 +1,28 @@
+{
+  "version": 0,
+  "length": {
+    "type": "seconds",
+    "length": 15
+  },
+  "path": {
+    "segments": [
+      {
+        "type": "cutscenes:line",
+        "start": [0, 0, 0],
+        "end": [15, 0, 0]
+      }
+    ]
+  },
+  "rotation": {
+    "segments": [
+      {
+        "type": "cutscenes:constant",
+        "point": [0, 0, 0]
+      }
+    ]
+  },
+  "rotation_handler": {
+    "type": "cutscenes:ease_back",
+    "decay": 1
+  }
+}

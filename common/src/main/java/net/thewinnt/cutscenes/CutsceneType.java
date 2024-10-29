@@ -3,8 +3,13 @@ package net.thewinnt.cutscenes;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.thewinnt.cutscenes.client.ClientCutsceneManager;
+import net.thewinnt.cutscenes.rotation.handler.CutsceneRotation;
+import net.thewinnt.cutscenes.rotation.handler.PlayerRotation;
 import net.thewinnt.cutscenes.time.CutsceneLength;
 import net.thewinnt.cutscenes.time.GameTickManager;
+import net.thewinnt.cutscenes.rotation.RotationHandler;
+import net.thewinnt.cutscenes.time.TimeManager;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonArray;
@@ -37,7 +42,7 @@ public class CutsceneType {
     public final Transition startTransition;
     public final Transition endTransition;
     public final boolean blockMovement;
-    public final boolean blockCameraRotation;
+    public final RotationHandler rotationHandler;
     public final ActionToggles actionToggles;
     public final boolean hideHand;
     public final boolean hideBlockOutline;
@@ -46,7 +51,7 @@ public class CutsceneType {
 
     /** Constructs a cutscene type with all parameters specified. */
     @SuppressWarnings("deprecation")
-    public CutsceneType(PathLike path, Path rotationProvider, CutsceneLength length, Transition start, Transition end, boolean blockMovement, boolean blockCameraRotation, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects) {
+    public CutsceneType(PathLike path, Path rotationProvider, CutsceneLength length, Transition start, Transition end, boolean blockMovement, RotationHandler rotationHandler, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects) {
         if (path instanceof Path pth) {
             this.path = pth;
         } else if (path != null) {
@@ -59,7 +64,7 @@ public class CutsceneType {
         this.startTransition = start;
         this.endTransition = end;
         this.blockMovement = path != null || blockMovement; // if there's a path, you can't block movement
-        this.blockCameraRotation = rotationProvider != null || blockCameraRotation; // same for rotation
+        this.rotationHandler = rotationHandler;
         this.actionToggles = toggles;
         this.hideHand = hideHand;
         this.hideBlockOutline = hideBlockOutline;
@@ -81,7 +86,7 @@ public class CutsceneType {
         this.startTransition = new SmoothEaseTransition(40, true, true);
         this.endTransition = new SmoothEaseTransition(40, false, false);
         this.blockMovement = true;
-        this.blockCameraRotation = true;
+        this.rotationHandler = CutsceneRotation.INSTANCE;
         this.actionToggles = new Builder(true).build();
         this.hideHand = false;
         this.hideBlockOutline = false;
@@ -108,8 +113,7 @@ public class CutsceneType {
      * @param level the level where the cutscene is run
      * @param cutsceneStart the cutscene's starting position
      * @return a point for the given progress, or {@code null} if there's no path. The returned point's coordinates
-     * are [yaw, pitch, roll], matching Minecraft's [y, x, z] coordinates respectively. By the way, the values on
-     * the F3 screen are [y / x] too.
+     * are [yaw, pitch, roll], matching Minecraft's [y, x, z] coordinates respectively.
      */
     @Nullable
     public Vec3 getRotationAt(double point, Level level, Vec3 cutsceneStart) {
@@ -117,19 +121,39 @@ public class CutsceneType {
         return rotationProvider.getPoint(point, level, cutsceneStart);
     }
 
+    /**
+     * Returns a point for this cutscene's camera rotation at given progress value, transformed by the
+     * rotation handler.
+     * @param point the progress value, in range [0, 1]
+     * @param level the world where the cutscene is run
+     * @param cutsceneStart the cutscene's starting position
+     * @param initCamRot the player's camera rotation before the cutscene began
+     * @param startRot the starting rotation of the cutscene
+     * @param playerRot the player's current rotation
+     * @param dt the time since last call, in seconds
+     * @return a point for the given progress, in format [yaw, pitch, roll] (aka minecraft [y, x, z]).
+     */
+    public Vec3 getTransformedRotation(double point, Level level, Vec3 cutsceneStart, Vec3 initCamRot, Vec3 startRot, Vec3 playerRot, double dt) {
+        Vec3 output;
+        if (rotationProvider == null) {
+            output = Vec3.ZERO;
+        } else {
+            output = rotationProvider.getPoint(point, level, cutsceneStart);
+        }
+        return rotationHandler.apply(initCamRot, startRot, playerRot, output, dt);
+    }
+
     /** Serializes this cutscene type to network, to fully reconstruct it later on the client side. */
     public void toNetwork(FriendlyByteBuf buf) {
         length.toNetwork(buf);
-        buf.writeBoolean(path == null);
-        if (path != null) path.toNetwork(buf);
-        buf.writeBoolean(rotationProvider == null);
-        if (rotationProvider != null) rotationProvider.toNetwork(buf);
+        buf.writeNullable(path, (buf1, path) -> path.toNetwork(buf1));
+        buf.writeNullable(rotationProvider, (buf1, path) -> path.toNetwork(buf1));
         buf.writeResourceLocation(CutsceneManager.getTransitionTypeId(startTransition.getSerializer()));
         startTransition.toNetwork(buf);
         buf.writeResourceLocation(CutsceneManager.getTransitionTypeId(endTransition.getSerializer()));
         endTransition.toNetwork(buf);
         buf.writeBoolean(blockMovement);
-        buf.writeBoolean(blockCameraRotation);
+        RotationHandler.toNetwork(buf, rotationHandler);
         actionToggles.toNetwork(buf);
         buf.writeBoolean(hideHand);
         buf.writeBoolean(hideBlockOutline);
@@ -139,26 +163,17 @@ public class CutsceneType {
     /** Reads a cutscene type from network. */
     public static CutsceneType fromNetwork(FriendlyByteBuf buf) {
         CutsceneLength length = CutsceneLength.fromNetwork(buf);
-        Path path, rotationProvider;
-        if (!buf.readBoolean()) {
-            path = Path.fromNetwork(buf, null);
-        } else {
-            path = null;
-        }
-        if (!buf.readBoolean()) {
-            rotationProvider = Path.fromNetwork(buf, path);
-        } else {
-            rotationProvider = null;
-        }
+        Path path = buf.readNullable(buf1 -> Path.fromNetwork(buf1, null));
+        Path rotationProvider = buf.readNullable(buf1 -> Path.fromNetwork(buf1, path));
         Transition start = Transition.fromNetwork(buf);
         Transition end = Transition.fromNetwork(buf);
         boolean blockMovement = buf.readBoolean();
-        boolean blockCameraRotation = buf.readBoolean();
+        RotationHandler rotationHandler = RotationHandler.fromNetwork(buf);
         ActionToggles actionToggles = ActionToggles.fromNetwork(buf);
         boolean hideHand = buf.readBoolean();
         boolean hideBlockOutline = buf.readBoolean();
         List<CutsceneEffect<?>> effects = buf.readCollection(ArrayList::new, CutsceneEffect::fromNetwork);
-        return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, blockCameraRotation, actionToggles, hideHand, hideBlockOutline, effects);
+        return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, rotationHandler, actionToggles, hideHand, hideBlockOutline, effects);
     }
 
     /** Reads a cutscene type from JSON. */
@@ -178,10 +193,16 @@ public class CutsceneType {
         CutsceneLength length = CutsceneLength.fromJson(json.get("length"));
         Path path = Path.fromJSON(JsonHelper.getNullableObject(json, "path"), null);
         Path rotation = Path.fromJSON(JsonHelper.getNullableObject(json, "rotation"), path);
-        Transition start = Transition.fromJSON(JsonHelper.getNullableObject(json, "start_transition"), new SmoothEaseTransition(40, true, true));
-        Transition end = Transition.fromJSON(JsonHelper.getNullableObject(json, "end_transition"), new SmoothEaseTransition(40, false, false));
+        Transition start = Transition.fromJSON(JsonHelper.getNullableObject(json, "start_transition"), TimeManager.DEFAULT_TRANSITIONS.get(length.manager().type()).get(true));
+        Transition end = Transition.fromJSON(JsonHelper.getNullableObject(json, "end_transition"), TimeManager.DEFAULT_TRANSITIONS.get(length.manager().type()).get(false));
         boolean blockMovement = GsonHelper.getAsBoolean(json, "block_movement", false) || path != null;
-        boolean blockRotation = GsonHelper.getAsBoolean(json, "block_rotation", false) || rotation != null;
+        RotationHandler rotationHandler;
+        if (json.has("block_rotation") || !json.has("rotation_handler")) {
+            boolean blockRotation = GsonHelper.getAsBoolean(json, "block_rotation", false) || rotation != null;
+            rotationHandler = blockRotation ? CutsceneRotation.INSTANCE : PlayerRotation.INSTANCE;
+        } else {
+            rotationHandler = RotationHandler.fromJson(json.get("rotation_handler"));
+        }
         ActionToggles toggles;
         if (json.has("disable_actions")) {
             toggles = ActionToggles.fromJson(json.get("disable_actions"));
@@ -197,6 +218,6 @@ public class CutsceneType {
         for (JsonElement i : effectsJson) {
             effects.add(CutsceneEffect.fromJSON(GsonHelper.convertToJsonObject(i, "effect")));
         }
-        return new CutsceneType(path, rotation, length, start, end, blockMovement, blockRotation, toggles, hideHand, hideBlockOutline, effects);
+        return new CutsceneType(path, rotation, length, start, end, blockMovement, rotationHandler, toggles, hideHand, hideBlockOutline, effects);
     }
 }

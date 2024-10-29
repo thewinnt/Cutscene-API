@@ -18,7 +18,7 @@ public final class CutsceneAPIFabricClient implements ClientModInitializer {
         FabricPlatform platform = CutsceneAPIFabric.PLATFORM;
         platform.clientboundPackets.forEach(type -> {
             ClientPlayNetworking.registerGlobalReceiver(type.type(), (packet, context) -> {
-                context.client().execute(packet::execute);
+                context.client().executeBlocking(packet::execute);
             });
         });
         CutsceneAPI.onInitializeClient(CLIENT_PLATFORM);

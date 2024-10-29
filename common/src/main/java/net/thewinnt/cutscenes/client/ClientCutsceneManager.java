@@ -5,6 +5,7 @@ import com.google.common.collect.HashBiMap;
 import com.mojang.logging.LogUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.player.KeyboardInput;
@@ -20,6 +21,7 @@ import net.thewinnt.cutscenes.event.EndingReason;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.platform.CameraAngleSetter;
 import net.thewinnt.cutscenes.util.ActionToggles;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 import java.util.Map;
@@ -39,6 +41,9 @@ public class ClientCutsceneManager {
     public static float startPathYaw;
     public static float startPathPitch;
     public static float startPathRoll;
+    private static double lastFrameTime;
+    private static double dt;
+    private static Vec3 cutsceneRot;
 
     private static CutsceneType previewedCutscene = null;
     public static Vec3 previewOffset;
@@ -154,41 +159,45 @@ public class ClientCutsceneManager {
             }
             Level level = Minecraft.getInstance().level;
             Minecraft.getInstance().getProfiler().push("cutscene_tick");
+            double now = now();
+            dt = now - lastFrameTime;
+            lastFrameTime = now;
+            if (!runningCutscene.isInitialized()) {
+                dt = 0;
+            }
             if (runningCutscene.tick()) {
-                float partialTick = (float) (runningCutscene.getTime() % 1f);
-                Minecraft.getInstance().getProfiler().popPush("cutscene_rotation");
-                Vec3 startRot = new Vec3(startCameraYaw, startCameraPitch, startCameraRoll);
+                Minecraft.getInstance().getProfiler().popPush("rotation");
+                Vector3f finalRot;
                 Vec3 initCamRot = new Vec3(initCameraYaw, initCameraPitch, initCameraRoll);
-                if (runningCutscene.isTimeForStart()) {
-                    double progress = runningCutscene.getTime() / runningCutscene.cutscene.startTransition.getLength();
-                    event.setRoll((float) runningCutscene.cutscene.startTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene.cutscene).z);
-                    if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
-                        // if the player can move but can't rotate, the camera won't update its rotation,
-                        // so we do it here
-                        event.setPitch(camera.getViewXRot(partialTick));
-                        event.setYaw(camera.getViewYRot(partialTick));
+                Vec3 startRot = new Vec3(startCameraYaw, startCameraPitch, startCameraRoll);
+                Vec3 playerRot = camera.getPlayerCamRot();
+                if (runningCutscene.cutscene.rotationProvider != null) {
+                    double progress = (runningCutscene.getTime() - runningCutscene.cutscene.startTransition.getOffCutsceneTime()) / runningCutscene.cutscene.length.length();
+                    cutsceneRot = runningCutscene.cutscene.getRotationAt(progress, level, startPosition);
+                    cutsceneRot = runningCutscene.cutscene.rotationHandler.apply(initCamRot, startRot, playerRot, cutsceneRot, dt);
+                    if (runningCutscene.isTimeForStart()) {
+                        progress = runningCutscene.getTime() / runningCutscene.cutscene.startTransition.getLength();
+                        finalRot = runningCutscene.cutscene.startTransition.getRot(progress, level, startPosition, startRot, camera.getPlayerCamRot(), runningCutscene.cutscene).toVector3f();
+                    } else if (runningCutscene.isTimeForEnd()) {
+                        progress = runningCutscene.getEndProress();
+                        finalRot = runningCutscene.cutscene.endTransition.getRot(progress, level, startPosition, startRot, camera.getPlayerCamRot(), runningCutscene.cutscene).toVector3f();
+                    } else {
+                        finalRot = cutsceneRot.toVector3f();
                     }
-                } else if (runningCutscene.isTimeForEnd()) {
-                    double progress = runningCutscene.getEndProress();
-                    event.setRoll((float) runningCutscene.cutscene.endTransition.getRot(progress, level, startPosition, startRot, initCamRot, runningCutscene.cutscene).z);
-                    if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
-                        event.setPitch(camera.getViewXRot(partialTick));
-                        event.setYaw(camera.getViewYRot(partialTick));
-                    }
-                } else if (runningCutscene.cutscene.rotationProvider != null) {
-                    double progress = runningCutscene.getTime() / runningCutscene.cutscene.length.length();
-                    event.setRoll((float) runningCutscene.cutscene.getRotationAt(progress, level, startPosition).z + startCameraRoll);
-                    if (!runningCutscene.cutscene.blockMovement && runningCutscene.cutscene.blockCameraRotation) {
-                        event.setPitch(camera.getViewXRot(partialTick));
-                        event.setYaw(camera.getViewYRot(partialTick));
-                    }
+                } else {
+                    finalRot = runningCutscene.cutscene.rotationHandler.apply(initCamRot, startRot, playerRot, Vec3.ZERO, dt).toVector3f();
                 }
+                event.setYaw(finalRot.x);
+                event.setPitch(finalRot.y);
+                event.setRoll(finalRot.z);
+                Minecraft.getInstance().getProfiler().pop();
             }
             Minecraft.getInstance().getProfiler().pop();
         } else {
             initCameraYaw = event.getYaw();
             initCameraPitch = event.getPitch();
             initCameraRoll = event.getRoll();
+            dt = -1;
         }
     }
 
@@ -219,5 +228,17 @@ public class ClientCutsceneManager {
 
     public static long getStartGameTime() {
         return startGameTime;
+    }
+
+    public static double dt() {
+        return dt;
+    }
+
+    public static Vec3 getCutsceneRotation() {
+        return cutsceneRot;
+    }
+
+    private static double now() {
+        return Util.getNanos() / 1000000000.0;
     }
 }

@@ -12,6 +12,7 @@ import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
+import net.thewinnt.cutscenes.rotation.RotationSerializer;
 
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class ModEventListener {
@@ -30,6 +31,7 @@ public class ModEventListener {
         event.register(CutsceneAPI.POINT_TYPES);
         event.register(CutsceneAPI.TRANSITION_TYPES);
         event.register(CutsceneAPI.DELAY_PROVIDERS);
+        event.register(CutsceneAPI.ROTATION_HANDLERS);
     }
 
     @SubscribeEvent
@@ -55,6 +57,8 @@ public class ModEventListener {
             EasingSerializer.init();
             CutsceneEffectSerializer.init();
             DelayProviderSerializer.init();
+            RotationSerializer.init();
+            // TODO fix kick from server
         }
     }
 }
