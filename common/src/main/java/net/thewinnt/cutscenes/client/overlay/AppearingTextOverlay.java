@@ -9,6 +9,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
+import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
@@ -31,9 +32,10 @@ public class AppearingTextOverlay implements Overlay {
         minecraft.getProfiler().push("prepare");
         TimeProvider time = (TimeProvider) config;
         Component text = this.config.text();
+        double tickrate = ClientCutsceneManager.runningCutscene.cutscene.length.manager().ticksPerUnit();
         // list 1: each component split into formatted strings
         List<Pair<String, Style>> styles = new ArrayList<>();
-        double currentTime = time.getTime();
+        double currentTime = time.getTime() * tickrate;
         final var state = new DrawingState();
         final DelayProvider delays = this.config.delays();
         text.getVisualOrderText().accept((index, nextStyle, codepoint) -> {

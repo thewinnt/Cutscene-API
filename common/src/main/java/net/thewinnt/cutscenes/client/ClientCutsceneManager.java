@@ -119,6 +119,9 @@ public class ClientCutsceneManager {
         isCutsceneRunning = false;
         if (runningCutscene != null) {
             CutsceneEvents.CUTSCENE_OVER_CLIENT.invoke(listener -> listener.accept(runningCutscene.cutscene, CLIENT_REGISTRY.inverse().get(runningCutscene.cutscene), minecraft.player, reason));
+            if (reason != EndingReason.FINISH) {
+                runningCutscene.interrupt();
+            }
         }
         runningCutscene = null;
         CutsceneOverlayManager.clearOverlays();

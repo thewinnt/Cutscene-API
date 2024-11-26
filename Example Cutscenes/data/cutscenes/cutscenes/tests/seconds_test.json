@@ -1,0 +1,16 @@
+{
+  "length": {
+    "type": "seconds",
+    "length": 10
+  },
+  "effects": [
+    {
+      "type": "cutscenes:appearing_text",
+      "start": 0,
+      "end": 10,
+      "text": "Testing the appearing text with a different time manager...",
+      "x": 0.1,
+      "y": 0.1
+    }
+  ]
+}

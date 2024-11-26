@@ -118,7 +118,21 @@ public class CutsceneInstance {
                 }
             }
         }
+        profiler.pop();
         return !endedEndTransition; // this effectively means "is cutscene over?"
+    }
+
+    /**
+     * Stops all running effects and transitions. The cutscene should not be ticked after
+     * calling this method.
+     */
+    public void interrupt() {
+        for (CutsceneEffect<?> i : cutscene.effects) {
+            if (startedEffects.contains(i) && !endedEffects.contains(i)) {
+                i.onEnd(Minecraft.getInstance().level, cutscene);;
+                endedEffects.add(i);
+            }
+        }
     }
 
     public double getTime() {

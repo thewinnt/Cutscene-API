@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.thewinnt.cutscenes.client.CutsceneOverlayManager;
 import net.thewinnt.cutscenes.event.CutsceneEvents;
 import net.thewinnt.cutscenes.networking.packets.CutsceneOverPacket;
 import net.thewinnt.cutscenes.path.point.PointProvider;

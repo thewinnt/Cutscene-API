@@ -39,10 +39,10 @@ public class BlitOverlay implements Overlay {
         RenderSystem.enableBlend();
         Matrix4f matrix4f = graphics.pose().last().pose();
         BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(matrix4f, x1, y1, 0).setColor(color).setUv(u1, v1);
-        bufferbuilder.addVertex(matrix4f, x1, y2, 0).setColor(color).setUv(u1, v2);
-        bufferbuilder.addVertex(matrix4f, x2, y2, 0).setColor(color).setUv(u2, v2);
-        bufferbuilder.addVertex(matrix4f, x2, y1, 0).setColor(color).setUv(u2, v1);
+        bufferbuilder.addVertex(matrix4f, x1, y1, -1).setColor(color).setUv(u1, v1);
+        bufferbuilder.addVertex(matrix4f, x1, y2, -1).setColor(color).setUv(u1, v2);
+        bufferbuilder.addVertex(matrix4f, x2, y2, -1).setColor(color).setUv(u2, v2);
+        bufferbuilder.addVertex(matrix4f, x2, y1, -1).setColor(color).setUv(u2, v1);
         BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
         RenderSystem.disableBlend();
     }
