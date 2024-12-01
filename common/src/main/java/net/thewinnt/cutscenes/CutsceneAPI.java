@@ -77,12 +77,12 @@ public class CutsceneAPI {
     public static final ResourceKey<Registry<RotationSerializer<?>>> ROTATION_HANDLER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:rotation_handlers"));
 
     // registries
-    public static final DefaultedMappedRegistry<EasingSerializer<?>> EASING_SERIALIZERS = new DefaultedMappedRegistry<>("cutscenes:linear", EASING_SERIALIZER_KEY, Lifecycle.stable(), false);
+    public static final MappedRegistry<EasingSerializer<?>> EASING_SERIALIZERS = new MappedRegistry<>(EASING_SERIALIZER_KEY, Lifecycle.stable());
     public static final MappedRegistry<CutsceneEffectSerializer<?>> CUTSCENE_EFFECT_SERIALIZERS = new MappedRegistry<>(CUTSCENE_EFFECT_SERIALIZER_KEY, Lifecycle.stable());
     public static final MappedRegistry<SegmentSerializer<?>> SEGMENT_TYPES = new MappedRegistry<>(SEGMENT_TYPE_KEY, Lifecycle.stable());
     public static final MappedRegistry<PointSerializer<?>> POINT_TYPES = new MappedRegistry<>(POINT_TYPE_KEY, Lifecycle.stable());
-    public static final DefaultedMappedRegistry<TransitionSerializer<?>> TRANSITION_TYPES = new DefaultedMappedRegistry<>("cutscenes:no_op", TRANSITION_TYPE_KEY, Lifecycle.stable(), false);
-    public static final DefaultedMappedRegistry<DelayProviderSerializer<?>> DELAY_PROVIDERS = new DefaultedMappedRegistry<>("cutscenes:undertale", DELAY_PROVIDER_KEY, Lifecycle.stable(), false);
+    public static final MappedRegistry<TransitionSerializer<?>> TRANSITION_TYPES = new MappedRegistry<>(TRANSITION_TYPE_KEY, Lifecycle.stable());
+    public static final MappedRegistry<DelayProviderSerializer<?>> DELAY_PROVIDERS = new MappedRegistry<>(DELAY_PROVIDER_KEY, Lifecycle.stable());
     public static final MappedRegistry<RotationSerializer<?>> ROTATION_HANDLERS = new MappedRegistry<>(ROTATION_HANDLER_KEY, Lifecycle.stable());
 
     public static void onInitialize(@NotNull PlatformAbstractions abstractions) {

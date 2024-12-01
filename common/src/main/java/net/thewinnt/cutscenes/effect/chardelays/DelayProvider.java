@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +39,11 @@ public interface DelayProvider {
             return fromJSONPrimitive(json.getAsJsonPrimitive());
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            DelayProviderSerializer<?> serializer = CutsceneAPI.DELAY_PROVIDERS.get(ResourceLocation.parse(obj.get("type").getAsString()));
+            ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
+            DelayProviderSerializer<?> serializer = CutsceneAPI.DELAY_PROVIDERS.get(type);
+            if (serializer == null) {
+                throw new IllegalArgumentException("Unknown delay provider type: " + type);
+            }
             return serializer.fromJSON(obj);
         }
         throw new IllegalArgumentException("Cannot get DelayProvider from JSON: " + json);

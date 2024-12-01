@@ -183,10 +183,11 @@ public class CutsceneType {
         if (dataVersionJson != null) {
             dataVersion = dataVersionJson.getAsInt();
         } else {
+            CutsceneAPI.LOGGER.info("Loading a cutscene type with no version specified, assuming it is 0. Current version is {}.", CutsceneAPI.DATA_VERSION);
             dataVersion = 0;
         }
         if (dataVersion > CutsceneAPI.DATA_VERSION) {
-            CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is greater than the current one ({}). Things may break!", dataVersion, CutsceneAPI.DATA_VERSION);
+            CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is newer than the current one ({}). Things may break!", dataVersion, CutsceneAPI.DATA_VERSION);
         } else if (dataVersion < CutsceneAPI.DATA_VERSION) {
             CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is earlier than the current one ({}). The cutscene should be updated to the new format to make sure it shows up correctly!", dataVersion, CutsceneAPI.DATA_VERSION);
         }
