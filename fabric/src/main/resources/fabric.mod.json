@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "cutscene_api",
-  "version": "${mod_version}",
+  "version": "mc${minecraft_version}-fabric-${mod_version}",
   "name": "Cutscene API",
   "description": "A Minecraft mod for making cutscenes",
   "authors": [
     "TheWinNT"
   ],
   "contact": {
-    "homepage": "https://github.com/thewinnt/Cutscene-API-Forge",
+    "homepage": "https://modrinth.com/mod/cutscene-api",
     "sources": "https://github.com/thewinnt/Cutscene-API-Forge",
     "issues": "https://github.com/thewinnt/Cutscene-API-Forge/issues"
   },
