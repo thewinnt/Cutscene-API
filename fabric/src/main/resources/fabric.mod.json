@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "cutscene_api",
-  "version": "mc${minecraft_version}-fabric-${mod_version}",
+  "version": "${mod_version}",
   "name": "Cutscene API",
   "description": "A Minecraft mod for making cutscenes",
   "authors": [
