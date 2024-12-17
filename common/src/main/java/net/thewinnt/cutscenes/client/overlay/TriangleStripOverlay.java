@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.client.Overlay;
@@ -24,7 +25,8 @@ public class TriangleStripOverlay implements Overlay {
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object config) {
         minecraft.getProfiler().push("cutscenes:triangle_strip");
         TimeProvider time = (TimeProvider) config;
-        VertexConsumer consumer = graphics.bufferSource().getBuffer(TRIANGLE_STRIP);
+        MultiBufferSource.BufferSource source = graphics.bufferSource();
+        VertexConsumer consumer = source.getBuffer(TRIANGLE_STRIP);
         PoseStack stack = graphics.pose();
         stack.pushPose();
         Matrix4f matrix4f = stack.last().pose();
@@ -32,8 +34,9 @@ public class TriangleStripOverlay implements Overlay {
         for (DynamicVertex i : this.config.vertices()) {
             float x = i.x().get(t, width);
             float y = i.y().get(t, height);
-            consumer.addVertex(matrix4f, x, y, 0).setColor(i.color().toARGB(t));
+            consumer.vertex(matrix4f, x, y, 0).color(i.color().toARGB(t)).endVertex();
         }
+        source.endBatch(TRIANGLE_STRIP);
         stack.popPose();
         minecraft.getProfiler().pop();
     }

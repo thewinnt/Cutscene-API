@@ -1,28 +1,34 @@
-package net.thewinnt.cutscenes.neoforge;
+package net.thewinnt.cutscenes.forge;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.EntityType;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
-import net.neoforged.neoforge.event.OnDatapackSyncEvent;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadHandler;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
@@ -34,12 +40,22 @@ import net.thewinnt.cutscenes.platform.CameraAngleSetter;
 import net.thewinnt.cutscenes.platform.PacketType;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME)
-public class NeoForgePlatform implements PlatformAbstractions {
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
+public class ForgePlatform implements PlatformAbstractions {
+    public static final String NETWORK_VERSION = "1.6";
+    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
+        new ResourceLocation("cutscenes", "network"),
+        () -> NETWORK_VERSION,
+        NETWORK_VERSION::equals,
+        NETWORK_VERSION::equals
+    );
+    private static int idCounter;
     private final List<PreparableReloadListener> reloadListeners = new ArrayList<>();
     protected final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();
     private final List<Consumer<CommandDispatcher<CommandSourceStack>>> commandMakers = new ArrayList<>();
     public final List<Runnable> onLogout = new ArrayList<>();
+    public final Map<ResourceKey<?>, Object> registryObjects = new HashMap<>();
+    public final Map<ResourceKey<?>, Consumer<?>> registries = new HashMap<>();
     protected final List<Runnable> clientTick = new ArrayList<>();
     public List<PacketType<? extends AbstractClientboundPacket>> clientboundPackets = new ArrayList<>();
     public List<PacketType<? extends AbstractServerboundPacket>> serverboundPackets = new ArrayList<>();
@@ -49,36 +65,53 @@ public class NeoForgePlatform implements PlatformAbstractions {
         reloadListeners.add(listener);
     }
 
+    @Override
+    public <T> T register(ResourceKey<T> id, T element) {
+        this.registryObjects.put(id, element);
+        return element;
+    }
+
+    @Override
+    public <T> void registerRegistry(ResourceKey<Registry<T>> key, Consumer<MappedRegistry<T>> setter) {
+        this.registries.put(key, setter);
+    }
+
     @SubscribeEvent
     public static void addReloadListeners(AddReloadListenerEvent event) {
-        NeoForgePlatform platform = CutsceneAPINeoForge.PLATFORM;
+        ForgePlatform platform = CutsceneAPIForge.PLATFORM;
         platform.reloadListeners.forEach(event::addListener);
     }
 
     @Override
-    public <T extends AbstractClientboundPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader) {
+    public <T extends AbstractClientboundPacket> void registerClientboundPacket(Class<T> type, AbstractPacket.PacketReader<T> reader, ResourceLocation id) {
         if (clientboundPackets == null) {
             throw new IllegalStateException("Too late! Clientbound packets should be registered during mod initialization");
         }
-        clientboundPackets.add(new PacketType<>(type, reader));
+        CHANNEL.registerMessage(idCounter++, type, AbstractPacket::write, reader::read, (t, contextSupplier) -> {
+            contextSupplier.get().enqueueWork(t::execute);
+            contextSupplier.get().setPacketHandled(true);
+        }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
 
     @Override
     public void sendPacketToPlayer(AbstractClientboundPacket packet, ServerPlayer player) {
-        PacketDistributor.sendToPlayer(player, packet);
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
     @Override
-    public <T extends AbstractServerboundPacket> void registerServerboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader) {
+    public <T extends AbstractServerboundPacket> void registerServerboundPacket(Class<T> type, AbstractPacket.PacketReader<T> reader, ResourceLocation id) {
         if (serverboundPackets == null) {
             throw new IllegalStateException("Too late! Serverbound packets should be registered during mod initialization");
         }
-        serverboundPackets.add(new PacketType<>(type, reader));
+        CHANNEL.registerMessage(idCounter++, type, AbstractPacket::write, reader::read, (t, contextSupplier) -> {
+            contextSupplier.get().enqueueWork(() -> t.execute(contextSupplier.get().getSender()));
+            contextSupplier.get().setPacketHandled(true);
+        }, Optional.of(NetworkDirection.PLAY_TO_SERVER));
     }
 
     @Override
     public void sendPacketFromPlayer(AbstractServerboundPacket packet) {
-        PacketDistributor.sendToServer(packet);
+        CHANNEL.sendToServer(packet);
     }
 
     @Override
@@ -108,23 +141,7 @@ public class NeoForgePlatform implements PlatformAbstractions {
 
     @Override
     public EntityType<WaypointEntity> getWaypointEntityType() {
-        return CutsceneAPIEntities.WAYPOINT.value();
-    }
-
-    public static <T extends AbstractClientboundPacket> IPayloadHandler<T> createClientboundHandler(PacketType<T> type) {
-        return (payload, context) -> context.enqueueWork(payload::execute);
-    }
-
-    public static <T extends AbstractServerboundPacket> IPayloadHandler<T> createServerboundHandler(PacketType<T> type) {
-        return (payload, context) -> context.enqueueWork(() -> payload.execute(((ServerPlayer) context.player())));
-    }
-
-    public static <T extends AbstractClientboundPacket> void registerClientboundPacket(PayloadRegistrar registrar, PacketType<T> type) {
-        registrar.playToClient(type.type(), type.codec(), createClientboundHandler(type));
-    }
-
-    public static <T extends AbstractServerboundPacket> void registerServerboundPacket(PayloadRegistrar registrar, PacketType<T> type) {
-        registrar.playToServer(type.type(), type.codec(), createServerboundHandler(type));
+        return CutsceneAPIEntities.WAYPOINT.get();
     }
 
     // --- EVENT LISTENERS ---
@@ -133,21 +150,25 @@ public class NeoForgePlatform implements PlatformAbstractions {
     @SubscribeEvent
     public static void sendRegistry(OnDatapackSyncEvent event) {
         if (event != null && event.getPlayer() != null) {
-            PacketDistributor.sendToPlayer(event.getPlayer(), new UpdateCutscenesPacket(CutsceneManager.REGISTRY));
+            CHANNEL.send(PacketDistributor.PLAYER.with(event::getPlayer), new UpdateCutscenesPacket(CutsceneManager.REGISTRY));
         } else {
-            PacketDistributor.sendToAllPlayers(new UpdateCutscenesPacket(CutsceneManager.REGISTRY));
+            CHANNEL.send(PacketDistributor.ALL.noArg(), new UpdateCutscenesPacket(CutsceneManager.REGISTRY));
         }
     }
 
     @SubscribeEvent
     public static void sendPreviewToNewPlayers(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player && CutsceneManager.getPreviewedCutscene() != null && CutsceneManager.previewOffset != null) {
-            PacketDistributor.sendToPlayer(player, new PreviewCutscenePacket(CutsceneManager.REGISTRY.inverse().get(CutsceneManager.getPreviewedCutscene()), CutsceneManager.previewOffset, CutsceneManager.previewPathYaw, CutsceneManager.previewPathPitch, CutsceneManager.previewPathRoll));
+            CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new PreviewCutscenePacket(CutsceneManager.REGISTRY.inverse().get(CutsceneManager.getPreviewedCutscene()), CutsceneManager.previewOffset, CutsceneManager.previewPathYaw, CutsceneManager.previewPathPitch, CutsceneManager.previewPathRoll));
         }
     }
 
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
-        CutsceneAPINeoForge.PLATFORM.commandMakers.forEach(consumer -> consumer.accept(event.getDispatcher()));
+        CutsceneAPIForge.PLATFORM.commandMakers.forEach(consumer -> consumer.accept(event.getDispatcher()));
     }
+
+    // TODO networking (see 1.20.1-forge branch!)
+    // TODO start porting natives
+    // TODO start porting main mod
 }

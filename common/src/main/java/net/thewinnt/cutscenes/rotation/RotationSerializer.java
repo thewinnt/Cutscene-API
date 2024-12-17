@@ -18,10 +18,10 @@ import java.util.Map;
 public interface RotationSerializer<T extends RotationHandler> {
     Map<String, RotationHandler> SIMPLE_HANDLERS = new HashMap<>();
 
-    RotationSerializer<CutsceneRotation> CUTSCENE = registerSimple(CutsceneRotation.INSTANCE, ResourceLocation.parse("cutscenes:cutscene"));
-    RotationSerializer<PlayerRotation> PLAYER = registerSimple(PlayerRotation.INSTANCE, ResourceLocation.parse("cutscenes:player"));
-    RotationSerializer<AddToCutsceneRotation> ADD = registerSimple(AddToCutsceneRotation.INSTANCE, ResourceLocation.parse("cutscenes:add"));
-    RotationSerializer<EaseBackRotation> EASE_BACK = register(EaseBackSerializer.INSTANCE, ResourceLocation.parse("cutscenes:ease_back"));
+    RotationSerializer<CutsceneRotation> CUTSCENE = registerSimple(CutsceneRotation.INSTANCE, new ResourceLocation("cutscenes:cutscene"));
+    RotationSerializer<PlayerRotation> PLAYER = registerSimple(PlayerRotation.INSTANCE, new ResourceLocation("cutscenes:player"));
+    RotationSerializer<AddToCutsceneRotation> ADD = registerSimple(AddToCutsceneRotation.INSTANCE, new ResourceLocation("cutscenes:add"));
+    RotationSerializer<EaseBackRotation> EASE_BACK = register(EaseBackSerializer.INSTANCE, new ResourceLocation("cutscenes:ease_back"));
 
     void toNetwork(FriendlyByteBuf buf, T handler);
     T fromNetwork(FriendlyByteBuf buf);

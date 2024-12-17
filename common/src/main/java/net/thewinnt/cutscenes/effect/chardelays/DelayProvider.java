@@ -39,7 +39,7 @@ public interface DelayProvider {
             return fromJSONPrimitive(json.getAsJsonPrimitive());
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
+            ResourceLocation type = new ResourceLocation(GsonHelper.getAsString(obj, "type"));
             DelayProviderSerializer<?> serializer = CutsceneAPI.DELAY_PROVIDERS.get(type);
             if (serializer == null) {
                 throw new IllegalArgumentException("Unknown delay provider type: " + type);
@@ -63,7 +63,7 @@ public interface DelayProvider {
 
     static DelayProvider fromJSONPrimitive(JsonPrimitive json) {
         String value = json.getAsString();
-        ResourceLocation test = ResourceLocation.parse(value);
+        ResourceLocation test = new ResourceLocation(value);
         if (DelayProviderSerializer.SINGLETONS.containsKey(test)) {
             return DelayProviderSerializer.SINGLETONS.get(test);
         }

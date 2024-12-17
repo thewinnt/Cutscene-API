@@ -48,8 +48,8 @@ public class PathPreviewRenderer {
             PathLike segment = path.getSegment(i);
             Vec3 start = PointProvider.getPoint(segment.getStart(l, s), l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
             Vec3 end = PointProvider.getPoint(segment.getEnd(l, s), l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
-            drawPoint(stack, consumer, start, 0.3F, POINT_COLORS.getFirst());
-            drawPoint(stack, consumer, end, 0.3F, POINT_COLORS.getFirst());
+            drawPoint(stack, consumer, start, 0.3F, POINT_COLORS.get(0));
+            drawPoint(stack, consumer, end, 0.3F, POINT_COLORS.get(0));
             double ticksPerWeight = type.length.length() * type.length.manager().ticksPerUnit() * 3 / path.getWeightSum(); // roughly one line per frame at 60 fps
             int thisLength = (int)(ticksPerWeight * segment.getWeight());
             for (int j = 0; j < thisLength; j++) {
@@ -83,8 +83,8 @@ public class PathPreviewRenderer {
     /** Draws a line relative to the camera */
     private static void drawLineLocal(PoseStack stack, VertexConsumer consumer, float x1, float y1, float z1, float x2, float y2, float z2, Vector3f color) {
         Matrix4f matrix4f = stack.last().pose();
-        consumer.addVertex(matrix4f, x1, y1, z1).setColor(color.x(), color.y(), color.z(), 1f).setNormal(0, 0, 0);
-        consumer.addVertex(matrix4f, x2, y2, z2).setColor(color.x(), color.y(), color.z(), 1f).setNormal(0, 0, 0);
+        consumer.vertex(matrix4f, x1, y1, z1).color(color.x(), color.y(), color.z(), 1f).normal(0, 0, 0).endVertex();
+        consumer.vertex(matrix4f, x2, y2, z2).color(color.x(), color.y(), color.z(), 1f).normal(0, 0, 0).endVertex();
     }
 
     /** Draws a line relative to the world center */

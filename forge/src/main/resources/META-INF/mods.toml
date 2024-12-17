@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+#issueTrackerURL = ""
+license = "MIT"
+
+[[mods]]
+modId = "cutscene_api"
+version = "${version}"
+displayName = "Cutscene API"
+authors = "TheWinNT"
+description = '''
+A Minecraft mod that adds cutscene mechanics to the game. Can be useful for mapmakers and mod developers.
+'''
+#logoFile = ""
+
+[[dependencies.cutscene_api]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cutscene_api]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1]"
+ordering = "NONE"
+side = "BOTH"

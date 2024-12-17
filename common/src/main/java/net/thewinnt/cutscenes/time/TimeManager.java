@@ -45,12 +45,6 @@ public interface TimeManager {
     void start();
 
     /**
-     * Notifies the time manager that the game tick rate has changed.
-     * @param tickrate the new tickrate, in game ticks per second.
-     */
-    void setGameTickRate(float tickrate);
-
-    /**
      * Notifies the time manager that the game time has been synchronized.
      * @param gameTime the current game time
      */

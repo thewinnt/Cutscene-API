@@ -1,8 +1,6 @@
 package net.thewinnt.cutscenes.networking;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamDecoder;
-import net.minecraft.network.codec.StreamEncoder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
@@ -10,9 +8,9 @@ import net.thewinnt.cutscenes.path.point.PointProvider;
 
 import java.util.function.IntFunction;
 
+import io.netty.buffer.ByteBuf;
+
 public class CutsceneNetworkHandler {
-    /** @deprecated use {@link FriendlyByteBuf#readVec3()} instead */
-    @Deprecated(forRemoval = true)
     public static Vec3 readVec3(FriendlyByteBuf buf) {
         if (buf.readBoolean()) {
             double x = buf.readDouble();
@@ -33,8 +31,6 @@ public class CutsceneNetworkHandler {
         }
     }
 
-    /** @deprecated use {@link FriendlyByteBuf#writeVec3(Vec3)} instead */
-    @Deprecated(forRemoval = true)
     public static void writeVec3(FriendlyByteBuf buf, Vec3 vec) {
         if (vec == null) {
             buf.writeBoolean(false); // is present
@@ -86,5 +82,15 @@ public class CutsceneNetworkHandler {
         for (T i : array) {
             writer.encode(buf, i);
         }
+    }
+
+    @FunctionalInterface
+    public interface StreamDecoder<B extends ByteBuf, T> {
+        T decode(B buf);
+    }
+
+    @FunctionalInterface
+    public interface StreamEncoder<B extends ByteBuf, T> {
+        void encode(B buf, T object);
     }
 }

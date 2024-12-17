@@ -67,12 +67,12 @@ public class Path implements PathLike {
 
     @Override
     public PointProvider getStart(Level level, Vec3 cutsceneStart) {
-        return this.segments.getFirst().getStart(level, cutsceneStart);
+        return this.segments.get(0).getStart(level, cutsceneStart);
     }
 
     @Override
     public PointProvider getEnd(Level level, Vec3 cutsceneStart) {
-        return this.segments.getLast().getEnd(level, cutsceneStart);
+        return this.segments.get(this.segments.size() - 1).getEnd(level, cutsceneStart);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class Path implements PathLike {
     }
 
     public PathLike last() {
-        return this.segments.getLast();
+        return this.segments.get(this.segments.size() - 1);
     }
 
     /** Literally makes it shorter */
@@ -182,7 +182,7 @@ public class Path implements PathLike {
                 throw new IllegalArgumentException("Unknown segment type: " + id);
             }
             try {
-                if (id.equals(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"))) {
+                if (id.equals(new ResourceLocation("cutscenes", "look_at_point"))) {
                     // special handling - look_at_point needs a rotation path, while others need this path
                     output.add(CutsceneManager.LOOK_AT_POINT.fromNetwork(buf, path));
                 } else {
@@ -212,11 +212,11 @@ public class Path implements PathLike {
         JsonArray segments_j = json.getAsJsonArray("segments");
         for (JsonElement i : segments_j) {
             JsonObject j = i.getAsJsonObject();
-            ResourceLocation id = ResourceLocation.parse(j.get("type").getAsString());
+            ResourceLocation id = new ResourceLocation(j.get("type").getAsString());
             if (CutsceneManager.getSegmentType(id) == null) {
                 throw new IllegalArgumentException("Unknown segment type: " + id);
             }
-            if (id.equals(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"))) {
+            if (id.equals(new ResourceLocation("cutscenes", "look_at_point"))) {
                 // special handling - look_at_point needs a rotation path, while others need this path
                 output.add(CutsceneManager.LOOK_AT_POINT.fromJSON(j, path));
             } else {

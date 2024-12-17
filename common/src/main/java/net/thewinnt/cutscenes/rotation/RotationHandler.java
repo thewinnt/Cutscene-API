@@ -15,7 +15,7 @@ import net.thewinnt.cutscenes.rotation.handler.CutsceneRotation;
  * Defines how to handle the player's rotation.
  */
 public interface RotationHandler {
-    ResourceLocation UNKNOWN = ResourceLocation.withDefaultNamespace("null");
+    ResourceLocation UNKNOWN = new ResourceLocation("null");
     /**
      * Applies the rotation transform. There is at most one rotation handler ticked at any point in time, so you
      * can freely store data in your instances.
@@ -74,7 +74,7 @@ public interface RotationHandler {
             return CutsceneRotation.INSTANCE;
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
+            ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(obj, "type"));
             RotationSerializer<?> serializer = CutsceneAPI.ROTATION_HANDLERS.get(id);
             if (serializer != null) {
                 return serializer.fromJson(obj);

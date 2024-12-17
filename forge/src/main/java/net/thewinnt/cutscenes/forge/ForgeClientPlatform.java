@@ -1,13 +1,13 @@
-package net.thewinnt.cutscenes.neoforge;
+package net.thewinnt.cutscenes.forge;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.renderer.RenderType;
-import net.thewinnt.cutscenes.neoforge.mixin.RenderStateShardAccessor;
+import net.thewinnt.cutscenes.forge.mixin.RenderStateShardAccessor;
 import net.thewinnt.cutscenes.platform.ClientPlatformAbstractions;
 
-public class NeoForgeClientPlatform extends NeoForgePlatform implements ClientPlatformAbstractions {
+public class ForgeClientPlatform extends ForgePlatform implements ClientPlatformAbstractions {
     public static final RenderType TRIANGLE_STRIP = RenderType.create(
         "cutscenes:triangle_strip",
         DefaultVertexFormat.POSITION_COLOR,

@@ -68,32 +68,41 @@ public class CutsceneAPI {
     private static ClientPlatformAbstractions CLIENT_PLATFORM;
 
     // registry keys
-    public static final ResourceKey<Registry<EasingSerializer<?>>> EASING_SERIALIZER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:easing_types"));
-    public static final ResourceKey<Registry<CutsceneEffectSerializer<?>>> CUTSCENE_EFFECT_SERIALIZER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:effect_serializers"));
-    public static final ResourceKey<Registry<SegmentSerializer<?>>> SEGMENT_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:segment_types"));
-    public static final ResourceKey<Registry<PointSerializer<?>>> POINT_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:point_providers"));
-    public static final ResourceKey<Registry<TransitionSerializer<?>>> TRANSITION_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:transition_types"));
-    public static final ResourceKey<Registry<DelayProviderSerializer<?>>> DELAY_PROVIDER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:delay_providers"));
-    public static final ResourceKey<Registry<RotationSerializer<?>>> ROTATION_HANDLER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:rotation_handlers"));
+    public static final ResourceKey<Registry<EasingSerializer<?>>> EASING_SERIALIZER_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:easing_types"));
+    public static final ResourceKey<Registry<CutsceneEffectSerializer<?>>> CUTSCENE_EFFECT_SERIALIZER_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:effect_serializers"));
+    public static final ResourceKey<Registry<SegmentSerializer<?>>> SEGMENT_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:segment_types"));
+    public static final ResourceKey<Registry<PointSerializer<?>>> POINT_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:point_providers"));
+    public static final ResourceKey<Registry<TransitionSerializer<?>>> TRANSITION_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:transition_types"));
+    public static final ResourceKey<Registry<DelayProviderSerializer<?>>> DELAY_PROVIDER_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:delay_providers"));
+    public static final ResourceKey<Registry<RotationSerializer<?>>> ROTATION_HANDLER_KEY = ResourceKey.createRegistryKey(new ResourceLocation("cutscenes:rotation_handlers"));
 
     // registries
-    public static final MappedRegistry<EasingSerializer<?>> EASING_SERIALIZERS = new MappedRegistry<>(EASING_SERIALIZER_KEY, Lifecycle.stable());
-    public static final MappedRegistry<CutsceneEffectSerializer<?>> CUTSCENE_EFFECT_SERIALIZERS = new MappedRegistry<>(CUTSCENE_EFFECT_SERIALIZER_KEY, Lifecycle.stable());
-    public static final MappedRegistry<SegmentSerializer<?>> SEGMENT_TYPES = new MappedRegistry<>(SEGMENT_TYPE_KEY, Lifecycle.stable());
-    public static final MappedRegistry<PointSerializer<?>> POINT_TYPES = new MappedRegistry<>(POINT_TYPE_KEY, Lifecycle.stable());
-    public static final MappedRegistry<TransitionSerializer<?>> TRANSITION_TYPES = new MappedRegistry<>(TRANSITION_TYPE_KEY, Lifecycle.stable());
-    public static final MappedRegistry<DelayProviderSerializer<?>> DELAY_PROVIDERS = new MappedRegistry<>(DELAY_PROVIDER_KEY, Lifecycle.stable());
-    public static final MappedRegistry<RotationSerializer<?>> ROTATION_HANDLERS = new MappedRegistry<>(ROTATION_HANDLER_KEY, Lifecycle.stable());
+    public static MappedRegistry<EasingSerializer<?>> EASING_SERIALIZERS;
+    public static MappedRegistry<CutsceneEffectSerializer<?>> CUTSCENE_EFFECT_SERIALIZERS;
+    public static MappedRegistry<SegmentSerializer<?>> SEGMENT_TYPES;
+    public static MappedRegistry<PointSerializer<?>> POINT_TYPES;
+    public static MappedRegistry<TransitionSerializer<?>> TRANSITION_TYPES;
+    public static MappedRegistry<DelayProviderSerializer<?>> DELAY_PROVIDERS;
+    public static MappedRegistry<RotationSerializer<?>> ROTATION_HANDLERS;
 
     public static void onInitialize(@NotNull PlatformAbstractions abstractions) {
         CutsceneAPI.PLATFORM = abstractions;
 
+        // registries
+        abstractions.registerRegistry(CutsceneAPI.EASING_SERIALIZER_KEY, registry -> CutsceneAPI.EASING_SERIALIZERS = registry);
+        abstractions.registerRegistry(CutsceneAPI.CUTSCENE_EFFECT_SERIALIZER_KEY, registry -> CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS = registry);
+        abstractions.registerRegistry(CutsceneAPI.SEGMENT_TYPE_KEY, registry -> CutsceneAPI.SEGMENT_TYPES = registry);
+        abstractions.registerRegistry(CutsceneAPI.POINT_TYPE_KEY, registry -> CutsceneAPI.POINT_TYPES = registry);
+        abstractions.registerRegistry(CutsceneAPI.TRANSITION_TYPE_KEY, registry -> CutsceneAPI.TRANSITION_TYPES = registry);
+        abstractions.registerRegistry(CutsceneAPI.DELAY_PROVIDER_KEY, registry -> CutsceneAPI.DELAY_PROVIDERS = registry);
+        abstractions.registerRegistry(CutsceneAPI.ROTATION_HANDLER_KEY, registry -> CutsceneAPI.ROTATION_HANDLERS = registry);
+
         // networking
-        abstractions.registerClientboundPacket(PreviewCutscenePacket.TYPE, PreviewCutscenePacket::read);
-        abstractions.registerClientboundPacket(StartCutscenePacket.TYPE, StartCutscenePacket::read);
-        abstractions.registerClientboundPacket(StopCutscenePacket.TYPE, StopCutscenePacket::read);
-        abstractions.registerClientboundPacket(UpdateCutscenesPacket.TYPE, UpdateCutscenesPacket::read);
-        abstractions.registerServerboundPacket(CutsceneOverPacket.TYPE, buf -> new CutsceneOverPacket());
+        abstractions.registerClientboundPacket(PreviewCutscenePacket.class, PreviewCutscenePacket::read, PreviewCutscenePacket.ID);
+        abstractions.registerClientboundPacket(StartCutscenePacket.class, StartCutscenePacket::read, StartCutscenePacket.ID);
+        abstractions.registerClientboundPacket(StopCutscenePacket.class, StopCutscenePacket::read, StopCutscenePacket.ID);
+        abstractions.registerClientboundPacket(UpdateCutscenesPacket.class, UpdateCutscenesPacket::read, UpdateCutscenesPacket.ID);
+        abstractions.registerServerboundPacket(CutsceneOverPacket.class, buf -> new CutsceneOverPacket(), CutsceneOverPacket.ID);
 
         // other stuff
         addReloadListeners(abstractions);
@@ -138,7 +147,7 @@ public class CutsceneAPI {
                 Easing.EASING_MACROS.putAll(macroLoader.load());
                 LOGGER.info("Loaded {} easing macros", Easing.EASING_MACROS.size());
             }
-        }, ResourceLocation.parse("cutscenes:easing_macros"));
+        }, new ResourceLocation("cutscenes:easing_macros"));
         abstractions.registerReloadListener(new SimpleJsonResourceReloadListener(GSON, "cutscenes") {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
@@ -157,6 +166,6 @@ public class CutsceneAPI {
                 });
                 LOGGER.info("Loaded {} cutscenes", loaded.get());
             }
-        }, ResourceLocation.parse("cutscenes:cutscenes"));
+        }, new ResourceLocation("cutscenes:cutscenes"));
     }
 }

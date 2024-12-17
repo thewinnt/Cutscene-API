@@ -38,12 +38,13 @@ public class BlitOverlay implements Overlay {
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.enableBlend();
         Matrix4f matrix4f = graphics.pose().last().pose();
-        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(matrix4f, x1, y1, 0).setColor(color).setUv(u1, v1);
-        bufferbuilder.addVertex(matrix4f, x1, y2, 0).setColor(color).setUv(u1, v2);
-        bufferbuilder.addVertex(matrix4f, x2, y2, 0).setColor(color).setUv(u2, v2);
-        bufferbuilder.addVertex(matrix4f, x2, y1, 0).setColor(color).setUv(u2, v1);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferbuilder.vertex(matrix4f, x1, y1, 0).uv(u1, v1).color(color).endVertex();
+        bufferbuilder.vertex(matrix4f, x1, y2, 0).uv(u1, v2).color(color).endVertex();
+        bufferbuilder.vertex(matrix4f, x2, y2, 0).uv(u2, v2).color(color).endVertex();
+        bufferbuilder.vertex(matrix4f, x2, y1, 0).uv(u2, v1).color(color).endVertex();
+        BufferUploader.drawWithShader(bufferbuilder.end());
         RenderSystem.disableBlend();
     }
 }

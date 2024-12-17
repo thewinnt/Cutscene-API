@@ -1,12 +1,10 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.thewinnt.cutscenes.neoforge.mixin",
+  "package": "net.thewinnt.cutscenes.forge.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [],
   "client": [
-    "ClientPayloadHandlerMixin",
-    "GuiMixin",
     "RenderStateShardAccessor"
   ],
   "injectors": {

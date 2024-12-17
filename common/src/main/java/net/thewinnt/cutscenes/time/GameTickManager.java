@@ -8,7 +8,6 @@ import net.thewinnt.cutscenes.util.MathHelper;
 
 public class GameTickManager implements TimeManager {
     private long startGameTime;
-    private float tickrate;
     private double prevRealTime;
     private double currentRealTime;
     private double nextRealTime;
@@ -18,7 +17,7 @@ public class GameTickManager implements TimeManager {
 
     @Override
     public double tick() {
-        if (Minecraft.getInstance().isPaused() || !Minecraft.getInstance().level.tickRateManager().runsNormally()) {
+        if (Minecraft.getInstance().isPaused()) {
             double diff = now() - currentRealTime;
             prevRealTime += diff;
             currentRealTime += diff;
@@ -33,28 +32,18 @@ public class GameTickManager implements TimeManager {
     @Override
     public void start() {
         this.startGameTime = ClientCutsceneManager.getStartGameTime();
-        this.tickrate = Minecraft.getInstance().level.tickRateManager().tickrate();
         currentGameTime = startGameTime;
         this.prevGameTime = startGameTime;
         this.nextGameTime = prevGameTime + 20;
         currentRealTime = now();
         this.prevRealTime = currentRealTime;
-        this.nextRealTime = prevRealTime + 20 / tickrate;
-    }
-
-    @Override
-    public void setGameTickRate(float tickrate) {
-        this.tickrate = tickrate;
-        this.prevRealTime = currentRealTime;
-        this.nextRealTime = prevRealTime + 20 / tickrate;
-        this.prevGameTime = (long) currentGameTime;
-        this.nextGameTime = prevGameTime + 20;
+        this.nextRealTime = prevRealTime + 1;
     }
 
     @Override
     public void syncGameTime(long gameTime) {
         this.prevRealTime = currentRealTime;
-        this.nextRealTime = now() + 20 / tickrate;
+        this.nextRealTime = now() + 1;
         this.prevGameTime = (long)currentGameTime;
         this.nextGameTime = gameTime + 20;
     }

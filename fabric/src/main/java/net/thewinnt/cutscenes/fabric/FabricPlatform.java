@@ -1,24 +1,30 @@
 package net.thewinnt.cutscenes.fabric;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import com.mojang.brigadier.CommandDispatcher;
 
+import com.mojang.serialization.Lifecycle;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,8 +42,8 @@ import net.thewinnt.cutscenes.platform.PacketType;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 
 public class FabricPlatform implements PlatformAbstractions {
-    public List<PacketType<? extends AbstractClientboundPacket>> clientboundPackets = new ArrayList<>();
-    public List<PacketType<? extends AbstractServerboundPacket>> serverboundPackets = new ArrayList<>();
+    public Map<ResourceLocation, PacketType<? extends AbstractClientboundPacket>> clientboundPackets = new HashMap<>();
+    public Map<ResourceLocation, PacketType<? extends AbstractServerboundPacket>> serverboundPackets = new HashMap<>();
     public final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();
     public final List<Runnable> onLogout = new ArrayList<>();
     public MinecraftServer server;
@@ -58,38 +64,56 @@ public class FabricPlatform implements PlatformAbstractions {
     }
 
     @Override
-    public <T extends AbstractClientboundPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader) {
+    @SuppressWarnings("unchecked")
+    public <T> T register(ResourceKey<T> id, T element) {
+        return Registry.register((Registry<T>)BuiltInRegistries.REGISTRY.get(id.registry()), id, element);
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> void registerRegistry(ResourceKey<Registry<T>> key, Consumer<MappedRegistry<T>> setter) {
+        MappedRegistry<T> output = new MappedRegistry<>(key, Lifecycle.stable());
+        ((WritableRegistry)BuiltInRegistries.REGISTRY).register(key, output, Lifecycle.stable());
+        setter.accept(output);
+    }
+
+    @Override
+    public <T extends AbstractClientboundPacket> void registerClientboundPacket(Class<T> type, AbstractPacket.PacketReader<T> reader, ResourceLocation id) {
         if (clientboundPackets == null) {
             throw new IllegalStateException("Too late! Clientbound packets should be registered during mod initialization");
         }
-        clientboundPackets.add(new PacketType<>(type, reader));
+        clientboundPackets.put(id, new PacketType<>(type, reader));
     }
 
     @Override
     public void sendPacketToPlayer(AbstractClientboundPacket packet, ServerPlayer player) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         packet.write(buf);
-        ServerPlayNetworking.send(player, packet);
+        ServerPlayNetworking.send(player, packet.id(), buf);
     }
 
     @Override
-    public <T extends AbstractServerboundPacket> void registerServerboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader) {
+    public <T extends AbstractServerboundPacket> void registerServerboundPacket(Class<T> type, AbstractPacket.PacketReader<T> reader, ResourceLocation id) {
         if (serverboundPackets == null) {
             throw new IllegalStateException("Too late! Serverbound packets should be registered during mod initialization");
         }
-        serverboundPackets.add(new PacketType<>(type, reader));
+        serverboundPackets.put(id, new PacketType<>(type, reader));
     }
 
     @Override
     public void sendPacketFromPlayer(AbstractServerboundPacket packet) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         packet.write(buf);
-        ClientPlayNetworking.send(packet);
+        ClientPlayNetworking.send(packet.id(), buf);
     }
 
     @Override
     public MinecraftServer getServer() {
         return server;
+    }
+
+    public void setServer(MinecraftServer server) {
+        this.server = server;
     }
 
     @Override
@@ -115,17 +139,5 @@ public class FabricPlatform implements PlatformAbstractions {
     @Override
     public EntityType<WaypointEntity> getWaypointEntityType() {
         return CutsceneAPIFabric.WAYPOINT;
-    }
-
-    public void setServer(MinecraftServer server) {
-        this.server = server;
-    }
-
-    public static <T extends AbstractClientboundPacket> void registerClientboundPacket(PacketType<T> type) {
-        PayloadTypeRegistry.playS2C().register(type.type(), type.codec());
-    }
-
-    public static <T extends AbstractServerboundPacket> void registerServerboundPacket(PacketType<T> type) {
-        PayloadTypeRegistry.playC2S().register(type.type(), type.codec());
     }
 }

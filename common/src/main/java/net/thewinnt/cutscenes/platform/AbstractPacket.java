@@ -1,9 +1,10 @@
 package net.thewinnt.cutscenes.platform;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-public interface AbstractPacket extends CustomPacketPayload {
+public interface AbstractPacket {
+    ResourceLocation id();
     void write(FriendlyByteBuf buf);
 
     @FunctionalInterface

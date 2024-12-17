@@ -1,9 +1,9 @@
 package net.thewinnt.cutscenes.fabric;
 
+import com.mojang.serialization.Lifecycle;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -46,42 +46,33 @@ public final class CutsceneAPIFabric implements ModInitializer {
             }
         });
         // register stuff
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.EASING_SERIALIZER_KEY, CutsceneAPI.EASING_SERIALIZERS, RegistrationInfo.BUILT_IN);
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.CUTSCENE_EFFECT_SERIALIZER_KEY, CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS, RegistrationInfo.BUILT_IN);
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.SEGMENT_TYPE_KEY, CutsceneAPI.SEGMENT_TYPES, RegistrationInfo.BUILT_IN);
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.POINT_TYPE_KEY, CutsceneAPI.POINT_TYPES, RegistrationInfo.BUILT_IN);
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.TRANSITION_TYPE_KEY, CutsceneAPI.TRANSITION_TYPES, RegistrationInfo.BUILT_IN);
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.DELAY_PROVIDER_KEY, CutsceneAPI.DELAY_PROVIDERS, RegistrationInfo.BUILT_IN);
-        ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.ROTATION_HANDLER_KEY, CutsceneAPI.ROTATION_HANDLERS, RegistrationInfo.BUILT_IN);
         Registry.register(BuiltInRegistries.ENTITY_TYPE, "cutscenes:waypoint", WAYPOINT);
 
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "line"), CutsceneManager.LINE);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "bezier"), CutsceneManager.BEZIER);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "catmull_rom"), CutsceneManager.CATMULL_ROM);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "path"), CutsceneManager.PATH);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "constant"), CutsceneManager.CONSTANT);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"), CutsceneManager.LOOK_AT_POINT);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "transition"), CutsceneManager.PATH_TRANSITION);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "calculated"), CutsceneManager.CALCULATED_POINT);
+        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "line"), CutsceneManager.LINE);
+        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "bezier"), CutsceneManager.BEZIER);
+        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "catmull_rom"), CutsceneManager.CATMULL_ROM);
+        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "path"), CutsceneManager.PATH);
+        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "constant"), CutsceneManager.CONSTANT);
+        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "look_at_point"), CutsceneManager.LOOK_AT_POINT);
+        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "transition"), CutsceneManager.PATH_TRANSITION);
+        CutsceneManager.registerSegmentType(new ResourceLocation("cutscenes", "calculated"), CutsceneManager.CALCULATED_POINT);
 
-        CutsceneManager.registerPointType(ResourceLocation.fromNamespaceAndPath("cutscenes", "static"), CutsceneManager.STATIC);
-        CutsceneManager.registerPointType(ResourceLocation.fromNamespaceAndPath("cutscenes", "waypoint"), CutsceneManager.WAYPOINT);
-        CutsceneManager.registerPointType(ResourceLocation.fromNamespaceAndPath("cutscenes", "world"), CutsceneManager.WORLD);
+        CutsceneManager.registerPointType(new ResourceLocation("cutscenes", "static"), CutsceneManager.STATIC);
+        CutsceneManager.registerPointType(new ResourceLocation("cutscenes", "waypoint"), CutsceneManager.WAYPOINT);
+        CutsceneManager.registerPointType(new ResourceLocation("cutscenes", "world"), CutsceneManager.WORLD);
 
-        CutsceneManager.registerTransitionType(ResourceLocation.fromNamespaceAndPath("cutscenes", "no_op"), CutsceneManager.NO_OP);
-        CutsceneManager.registerTransitionType(ResourceLocation.fromNamespaceAndPath("cutscenes", "smooth_ease"), CutsceneManager.SMOOTH_EASE);
-        CutsceneManager.registerTransitionType(ResourceLocation.fromNamespaceAndPath("cutscenes", "fade"), CutsceneManager.FADE);
+        CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "no_op"), CutsceneManager.NO_OP);
+        CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "smooth_ease"), CutsceneManager.SMOOTH_EASE);
+        CutsceneManager.registerTransitionType(new ResourceLocation("cutscenes", "fade"), CutsceneManager.FADE);
 
         EasingSerializer.init();
         CutsceneEffectSerializer.init();
         DelayProviderSerializer.init();
         RotationSerializer.init();
 
-        PLATFORM.clientboundPackets.forEach(FabricPlatform::registerClientboundPacket);
-        PLATFORM.serverboundPackets.forEach(FabricPlatform::registerServerboundPacket);
-        PLATFORM.serverboundPackets.forEach(type -> {
-            ServerPlayNetworking.registerGlobalReceiver(type.type(), (packet, context) -> {
-                context.server().execute(() -> packet.execute(context.player()));
+        PLATFORM.serverboundPackets.forEach((id, type) -> {
+            ServerPlayNetworking.registerGlobalReceiver(id, (server, player, handler, buf, responseSender) -> {
+                server.execute(() -> type.reader().read(buf).execute(player));
             });
         });
     }

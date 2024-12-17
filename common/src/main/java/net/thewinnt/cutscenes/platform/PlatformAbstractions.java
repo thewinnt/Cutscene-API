@@ -6,7 +6,9 @@ import java.util.function.Consumer;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,10 +31,14 @@ public interface PlatformAbstractions {
     // reload listeners
     void registerReloadListener(PreparableReloadListener listener, ResourceLocation id);
 
+    // registration
+    <T> T register(ResourceKey<T> id, T element);
+    <T> void registerRegistry(ResourceKey<Registry<T>> key, Consumer<MappedRegistry<T>> setter);
+
     // networking
-    <T extends AbstractClientboundPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader);
+    <T extends AbstractClientboundPacket> void registerClientboundPacket(Class<T> type, AbstractPacket.PacketReader<T> reader, ResourceLocation id);
     void sendPacketToPlayer(AbstractClientboundPacket packet, ServerPlayer player);
-    <T extends AbstractServerboundPacket> void registerServerboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader);
+    <T extends AbstractServerboundPacket> void registerServerboundPacket(Class<T> type, AbstractPacket.PacketReader<T> reader, ResourceLocation id);
     void sendPacketFromPlayer(AbstractServerboundPacket packet);
     default void sendPacketToPlayers(AbstractClientboundPacket packet, Collection<ServerPlayer> players) {
         players.forEach(player -> sendPacketToPlayer(packet, player));

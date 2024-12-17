@@ -10,7 +10,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
@@ -18,7 +17,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.ServerLinks;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -35,22 +33,12 @@ import net.thewinnt.cutscenes.transition.Transition;
 public class CutsceneCameraEntity extends LocalPlayer {
     private static final Minecraft MINECRAFT = Minecraft.getInstance();
     private static final ClientPacketListener NETWORK_HANDLER = new ClientPacketListener(
-        MINECRAFT,
-        MINECRAFT.getConnection().getConnection(),
-        new CommonListenerCookie(
+            MINECRAFT,
+            MINECRAFT.screen,
+            MINECRAFT.getConnection().getConnection(),
+            MINECRAFT.getCurrentServer(),
             new GameProfile(UUID.randomUUID(), "CutsceneAPI$Camera"),
-            MINECRAFT.getTelemetryManager().createWorldSessionManager(false, Duration.ZERO, "cutscene-api$fakedata"),
-            RegistryAccess.Frozen.EMPTY,
-            FeatureFlagSet.of(),
-            "cutscene-api$fakedata",
-            new ServerData("csapi$fakedata", "127.0.0.1", ServerData.Type.OTHER),
-            Minecraft.getInstance().screen,
-            Map.of(),
-            new ChatComponent.State(List.of(), List.of(), List.of()),
-            false,
-            Map.of(),
-            new ServerLinks(List.of())
-        )
+            MINECRAFT.getTelemetryManager().createWorldSessionManager(false, null, null)
     ) {
         public void send(Packet<?> pPacket) {}
     };
@@ -88,7 +76,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
     }
 
     public void spawn() {
-        clientLevel.addEntity(this);
+        clientLevel.putNonPlayerEntity(getId(), this);
     }
 
     public void despawn() {
@@ -101,7 +89,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
     protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {}
 
     @Override
-    public MobEffectInstance getEffect(Holder<MobEffect> pEffect) {
+    public MobEffectInstance getEffect(MobEffect pEffect) {
         return MINECRAFT.player.getEffect(pEffect);
     }
 
@@ -178,7 +166,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
     }
 
     @Override
-    public boolean hasEffect(Holder<MobEffect> pEffect) {
+    public boolean hasEffect(MobEffect pEffect) {
         return minecraft.player.hasEffect(pEffect);
     }
 }

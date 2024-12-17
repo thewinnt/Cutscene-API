@@ -28,9 +28,6 @@ public class RealTimeManager implements TimeManager {
     }
 
     @Override
-    public void setGameTickRate(float tickrate) {}
-
-    @Override
     public void syncGameTime(long gameTime) {}
 
     @Override

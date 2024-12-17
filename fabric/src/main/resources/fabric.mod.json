@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "cutscene_api",
-  "version": "${mod_version}",
+  "version": "${version}",
   "name": "Cutscene API",
   "description": "A Minecraft mod for making cutscenes",
   "authors": [
@@ -9,8 +9,8 @@
   ],
   "contact": {
     "homepage": "https://modrinth.com/mod/cutscene-api",
-    "sources": "https://github.com/thewinnt/Cutscene-API-Forge",
-    "issues": "https://github.com/thewinnt/Cutscene-API-Forge/issues"
+    "sources": "https://github.com/thewinnt/Cutscene-API",
+    "issues": "https://github.com/thewinnt/Cutscene-API/issues"
   },
   "license": "MIT",
   "icon": "assets/cutscene_api/icon.png",
@@ -28,10 +28,8 @@
     "mixins.cutscenes-common.json"
   ],
   "depends": {
-    "fabricloader": ">=0.15.11",
-    "minecraft": ["~1.21", "~1.21.1"],
-    "java": ">=21",
-    "fabric-api": "*"
+    "minecraft": ["~1.20.1"],
+    "fabric": "*"
   },
   "suggests": {}
 }

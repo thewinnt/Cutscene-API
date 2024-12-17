@@ -11,5 +11,6 @@
   "commands.cutscene.preview.tracking": "Показываем путь камеры в катсцене %1$s с местоположения %2$s в текущий момент",
   "commands.cutscene.showing": "Показываем катсцену %1$s игроку %2$s",
   "commands.cutscene.stopped": "%1$s больше не наблюдает катсцену",
-  "commands.cutscene.warning.cutscene_mismatch": "Внимание: просматриваемая катсцена отличается от той, что в предпросмотре"
+  "commands.cutscene.warning.cutscene_mismatch": "Внимание: просматриваемая катсцена отличается от той, что в предпросмотре",
+  "commands.cutscene.preview.change": "Изменена кастцена в предпросмотре на %1$s"
 }

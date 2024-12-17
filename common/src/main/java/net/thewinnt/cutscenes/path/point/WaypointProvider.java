@@ -38,7 +38,7 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
                 default:
                     break;
             }
-            return entities.getFirst().getPosition(1).subtract(cutsceneStart).add(offset);
+            return entities.get(0).getPosition(1).subtract(cutsceneStart).add(offset);
         } else if (fallback.isPresent()) {
             return PointProvider.getPoint(fallback.get(), level, cutsceneStart);
         } else {
@@ -51,8 +51,8 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
         buf.writeUtf(name);
         buf.writeInt(searchRadius);
         buf.writeEnum(sorting);
-        buf.writeVec3(searchOffset);
-        buf.writeVec3(offset);
+        CutsceneNetworkHandler.writeVec3(buf, searchOffset);
+        CutsceneNetworkHandler.writeVec3(buf, offset);
         buf.writeOptional(fallback, CutsceneNetworkHandler::writePointProvider);
     }
 
@@ -70,8 +70,8 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
         String name = buf.readUtf();
         int searchRadius = buf.readInt();
         SortType sortType = buf.readEnum(SortType.class);
-        Vec3 searchOffset = buf.readVec3();
-        Vec3 offset = buf.readVec3();
+        Vec3 searchOffset = CutsceneNetworkHandler.readVec3(buf);
+        Vec3 offset = CutsceneNetworkHandler.readVec3(buf);
         Optional<PointProvider> fallback = buf.readOptional(CutsceneNetworkHandler::readPointProvider);
         return new WaypointProvider(name, searchRadius, sortType, searchOffset, offset, fallback);
     }

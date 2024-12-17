@@ -1,4 +1,4 @@
-package net.thewinnt.cutscenes.neoforge.mixin;
+package net.thewinnt.cutscenes.forge.mixin;
 
 import net.minecraft.client.renderer.RenderStateShard;
 import org.spongepowered.asm.mixin.Mixin;

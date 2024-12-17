@@ -1,7 +1,6 @@
 package net.thewinnt.cutscenes.networking.packets;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.thewinnt.cutscenes.event.EndingReason;
@@ -9,7 +8,7 @@ import net.thewinnt.cutscenes.platform.AbstractServerboundPacket;
 import net.thewinnt.cutscenes.util.ServerPlayerExt;
 
 public class CutsceneOverPacket implements AbstractServerboundPacket {
-    public static final Type<CutsceneOverPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("cutscenes", "cutscene_over"));
+    public static final ResourceLocation ID = new ResourceLocation("cutscenes", "cutscene_over");
 
     @Override
     public void execute(ServerPlayer player) {
@@ -20,7 +19,7 @@ public class CutsceneOverPacket implements AbstractServerboundPacket {
     public void write(FriendlyByteBuf FriendlyByteBuf) {}
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public ResourceLocation id() {
+        return ID;
     }
 }

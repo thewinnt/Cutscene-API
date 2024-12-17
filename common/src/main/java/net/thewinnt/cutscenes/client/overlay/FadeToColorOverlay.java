@@ -23,10 +23,10 @@ public class FadeToColorOverlay implements Overlay {
         float[] colorTopLeft = cfg.topLeft.sample(cfg.getProgress());
         float[] colorTopRight = cfg.topRight.sample(cfg.getProgress());
         float alpha = cfg.getAlpha();
-        builder.addVertex(pose, 0, height, 0).setColor(colorBottomLeft[0], colorBottomLeft[1], colorBottomLeft[2], colorBottomLeft[3] * alpha);
-        builder.addVertex(pose, width, height, 0).setColor(colorBottomRight[0], colorBottomRight[1], colorBottomRight[2], colorBottomRight[3] * alpha);
-        builder.addVertex(pose, width, 0, 0).setColor(colorTopRight[0], colorTopRight[1], colorTopRight[2], colorTopRight[3] * alpha);
-        builder.addVertex(pose, 0, 0, 0).setColor(colorTopLeft[0], colorTopLeft[1], colorTopLeft[2], colorTopLeft[3] * alpha);
+        builder.vertex(pose.pose(), 0, height, 0).color(colorBottomLeft[0], colorBottomLeft[1], colorBottomLeft[2], colorBottomLeft[3] * alpha);
+        builder.vertex(pose.pose(), width, height, 0).color(colorBottomRight[0], colorBottomRight[1], colorBottomRight[2], colorBottomRight[3] * alpha);
+        builder.vertex(pose.pose(), width, 0, 0).color(colorTopRight[0], colorTopRight[1], colorTopRight[2], colorTopRight[3] * alpha);
+        builder.vertex(pose.pose(), 0, 0, 0).color(colorTopLeft[0], colorTopLeft[1], colorTopLeft[2], colorTopLeft[3] * alpha);
         graphics.pose().popPose();
         minecraft.getProfiler().pop();
 

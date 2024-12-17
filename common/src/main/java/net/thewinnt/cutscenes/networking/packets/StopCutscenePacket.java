@@ -1,15 +1,13 @@
 package net.thewinnt.cutscenes.networking.packets;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.event.EndingReason;
 import net.thewinnt.cutscenes.platform.AbstractClientboundPacket;
-import net.thewinnt.cutscenes.platform.AbstractPacket;
 
 public record StopCutscenePacket(EndingReason reason) implements AbstractClientboundPacket {
-    public static final Type<StopCutscenePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("cutscenes", "stop_cutscene"));
+    public static final ResourceLocation ID = new ResourceLocation("cutscenes", "stop_cutscene");
 
     @Override
     public void execute() {
@@ -26,7 +24,7 @@ public record StopCutscenePacket(EndingReason reason) implements AbstractClientb
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public ResourceLocation id() {
+        return ID;
     }
 }
