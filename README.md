@@ -22,13 +22,10 @@ This mod is for Fabric/Quilt/Forge 1.20.1.
 
 ## Documentation
 Not ready yet. Until I get my hands on this, you can check out the
-[releases](https://github.com/thewinnt/Cutscene-API-Forge/releases)
+[releases](https://github.com/thewinnt/Cutscene-API/releases)
 page for some documentation. I usually write it out pretty well.
 
 ## Building
 Run `./gradlew build` in your terminal of choice (without `./` in Windows CMD).
 
-Output files will be in `fabric/build/libs` and `neoforge/build/libs`.
-
-On NeoForge, you will have to remove `cutscene_api.common.refmap.json` from the built JAR file manually
-in order for the mod to work. You can use any archiver for this.
+Output files will be in `fabric/build/libs` and `forge/build/libs`.
