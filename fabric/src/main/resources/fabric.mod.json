@@ -28,7 +28,7 @@
     "mixins.cutscenes-common.json"
   ],
   "depends": {
-    "minecraft": ["~1.20.1"],
+    "minecraft": ["1.20", "1.20.1"],
     "fabric": "*"
   },
   "suggests": {}

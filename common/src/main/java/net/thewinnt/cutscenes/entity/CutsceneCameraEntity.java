@@ -169,4 +169,14 @@ public class CutsceneCameraEntity extends LocalPlayer {
     public boolean hasEffect(MobEffect pEffect) {
         return minecraft.player.hasEffect(pEffect);
     }
+
+    @Override
+    public boolean shouldRender(double d, double e, double f) {
+        return false;
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double d) {
+        return false;
+    }
 }

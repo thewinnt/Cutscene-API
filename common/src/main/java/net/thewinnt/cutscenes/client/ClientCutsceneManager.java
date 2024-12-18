@@ -77,6 +77,9 @@ public class ClientCutsceneManager {
         if (runningCutscene.cutscene.hideBlockOutline) {
             minecraft.gameRenderer.setRenderBlockOutline(false);
         }
+        if (minecraft.player != null && (minecraft.player.getXRot() == 90 || minecraft.player.getXRot() == -90)) {
+            minecraft.player.setXRot(0); // if the player is stuck vertically, it will break some rotation handlers
+        }
         camera = new CutsceneCameraEntity(-69420, runningCutscene, startPos, startCameraYaw, startCameraPitch, pathYaw, pathPitch, pathRoll);
         if (runningCutscene.cutscene.blockMovement) { // special case: keep the player if we want them to move
             camera.spawn();
@@ -115,6 +118,9 @@ public class ClientCutsceneManager {
         camera = null;
         if (minecraft.player != null) {
             minecraft.player.input = new KeyboardInput(minecraft.options);
+            if (minecraft.player.getXRot() == 0) {
+                minecraft.player.setXRot(initCameraPitch); // revert rotation handler fix
+            }
         }
         isCutsceneRunning = false;
         if (runningCutscene != null) {
