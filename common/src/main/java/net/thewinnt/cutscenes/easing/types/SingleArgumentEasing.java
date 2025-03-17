@@ -6,14 +6,8 @@ import net.thewinnt.cutscenes.easing.EasingSerializer;
 
 import java.util.function.DoubleUnaryOperator;
 
-public class SingleArgumentEasing implements Easing {
-    protected final Easing argument;
-    protected final DoubleUnaryOperator operation;
-
-    public SingleArgumentEasing(Easing argument, DoubleUnaryOperator operation) {
-        this.argument = argument;
-        this.operation = operation;
-    }
+public record SingleArgumentEasing(Easing argument,
+                                   DoubleUnaryOperator operation) implements Easing {
 
     @Override
     public double get(double t) {

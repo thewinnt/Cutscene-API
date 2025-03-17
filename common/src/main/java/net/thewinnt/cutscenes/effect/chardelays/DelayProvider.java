@@ -40,7 +40,7 @@ public interface DelayProvider {
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
             ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
-            DelayProviderSerializer<?> serializer = CutsceneAPI.DELAY_PROVIDERS.get(type);
+            DelayProviderSerializer<?> serializer = CutsceneAPI.DELAY_PROVIDERS.getValue(type);
             if (serializer == null) {
                 throw new IllegalArgumentException("Unknown delay provider type: " + type);
             }

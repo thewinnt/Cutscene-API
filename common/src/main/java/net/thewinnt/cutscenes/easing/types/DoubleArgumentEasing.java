@@ -6,16 +6,8 @@ import net.thewinnt.cutscenes.easing.EasingSerializer;
 
 import java.util.function.DoubleBinaryOperator;
 
-public class DoubleArgumentEasing implements Easing {
-    protected final Easing arg1;
-    protected final Easing arg2;
-    protected final DoubleBinaryOperator operation;
-
-    public DoubleArgumentEasing(Easing arg1, Easing arg2, DoubleBinaryOperator operation) {
-        this.arg1 = arg1;
-        this.arg2 = arg2;
-        this.operation = operation;
-    }
+public record DoubleArgumentEasing(Easing arg1, Easing arg2,
+                                   DoubleBinaryOperator operation) implements Easing {
 
     @Override
     public double get(double t) {

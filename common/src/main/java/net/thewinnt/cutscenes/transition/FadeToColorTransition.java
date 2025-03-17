@@ -1,6 +1,10 @@
 package net.thewinnt.cutscenes.transition;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
@@ -24,10 +28,15 @@ import net.thewinnt.cutscenes.util.DynamicColor;
 import java.util.List;
 
 public class FadeToColorTransition implements Transition {
-    private final DynamicColor colorBottomLeft;
-    private final DynamicColor colorTopLeft;
-    private final DynamicColor colorTopRight;
-    private final DynamicColor colorBottomRight;
+    public static final MapCodec<FadeToColorTransition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        ColorConfig.CODEC.fieldOf("colors").forGetter(t -> t.colors),
+        Codec.DOUBLE.fieldOf("length_a").forGetter(t -> t.lengthA),
+        Codec.DOUBLE.fieldOf("length_b").forGetter(t -> t.lengthB),
+        Easing.CODEC.optionalFieldOf("ease_in", SimpleEasing.LINEAR).forGetter(t -> t.easeIn),
+        Easing.CODEC.optionalFieldOf("ease_out", SimpleEasing.LINEAR).forGetter(t -> t.easeOut),
+        Codec.BOOL.fieldOf("is_start").forGetter(t -> t.isStart)
+    ).apply(instance, FadeToColorTransition::new));
+    private final ColorConfig colors;
     private final double lengthA;
     private final double lengthB;
     private final double progressLengthA;
@@ -37,11 +46,19 @@ public class FadeToColorTransition implements Transition {
     private final boolean isStart;
     private FadeToColorOverlayConfiguration config;
 
+    private FadeToColorTransition(ColorConfig colors, double lengthA, double lengthB, Easing easeIn, Easing easeOut, boolean isStart) {
+        this.colors = colors;
+        this.lengthA = lengthA;
+        this.lengthB = lengthB;
+        this.progressLengthA = lengthA / (lengthA + lengthB);
+        this.progressLengthB = lengthB / (lengthA + lengthB);
+        this.easeIn = easeIn;
+        this.easeOut = easeOut;
+        this.isStart = isStart;
+    }
+
     public FadeToColorTransition(DynamicColor colorBottomLeft, DynamicColor colorTopLeft, DynamicColor colorTopRight, DynamicColor colorBottomRight, double lengthA, double lengthB, Easing easeIn, Easing easeOut, boolean isStart) {
-        this.colorBottomLeft = colorBottomLeft;
-        this.colorTopLeft = colorTopLeft;
-        this.colorTopRight = colorTopRight;
-        this.colorBottomRight = colorBottomRight;
+        this.colors = new ColorConfig(colorBottomLeft, colorTopLeft, colorTopRight, colorBottomRight);
         this.lengthA = lengthA;
         this.lengthB = lengthB;
         this.progressLengthA = lengthA / (lengthA + lengthB);
@@ -122,7 +139,7 @@ public class FadeToColorTransition implements Transition {
 
     @Override
     public void onStart(CutsceneType cutscene) {
-        this.config = new FadeToColorOverlayConfiguration(colorBottomLeft, colorTopLeft, colorTopRight, colorBottomRight, 0);
+        this.config = new FadeToColorOverlayConfiguration(colors.bottomLeft, colors.topLeft, colors.topRight, colors.bottomRight, 0);
         CutsceneOverlayManager.addOverlay(FadeToColorOverlay.INSTANCE, this.config);
     }
 
@@ -144,10 +161,10 @@ public class FadeToColorTransition implements Transition {
 
     @Override
     public void toNetwork(FriendlyByteBuf buf) {
-        colorBottomLeft.toNetwork(buf);
-        colorTopLeft.toNetwork(buf);
-        colorTopRight.toNetwork(buf);
-        colorBottomRight.toNetwork(buf);
+        colors.bottomLeft.toNetwork(buf);
+        colors.topLeft.toNetwork(buf);
+        colors.topRight.toNetwork(buf);
+        colors.bottomRight.toNetwork(buf);
         buf.writeDouble(lengthA);
         buf.writeDouble(lengthB);
         Easing.toNetwork(easeIn, buf);
@@ -199,8 +216,8 @@ public class FadeToColorTransition implements Transition {
                 return new FadeToColorTransition(color1, color2, color2, color1, lengthA, lengthB, easeIn, easeOut, isStart);
             }
             case "four_angles" -> {
-                DynamicColor[] colors = legacyFourAngles(json, lengthA, lengthB);
-                return new FadeToColorTransition(colors[0], colors[1], colors[2], colors[3], lengthA, lengthB, easeIn, easeOut, isStart);
+                ColorConfig colors = legacyFourAngles(json, lengthA, lengthB);
+                return new FadeToColorTransition(colors.bottomLeft, colors.topLeft, colors.topRight, colors.bottomRight, lengthA, lengthB, easeIn, easeOut, isStart);
             }
             case "two_colors" -> {
                 DynamicColor color = legacyTwoColors(json, lengthA, lengthB);
@@ -213,7 +230,7 @@ public class FadeToColorTransition implements Transition {
         }
     }
 
-    private static DynamicColor[] legacyFourAngles(JsonObject json, double lengthA, double lengthB) {
+    private static ColorConfig legacyFourAngles(JsonObject json, double lengthA, double lengthB) {
         DynamicColor startColorBottomLeft = DynamicColor.fromJSON(json.get("start_color_bottom_left"));
         DynamicColor startColorTopLeft = DynamicColor.fromJSON(json.get("start_color_top_left"));
         DynamicColor startColorTopRight = DynamicColor.fromJSON(json.get("start_color_top_right"));
@@ -227,6 +244,11 @@ public class FadeToColorTransition implements Transition {
         double gradientTimeB = GsonHelper.getAsDouble(json, "gradient_time_b", lengthA);
         Easing colorEase = Easing.fromJSON(json.get("color_ease"), SimpleEasing.LINEAR);
 
+        return legacyFourAngles(lengthA, lengthB, gradientTimeA, gradientTimeB, startColorBottomLeft, endColorBottomLeft, colorEase, startColorTopLeft, endColorTopLeft, startColorTopRight, endColorTopRight, startColorBottomRight, endColorBottomRight);
+    }
+
+    private static ColorConfig legacyFourAngles(double lengthA, double lengthB, double gradientTimeA, double gradientTimeB, DynamicColor startColorBottomLeft, DynamicColor endColorBottomLeft, Easing colorEase, DynamicColor startColorTopLeft, DynamicColor endColorTopLeft, DynamicColor startColorTopRight, DynamicColor endColorTopRight, DynamicColor startColorBottomRight, DynamicColor endColorBottomRight) {
+        if (lengthB == -1) lengthB = lengthA;
         double progressGA = gradientTimeA / (lengthA + lengthB);
         double progressGB = gradientTimeB / (lengthA + lengthB);
         DynamicColor bottomLeft = new DynamicColor(
@@ -253,7 +275,7 @@ public class FadeToColorTransition implements Transition {
             createCompound(progressGA, progressGB, startColorBottomRight.b(), endColorBottomRight.b(), colorEase),
             createCompound(progressGA, progressGB, startColorBottomRight.a(), endColorBottomRight.a(), colorEase)
         );
-        return new DynamicColor[]{bottomLeft, topLeft, topRight, bottomRight};
+        return new ColorConfig(bottomLeft, topLeft, topRight, bottomRight);
     }
 
     private static DynamicColor legacyTwoColors(JsonObject json, double lengthA, double lengthB) {
@@ -264,14 +286,23 @@ public class FadeToColorTransition implements Transition {
         double gradientTimeB = GsonHelper.getAsDouble(json, "gradient_time_b", lengthA);
         Easing colorEase = Easing.fromJSON(json.get("color_ease"), SimpleEasing.LINEAR);
 
+        return legacyTwoColors(lengthA, lengthB, gradientTimeA, gradientTimeB, color1, color2, colorEase);
+    }
+
+    private static DynamicColor legacyTwoColors(double lengthA, double lengthB, double gradientTimeA, double gradientTimeB, DynamicColor color1, DynamicColor color2, Easing colorEase) {
         double progressGA = gradientTimeA / (lengthA + lengthB);
         double progressGB = gradientTimeB / (lengthA + lengthB);
         return new DynamicColor(
-            createCompound(progressGA, progressGB, color1.r(), color2.r(), colorEase),
-            createCompound(progressGA, progressGB, color1.g(), color2.g(), colorEase),
-            createCompound(progressGA, progressGB, color1.b(), color2.b(), colorEase),
-            createCompound(progressGA, progressGB, color1.a(), color2.a(), colorEase)
+                createCompound(progressGA, progressGB, color1.r(), color2.r(), colorEase),
+                createCompound(progressGA, progressGB, color1.g(), color2.g(), colorEase),
+                createCompound(progressGA, progressGB, color1.b(), color2.b(), colorEase),
+                createCompound(progressGA, progressGB, color1.a(), color2.a(), colorEase)
         );
+    }
+
+    private static ColorConfig legacyTwoColorsCfg(double lengthA, double lengthB, double gradientTimeA, double gradientTimeB, DynamicColor color1, DynamicColor color2, Easing colorEase) {
+        DynamicColor color = legacyTwoColors(lengthA, lengthB, gradientTimeA, gradientTimeB, color1, color2, colorEase);
+        return new ColorConfig(color, color, color, color);
     }
 
     private static CompoundEasing createCompound(double progressGA, double progressGB, Easing color1, Easing color2, Easing colorDelta) {
@@ -281,5 +312,67 @@ public class FadeToColorTransition implements Transition {
             new CompoundEasing.TimedEasingEntry(progressGA, new CompoundEasing.RangeAppliedEasing(0, 1, colorEasing)),
             new CompoundEasing.TimedEasingEntry(progressGB, new CompoundEasing.RangeAppliedEasing(0, 1, new ConstantEasing(colorEasing.get(1))))
         ));
+    }
+
+    private record ColorConfig(DynamicColor bottomLeft, DynamicColor topLeft, DynamicColor topRight, DynamicColor bottomRight) {
+        private ColorConfig(DynamicColor[] colors) {
+            this(colors[0], colors[1], colors[2], colors[3]);
+        }
+
+        private static final MapCodec<ColorConfig> PER_ANGLE = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                DynamicColor.CODEC.fieldOf("bottom_left").forGetter(ColorConfig::bottomLeft),
+                DynamicColor.CODEC.fieldOf("top_left").forGetter(ColorConfig::topLeft),
+                DynamicColor.CODEC.fieldOf("top_right").forGetter(ColorConfig::topRight),
+                DynamicColor.CODEC.fieldOf("bottom_right").forGetter(ColorConfig::bottomRight)
+        ).apply(instance, ColorConfig::new));
+
+        private static final MapCodec<ColorConfig> HORIZONTAL_GRADIENT = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                DynamicColor.CODEC.fieldOf("color1").forGetter(ColorConfig::bottomLeft),
+                DynamicColor.CODEC.fieldOf("color2").forGetter(ColorConfig::bottomRight)
+        ).apply(instance, (color, color2) -> new ColorConfig(color, color, color2, color2)));
+
+        private static final MapCodec<ColorConfig> VERTICAL_GRADIENT = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                DynamicColor.CODEC.fieldOf("color1").forGetter(ColorConfig::bottomLeft),
+                DynamicColor.CODEC.fieldOf("color2").forGetter(ColorConfig::topLeft)
+        ).apply(instance, (color, color2) -> new ColorConfig(color, color2, color2, color)));
+
+        private static final MapCodec<ColorConfig> SINGLE_COLOR = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                DynamicColor.CODEC.fieldOf("color").forGetter(ColorConfig::bottomLeft)
+        ).apply(instance, color -> new ColorConfig(color, color, color, color)));
+
+        private static final MapCodec<ColorConfig> LEGACY_FOUR_ANGLES = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                Codec.DOUBLE.fieldOf("length_a").forGetter(t -> -1d),
+                Codec.DOUBLE.fieldOf("length_b").forGetter(t -> -1d),
+                Codec.DOUBLE.fieldOf("gradient_time_a").forGetter(t -> -1d),
+                Codec.DOUBLE.fieldOf("gradient_time_b").forGetter(t -> -1d),
+                DynamicColor.CODEC.fieldOf("start_color_bottom_left").forGetter(ColorConfig::bottomLeft),
+                DynamicColor.CODEC.fieldOf("end_color_bottom_left").forGetter(ColorConfig::bottomLeft),
+                Easing.CODEC.fieldOf("color_ease").orElse(SimpleEasing.LINEAR).forGetter(t -> null),
+                DynamicColor.CODEC.fieldOf("start_color_top_left").forGetter(ColorConfig::topLeft),
+                DynamicColor.CODEC.fieldOf("end_color_top_left").forGetter(ColorConfig::topLeft),
+                DynamicColor.CODEC.fieldOf("start_color_bottom_right").forGetter(ColorConfig::bottomRight),
+                DynamicColor.CODEC.fieldOf("end_color_top_right").forGetter(ColorConfig::topRight),
+                DynamicColor.CODEC.fieldOf("start_color_top_right").forGetter(ColorConfig::topRight),
+                DynamicColor.CODEC.fieldOf("end_color_bottom_right").forGetter(ColorConfig::bottomRight)
+        ).apply(instance, FadeToColorTransition::legacyFourAngles));
+
+        private static final MapCodec<ColorConfig> LEGACY_TWO_COLORS = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                Codec.DOUBLE.fieldOf("length_a").forGetter(t -> -1d),
+                Codec.DOUBLE.fieldOf("length_b").forGetter(t -> -1d),
+                Codec.DOUBLE.fieldOf("gradient_time_a").forGetter(t -> -1d),
+                Codec.DOUBLE.fieldOf("gradient_time_b").forGetter(t -> -1d),
+                DynamicColor.CODEC.fieldOf("color1").forGetter(ColorConfig::topRight),
+                DynamicColor.CODEC.fieldOf("color2").forGetter(ColorConfig::topRight),
+                Easing.CODEC.fieldOf("color_ease").orElse(SimpleEasing.LINEAR).forGetter(t -> null)
+        ).apply(instance, FadeToColorTransition::legacyTwoColorsCfg));
+
+        private static final Codec<ColorConfig> CODEC = Codec.STRING.dispatch(colorConfig -> "per_angle", s -> switch (s) {
+            case "per_angle" -> PER_ANGLE;
+            case "vertical_gradient" -> HORIZONTAL_GRADIENT;
+            case "horizontal_gradient" -> VERTICAL_GRADIENT;
+            case "four_angles" -> LEGACY_FOUR_ANGLES;
+            case "two_colors" -> LEGACY_TWO_COLORS;
+            default -> SINGLE_COLOR;
+        });
     }
 }

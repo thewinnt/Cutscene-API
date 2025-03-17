@@ -5,6 +5,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.client.CutsceneOverlayManager;
 import org.spongepowered.asm.mixin.Final;
@@ -30,13 +31,13 @@ public abstract class GameRendererMixin {
     private void cs$render(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci, @Local GuiGraphics guigraphics) {
         // this method gets called several times, but we only want the first one
         if (!ClientCutsceneManager.renderedOverlaysThisFrame) {
-            this.minecraft.getProfiler().push("cutscene_overlay");
+            Profiler.get().push("cutscene_overlay");
             if (ClientCutsceneManager.isCutsceneRunning()) {
                 CutsceneOverlayManager.render(minecraft, guigraphics, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
             } else {
                 CutsceneOverlayManager.clearOverlays();
             }
-            this.minecraft.getProfiler().pop();
+            Profiler.get().pop();
             ClientCutsceneManager.renderedOverlaysThisFrame = true;
         }
     }

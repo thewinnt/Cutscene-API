@@ -3,12 +3,15 @@ package net.thewinnt.cutscenes.transition;
 import java.util.function.Function;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
 
@@ -16,6 +19,8 @@ import net.thewinnt.cutscenes.CutsceneType;
  * A Transition provides a smooth change between the player doing their business and watching a cutscene.
  */
 public interface Transition {
+    Codec<Transition> CODEC = CutsceneAPI.TRANSITION_TYPES.byNameCodec().dispatch(Transition::getSerializer, TransitionSerializer::codec);
+
     /** @return the total length of this transition. */
     double getLength();
 
@@ -135,6 +140,8 @@ public interface Transition {
          */
         T fromJSON(JsonObject json);
 
+        MapCodec<T> codec();
+
         /**
          * A helper method to create a segment serializer from 2 functions.
          * @param network a {@link #fromNetwork(FriendlyByteBuf)} implementation
@@ -143,7 +150,7 @@ public interface Transition {
          * @param <T> the class for the segment type
          * @see net.thewinnt.cutscenes.CutsceneManager#BEZIER
          */
-        public static <T extends Transition> TransitionSerializer<T> of(Function<FriendlyByteBuf, T> network, Function<JsonObject, T> json) {
+        public static <T extends Transition> TransitionSerializer<T> of(Function<FriendlyByteBuf, T> network, Function<JsonObject, T> json, MapCodec<T> codec) {
             return new TransitionSerializer<T>() {
                 @Override
                 public T fromNetwork(FriendlyByteBuf buf) {
@@ -153,6 +160,11 @@ public interface Transition {
                 @Override
                 public T fromJSON(JsonObject j) {
                     return json.apply(j);
+                }
+
+                @Override
+                public MapCodec<T> codec() {
+                    return codec;
                 }
             };
         }

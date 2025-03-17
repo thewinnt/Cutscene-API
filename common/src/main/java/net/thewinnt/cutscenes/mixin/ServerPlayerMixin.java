@@ -1,5 +1,6 @@
 package net.thewinnt.cutscenes.mixin;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
@@ -68,8 +69,8 @@ public class ServerPlayerMixin implements ServerPlayerExt {
         }
     }
 
-    @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
-    public void hurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
+    @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
+    public void hurt(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
         if (cutscenes$running != null && cutscenes$running.actionToggles.disableDamage()) {
             callback.setReturnValue(false);
         }

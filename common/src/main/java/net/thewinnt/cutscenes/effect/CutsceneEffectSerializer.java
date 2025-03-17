@@ -1,6 +1,7 @@
 package net.thewinnt.cutscenes.effect;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -28,6 +29,9 @@ public interface CutsceneEffectSerializer<T> {
     T fromJSON(JsonObject json);
     void toNetwork(T object, FriendlyByteBuf buf);
     CutsceneEffectFactory<T> factory();
+    default MapCodec<T> codec() {
+        return null;
+    }
 
     static <T> CutsceneEffectSerializer<T> register(ResourceLocation id, CutsceneEffectSerializer<T> serializer) {
         return Registry.register(CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS, id, serializer);

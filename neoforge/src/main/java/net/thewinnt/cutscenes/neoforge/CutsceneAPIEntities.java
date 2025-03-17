@@ -1,6 +1,9 @@
 package net.thewinnt.cutscenes.neoforge;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -13,6 +16,6 @@ public class CutsceneAPIEntities {
         .sized(0.1f, 0.1f)
         .clientTrackingRange(9999)
         .canSpawnFarFromPlayer()
-        .build("waypoint")
+        .build(ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath("cutscenes", "waypoint")))
     );
 }

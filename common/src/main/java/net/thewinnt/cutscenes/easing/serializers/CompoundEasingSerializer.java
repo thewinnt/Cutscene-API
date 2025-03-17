@@ -1,6 +1,10 @@
 package net.thewinnt.cutscenes.easing.serializers;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
@@ -13,9 +17,12 @@ import net.thewinnt.cutscenes.util.LoadResolver;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CompoundEasingSerializer implements EasingSerializer<CompoundEasing> {
     public static final CompoundEasingSerializer INSTANCE = new CompoundEasingSerializer();
+    public static final Codec<Map<String, RangeAppliedEasing>> MAP_CODEC = Codec.unboundedMap(Codec.DOUBLE.xmap(d -> Double.toString(d), Double::parseDouble), RangeAppliedEasing.CODEC);
+    public static final MapCodec<CompoundEasing> CODEC = MAP_CODEC.xmap(CompoundEasing::new, CompoundEasing::asMap).fieldOf("entries");
 
     private CompoundEasingSerializer() {}
 
@@ -55,5 +62,10 @@ public class CompoundEasingSerializer implements EasingSerializer<CompoundEasing
             entries.add(new TimedEasingEntry(time, easing));
         }
         return new CompoundEasing(entries);
+    }
+
+    @Override
+    public MapCodec<CompoundEasing> codec() {
+        return CODEC;
     }
 }

@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
@@ -17,9 +18,9 @@ public class EntityMixin {
     public void csapi$getPosition(float partialTick, CallbackInfoReturnable<Vec3> callback) {
         if (!ClientCutsceneManager.isCutsceneRunning()) return;
         if (((Entity)(Object)this) instanceof CutsceneCameraEntity camera) {
-            Minecraft.getInstance().getProfiler().push("cutscene_position");
+            Profiler.get().push("cutscene_position");
             Vec3 pos = camera.getProperPosition(partialTick);
-            Minecraft.getInstance().getProfiler().pop();
+            Profiler.get().pop();
             if (pos == null) return;
             callback.setReturnValue(pos);
         }

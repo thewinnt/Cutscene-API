@@ -2,6 +2,9 @@ package net.thewinnt.cutscenes.easing.serializers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.easing.Easing;
@@ -12,6 +15,9 @@ import net.thewinnt.cutscenes.util.LoadResolver;
 
 public class SplineEasingSerializer implements EasingSerializer<SplineEasing> {
     public static final SplineEasingSerializer INSTANCE = new SplineEasingSerializer();
+    public static final MapCodec<SplineEasing> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        Easing.CODEC.listOf().fieldOf("points").forGetter(SplineEasing::asList)
+    ).apply(instance, SplineEasing::new));
 
     private SplineEasingSerializer() {}
 
@@ -38,5 +44,10 @@ public class SplineEasingSerializer implements EasingSerializer<SplineEasing> {
             data[i] = Easing.fromJSON(easings.get(i), context);
         }
         return new SplineEasing(data);
+    }
+
+    @Override
+    public MapCodec<SplineEasing> codec() {
+        return CODEC;
     }
 }

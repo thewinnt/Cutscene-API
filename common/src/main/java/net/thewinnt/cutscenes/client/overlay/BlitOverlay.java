@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.GameRenderer;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.BlitConfiguration;
@@ -35,7 +36,7 @@ public class BlitOverlay implements Overlay {
         float v2 = config.v2().get(t, 1);
         int color = config.tint().toARGB(t);
         RenderSystem.setShaderTexture(0, config.texture());
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
         RenderSystem.enableBlend();
         Matrix4f matrix4f = graphics.pose().last().pose();
         BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);

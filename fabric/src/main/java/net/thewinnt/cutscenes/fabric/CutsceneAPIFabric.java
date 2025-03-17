@@ -7,6 +7,8 @@ import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -26,7 +28,7 @@ public final class CutsceneAPIFabric implements ModInitializer {
         .sized(0.1f, 0.1f)
         .clientTrackingRange(9999)
         .canSpawnFarFromPlayer()
-        .build("waypoint");
+        .build(ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath("cutscenes", "waypoint")));
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})

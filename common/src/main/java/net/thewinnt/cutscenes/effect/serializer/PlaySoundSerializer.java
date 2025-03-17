@@ -25,7 +25,7 @@ public class PlaySoundSerializer implements CutsceneEffectSerializer<PlaySoundCo
         SoundSource source = buf.readEnum(SoundSource.class);
         float volume = buf.readFloat();
         float pitch = buf.readFloat();
-        Optional<Vec3> pos = buf.readOptional(FriendlyByteBuf::readVec3);
+        Optional<Vec3> pos = buf.readOptional(object -> object.readVec3());
         return new PlaySoundConfiguration(sound, source, volume, pitch, pos);
     }
 
@@ -45,7 +45,7 @@ public class PlaySoundSerializer implements CutsceneEffectSerializer<PlaySoundCo
         buf.writeEnum(data.source());
         buf.writeFloat(data.volume());
         buf.writeFloat(data.pitch());
-        buf.writeOptional(data.pos(), FriendlyByteBuf::writeVec3);
+        buf.writeOptional(data.pos(), (object, object2) -> object.writeVec3(object2));
     }
 
     @Override

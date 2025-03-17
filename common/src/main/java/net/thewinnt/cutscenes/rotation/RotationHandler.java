@@ -56,7 +56,7 @@ public interface RotationHandler {
             CutsceneAPI.LOGGER.warn("Unknown rotation handler, returning default (cutscenes:block). Check server logs for more details.");
             return CutsceneRotation.INSTANCE;
         }
-        RotationSerializer<?> serializer = CutsceneAPI.ROTATION_HANDLERS.get(id);
+        RotationSerializer<?> serializer = CutsceneAPI.ROTATION_HANDLERS.getValue(id);
         if (serializer == null) {
             CutsceneAPI.LOGGER.warn("Unknown rotation handler: {}, returning default (cutscenes:block)", id);
             return CutsceneRotation.INSTANCE;
@@ -75,7 +75,7 @@ public interface RotationHandler {
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
             ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
-            RotationSerializer<?> serializer = CutsceneAPI.ROTATION_HANDLERS.get(id);
+            RotationSerializer<?> serializer = CutsceneAPI.ROTATION_HANDLERS.getValue(id);
             if (serializer != null) {
                 return serializer.fromJson(obj);
             }

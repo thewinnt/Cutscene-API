@@ -1,6 +1,9 @@
 package net.thewinnt.cutscenes.transition;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
@@ -15,6 +18,17 @@ import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 
 public class SmoothEaseTransition implements Transition {
+    public static final MapCodec<SmoothEaseTransition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        Codec.DOUBLE.fieldOf("length").forGetter(t -> t.length),
+        Codec.BOOL.fieldOf("count_towards_cutscene_time").forGetter(t -> t.countTowardsCutsceneTime),
+        Codec.BOOL.fieldOf("is_start").forGetter(t -> t.isStart),
+        Easing.CODEC.fieldOf("easing_x").forGetter(t -> t.easingX),
+        Easing.CODEC.fieldOf("easing_y").forGetter(t -> t.easingY),
+        Easing.CODEC.fieldOf("easing_z").forGetter(t -> t.easingZ),
+        Easing.CODEC.fieldOf("easing_rot_x").forGetter(t -> t.easingRotX),
+        Easing.CODEC.fieldOf("easing_rot_y").forGetter(t -> t.easingRotY),
+        Easing.CODEC.fieldOf("easing_rot_z").forGetter(t -> t.easingRotZ)
+    ).apply(instance, SmoothEaseTransition::new));
     private final double length;
     private final boolean countTowardsCutsceneTime;
     private final boolean isStart;

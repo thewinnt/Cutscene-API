@@ -7,11 +7,18 @@ import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.serializers.SplineEasingSerializer;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 
+import java.util.List;
+
 public class SplineEasing implements Easing {
     private final Easing[] points;
+    private List<Easing> easingList;
 
     public SplineEasing(Easing... points) {
         this.points = points;
+    }
+
+    public SplineEasing(List<Easing> points) {
+        this.points = points.toArray(Easing[]::new);
     }
 
     @Override
@@ -45,6 +52,13 @@ public class SplineEasing implements Easing {
         t -= startSegment * step;
         t /= step;
         return (2*b + t * (-a + c) + t*t * (2*a - 5*b + 4*c - d) + t*t*t * (-a + 3*b - 3*c + d)) * 0.5;
+    }
+
+    public List<Easing> asList() {
+        if (easingList == null) {
+            easingList = List.of(points);
+        }
+        return easingList;
     }
 
     @Override

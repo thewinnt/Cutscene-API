@@ -2,14 +2,22 @@ package net.thewinnt.cutscenes.util;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.Easing;
 
+import java.util.Objects;
 import java.util.function.DoubleUnaryOperator;
 
 public record CoordinateProvider(boolean isAbsolute, Easing value, CoordinateAnchor anchor) {
+
+    private Object getValue() {
+        return value;
+    }
+
     public float get(double t, float scale) {
         if (isAbsolute) return (float) anchor.apply(value.get(t) / scale) * scale;
         return (float) anchor.apply(value.get(t)) * scale;
@@ -63,6 +71,8 @@ public record CoordinateProvider(boolean isAbsolute, Easing value, CoordinateAnc
         BEFORE_CENTER(x -> 0.5 - x),
         AFTER_CENTER(x -> 0.5 + x),
         END(x -> 1 - x);
+
+        public static final EnumCodec<CoordinateAnchor> CODEC = EnumCodec.forClass(CoordinateAnchor.class);
 
         private final DoubleUnaryOperator operation;
 

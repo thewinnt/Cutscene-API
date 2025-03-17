@@ -129,6 +129,8 @@ public interface PathLike {
          */
         T fromJSON(JsonObject json, Path path);
 
+
+
         /**
          * A helper method to create a segment serializer from 2 functions.
          * @param network a {@link #fromNetwork(FriendlyByteBuf, Path)} implementation

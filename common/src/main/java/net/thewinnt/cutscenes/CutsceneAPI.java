@@ -46,6 +46,7 @@ import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 import net.thewinnt.cutscenes.platform.ClientPlatformAbstractions;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
+import net.thewinnt.cutscenes.util.JsonLoader;
 import net.thewinnt.cutscenes.util.LoadResolver;
 
 /** The main class of Cutscene API. Sort of. */
@@ -130,7 +131,7 @@ public class CutsceneAPI {
     }
 
     public static void addReloadListeners(PlatformAbstractions abstractions) {
-        abstractions.registerReloadListener(new SimpleJsonResourceReloadListener(GSON, "easing_macros") {
+        abstractions.registerReloadListener(new JsonLoader(GSON, "easing_macros") {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 Easing.EASING_MACROS.clear();
@@ -139,7 +140,7 @@ public class CutsceneAPI {
                 LOGGER.info("Loaded {} easing macros", Easing.EASING_MACROS.size());
             }
         }, ResourceLocation.parse("cutscenes:easing_macros"));
-        abstractions.registerReloadListener(new SimpleJsonResourceReloadListener(GSON, "cutscenes") {
+        abstractions.registerReloadListener(new JsonLoader(GSON, "cutscenes") {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 CutsceneManager.REGISTRY.clear();
