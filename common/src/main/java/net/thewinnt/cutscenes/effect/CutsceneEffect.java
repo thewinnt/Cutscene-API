@@ -66,7 +66,8 @@ public abstract class CutsceneEffect<T> {
         return serializer.factory().unchecked(start, end, serializer.fromNetwork(buf));
     }
 
-    public static CutsceneEffect<?> fromJSON(JsonObject json) {
+    @SuppressWarnings({"unchecked", "rawtypes"}) // java refuses to acknowledge that the ? is the same in serializer and its fromJSON
+    public static ServerEffectWrapper<?> fromJSON(JsonObject json) {
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(json, "type"));
         CutsceneEffectSerializer<?> serializer = CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS.getValue(type);
         if (serializer == null) {
@@ -74,6 +75,6 @@ public abstract class CutsceneEffect<T> {
         }
         double start = GsonHelper.getAsDouble(json, "start");
         double end = GsonHelper.getAsDouble(json, "end");
-        return serializer.factory().unchecked(start, end, serializer.fromJSON(json));
+        return new ServerEffectWrapper(start, end, serializer.fromJSON(json), serializer);
     }
 }

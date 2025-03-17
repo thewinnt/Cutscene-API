@@ -3,7 +3,6 @@ package net.thewinnt.cutscenes;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.rotation.handler.CutsceneRotation;
 import net.thewinnt.cutscenes.rotation.handler.PlayerRotation;
 import net.thewinnt.cutscenes.time.CutsceneLength;
@@ -50,7 +49,6 @@ public class CutsceneType {
     public final List<CutsceneEffect<?>> effects;
 
     /** Constructs a cutscene type with all parameters specified. */
-    @SuppressWarnings("deprecation")
     public CutsceneType(PathLike path, Path rotationProvider, CutsceneLength length, Transition start, Transition end, boolean blockMovement, RotationHandler rotationHandler, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects) {
         if (path instanceof Path pth) {
             this.path = pth;

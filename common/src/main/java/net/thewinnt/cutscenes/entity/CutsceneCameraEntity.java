@@ -16,7 +16,6 @@ import net.minecraft.client.player.ClientInput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.ServerLinks;
 import net.minecraft.tags.FluidTags;
@@ -29,7 +28,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.Vec3;
-import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneInstance;
 import net.thewinnt.cutscenes.transition.Transition;
 
@@ -183,5 +181,10 @@ public class CutsceneCameraEntity extends LocalPlayer {
     @Override
     public boolean hasEffect(Holder<MobEffect> pEffect) {
         return minecraft.player.hasEffect(pEffect);
+    }
+
+    @Override
+    public boolean shouldRender(double x, double y, double z) {
+        return false;
     }
 }
