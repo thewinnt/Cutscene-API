@@ -66,6 +66,7 @@ public abstract class CutsceneEffect<T> {
         return serializer.factory().unchecked(start, end, serializer.fromNetwork(buf));
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static CutsceneEffect<?> fromJSON(JsonObject json) {
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(json, "type"));
         CutsceneEffectSerializer<?> serializer = CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS.get(type);
@@ -74,6 +75,6 @@ public abstract class CutsceneEffect<T> {
         }
         double start = GsonHelper.getAsDouble(json, "start");
         double end = GsonHelper.getAsDouble(json, "end");
-        return serializer.factory().unchecked(start, end, serializer.fromJSON(json));
+        return new ServerEffectWrapper(start, end, serializer.fromJSON(json), serializer);
     }
 }

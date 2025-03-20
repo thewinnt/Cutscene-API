@@ -50,7 +50,9 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         ResourceLocation soundbite = tryGetSoundEffect(json.get("soundbite"));
         DelayProvider delayProvider = DelayProvider.fromJSON(json.get("delays"), UndertaleDelayProvider.INSTANCE);
         FloatProvider pitch = FloatProvider.CODEC.parse(JsonOps.INSTANCE, json.get("pitch")).result().orElse(BACKUP_FLOAT);
-        if (pitch == BACKUP_FLOAT) CutsceneAPI.LOGGER.warn("Error loading float provider, using fallback");
+        if (pitch == BACKUP_FLOAT && json.has("pitch")) {
+            CutsceneAPI.LOGGER.warn("Error loading float provider, using fallback");
+        }
         return new AppearingTextConfiguration(text, rx, ry, lineWidth, dropShadow, soundbite, delayProvider, pitch);
     }
 
