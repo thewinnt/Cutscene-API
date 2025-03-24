@@ -12,21 +12,34 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.Overlay;
-import net.thewinnt.cutscenes.effect.configuration.BlitConfiguration;
+import net.thewinnt.cutscenes.effect.configuration.TextureAnimationConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
 
-public class BlitOverlay implements Overlay {
-    private final BlitConfiguration config;
+public class TextureAnimationOverlay implements Overlay {
+    private final TextureAnimationConfiguration config;
+    private final ResourceLocation[] frames;
 
-    public BlitOverlay(BlitConfiguration config) {
+    public TextureAnimationOverlay(TextureAnimationConfiguration config) {
         this.config = config;
+        this.frames = new ResourceLocation[config.frameCount()];
+        for (int i = 0; i < frames.length; i++) {
+            String texture = config.textureMask();
+            String[] frameFormat = texture.split("%");
+            texture = texture.replaceAll("%[0-9]*%", String.format("%0" + frameFormat[1] + "d", i + config.frameOffset()));
+            this.frames[i] = ResourceLocation.parse(texture);
+        }
     }
 
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object cfg) {
+        Profiler.get().push("cutscenes:animation");
         TimeProvider time = (TimeProvider) cfg;
         double t = time.getProgress();
+
         float x1 = config.x1().get(t, width);
         float y1 = config.y1().get(t, height);
         float x2 = config.x2().get(t, width);
@@ -36,16 +49,21 @@ public class BlitOverlay implements Overlay {
         float u2 = config.u2().get(t, 1);
         float v2 = config.v2().get(t, 1);
         int color = config.tint().toARGB(t);
-        RenderSystem.setShaderTexture(0, config.texture());
+        int frame = (int) (Mth.clamp(config.timeWarp().get(time.getProgress()), 0, 1) * config.frameCount());
+
+        RenderSystem.setShaderTexture(0, frames[frame]);
         RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
         RenderSystem.enableBlend();
         Matrix4f matrix4f = graphics.pose().last().pose();
         BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(matrix4f, x1, y1, 0).setColor(color).setUv(u1, v1);
-        bufferbuilder.addVertex(matrix4f, x1, y2, 0).setColor(color).setUv(u1, v2);
-        bufferbuilder.addVertex(matrix4f, x2, y2, 0).setColor(color).setUv(u2, v2);
-        bufferbuilder.addVertex(matrix4f, x2, y1, 0).setColor(color).setUv(u2, v1);
+        
+        bufferbuilder.addVertex(matrix4f, x1, y1, config.zIndex()).setColor(color).setUv(u1, v1);
+        bufferbuilder.addVertex(matrix4f, x1, y2, config.zIndex()).setColor(color).setUv(u1, v2);
+        bufferbuilder.addVertex(matrix4f, x2, y2, config.zIndex()).setColor(color).setUv(u2, v2);
+        bufferbuilder.addVertex(matrix4f, x2, y1, config.zIndex()).setColor(color).setUv(u2, v1);
+
         BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
         RenderSystem.disableBlend();
+        Profiler.get().pop();
     }
 }
