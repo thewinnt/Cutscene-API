@@ -10,7 +10,6 @@ import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.DoubleArgumentEasing;
 import net.thewinnt.cutscenes.util.LoadResolver;
 
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.DoubleBinaryOperator;

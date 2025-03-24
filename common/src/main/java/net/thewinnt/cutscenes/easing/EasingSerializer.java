@@ -83,6 +83,9 @@ public interface EasingSerializer<T extends Easing> {
     EasingSerializer<SplineEasing> SPLINE = register(ResourceLocation.parse("cutscenes:spline"), SplineEasingSerializer.INSTANCE);
     EasingSerializer<LerpEasing> LERP = register(ResourceLocation.parse("cutscenes:lerp"), LerpEasingSerializer.INSTANCE);
     EasingSerializer<ColorEasing> COLOR = register(ResourceLocation.parse("cutscenes:color"), ColorEasingSerializer.INSTANCE);
+    EasingSerializer<IndependentCoordinateEasing> COORDINATE = register(ResourceLocation.parse("cutscenes:coordinate"), IndependentCoordinateSerializer.INSTANCE);
+    EasingSerializer<RangeChoiceEasing> RANGE_CHOICE = register(ResourceLocation.parse("cutscenes:range_choice"), RangeChoiceSerializer.INSTANCE);
+    EasingSerializer<RandomEasing> RANDOM = register(ResourceLocation.parse("cutscenes:random"), RandomEasingSerializer.INSTANCE);
 
 
     T fromNetwork(FriendlyByteBuf buf);
