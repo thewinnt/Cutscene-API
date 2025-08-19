@@ -17,7 +17,7 @@ import net.thewinnt.cutscenes.path.ConstantPoint;
 import net.thewinnt.cutscenes.path.LineSegment;
 import net.thewinnt.cutscenes.path.LookAtPoint;
 import net.thewinnt.cutscenes.path.Path;
-import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
+import net.thewinnt.cutscenes.path.PathLike.SegmentType;
 import net.thewinnt.cutscenes.path.PathTransition;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
@@ -57,21 +57,21 @@ public class CutsceneManager {
     // segments obtained from these serializers.
 
     /** A line, consisting of 2 point, interpolated between each other with some easings. */
-    public static final SegmentSerializer<LineSegment> LINE = SegmentSerializer.of(LineSegment::fromNetwork, LineSegment::fromJSON);
+    public static final SegmentType<LineSegment> LINE = SegmentType.of(LineSegment::fromNetwork, LineSegment::fromJSON);
     /** A cubic or quadratic Bézier curve, depending on the points supplied. */
-    public static final SegmentSerializer<BezierCurve> BEZIER = SegmentSerializer.of(BezierCurve::fromNetwork, BezierCurve::fromJSON);
+    public static final SegmentType<BezierCurve> BEZIER = SegmentType.of(BezierCurve::fromNetwork, BezierCurve::fromJSON);
     /** A Catmull-Rom spline, made of 2 or more points. */
-    public static final SegmentSerializer<CatmullRomSpline> CATMULL_ROM = SegmentSerializer.of(CatmullRomSpline::fromNetwork, CatmullRomSpline::fromJSON);
+    public static final SegmentType<CatmullRomSpline> CATMULL_ROM = SegmentType.of(CatmullRomSpline::fromNetwork, CatmullRomSpline::fromJSON);
     /** A segment made of other segments. */
-    public static final SegmentSerializer<Path> PATH = SegmentSerializer.of(Path::fromNetwork, Path::fromJSON);
+    public static final SegmentType<Path> PATH = SegmentType.of(Path::fromNetwork, Path::fromJSON);
     /** A segment always returning a single point. */
-    public static final SegmentSerializer<ConstantPoint> CONSTANT = SegmentSerializer.of(ConstantPoint::fromNetwork, ConstantPoint::fromJSON);
+    public static final SegmentType<ConstantPoint> CONSTANT = SegmentType.of(ConstantPoint::fromNetwork, ConstantPoint::fromJSON);
     /** A segment returning a look direction so that the player is looking at the specified point. */
-    public static final SegmentSerializer<LookAtPoint> LOOK_AT_POINT = SegmentSerializer.of(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
+    public static final SegmentType<LookAtPoint> LOOK_AT_POINT = SegmentType.of(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
     /** A transition between two segments - the one before and the one after this. */
-    public static final SegmentSerializer<PathTransition> PATH_TRANSITION = SegmentSerializer.of(PathTransition::fromNetwork, PathTransition::fromJSON);
+    public static final SegmentType<PathTransition> PATH_TRANSITION = SegmentType.of(PathTransition::fromNetwork, PathTransition::fromJSON);
     /** A segment getting its coordinates from easings. */
-    public static final SegmentSerializer<CalculatedPoint> CALCULATED_POINT = SegmentSerializer.of(CalculatedPoint::fromNetwork, CalculatedPoint::fromJSON);
+    public static final SegmentType<CalculatedPoint> CALCULATED_POINT = SegmentType.of(CalculatedPoint::fromNetwork, CalculatedPoint::fromJSON);
 
     // POINT TYPES //
     // Point serializers are used to identify and read point types. A point type gets a Level in and returns
@@ -116,7 +116,7 @@ public class CutsceneManager {
      * @param id The ID of the segment type that will be used in datapacks
      * @param type The serializer to register
      */
-    public static void registerSegmentType(ResourceLocation id, SegmentSerializer<?> type) {
+    public static void registerSegmentType(ResourceLocation id, SegmentType<?> type) {
         Registry.register(CutsceneAPI.SEGMENT_TYPES, id, type);
     }
 
@@ -139,12 +139,12 @@ public class CutsceneManager {
     }
 
     /** Returns the ID of the specified serializer, or {@code null} if it's not registered */
-    public static ResourceLocation getSegmentTypeId(SegmentSerializer<?> type) {
+    public static ResourceLocation getSegmentTypeId(SegmentType<?> type) {
         return CutsceneAPI.SEGMENT_TYPES.getKey(type);
     }
 
     /** Returns the segment serializer with this ID, or {@code null} if it doesn't exist */
-    public static SegmentSerializer<?> getSegmentType(ResourceLocation id) {
+    public static SegmentType<?> getSegmentType(ResourceLocation id) {
         return CutsceneAPI.SEGMENT_TYPES.getValue(id);
     }
 
@@ -218,6 +218,16 @@ public class CutsceneManager {
         ext.csapi$setRunningCutscene(type);
         player.setCamera(null);
         CutsceneAPI.platform().sendPacketToPlayer(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), player);
+    }
+
+    /**
+     * Starts a cutscene for a player from their position with no preset rotation
+     * @param id The ID of the cutscene to start
+     * @param player The player to play the cutscene to
+     * @see CutsceneManager#startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer)
+     */
+    public static void startCutscene(ResourceLocation id, ServerPlayer player) {
+        startCutscene(id, player.position(), Vec3.ZERO, Vec3.ZERO, player);
     }
 
     /**

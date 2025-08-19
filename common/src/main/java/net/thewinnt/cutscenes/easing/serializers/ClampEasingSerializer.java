@@ -9,6 +9,7 @@ import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.ClampEasing;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class ClampEasingSerializer implements EasingSerializer<ClampEasing> {
     public static final ClampEasingSerializer INSTANCE = new ClampEasingSerializer();
@@ -29,15 +30,7 @@ public class ClampEasingSerializer implements EasingSerializer<ClampEasing> {
     }
 
     @Override
-    public ClampEasing fromJSON(JsonObject json) {
-        Easing input = Easing.fromJSON(json.get("input"));
-        Easing min = Easing.fromJSON(json.get("min"));
-        Easing max = Easing.fromJSON(json.get("max"));
-        return new ClampEasing(input, min, max);
-    }
-
-    @Override
-    public ClampEasing fromJSON(JsonObject json, LoadResolver<Easing> context) {
+    public ClampEasing fromJSON(JsonObject json, LoadingContext context) {
         Easing input = Easing.fromJSON(json.get("input"), context);
         Easing min = Easing.fromJSON(json.get("min"), context);
         Easing max = Easing.fromJSON(json.get("max"), context);

@@ -9,6 +9,7 @@ import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.DoubleArgumentEasing;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -33,14 +34,7 @@ public record DoubleArgumentEasingSerializer(DoubleBinaryOperator operation) imp
     }
 
     @Override
-    public DoubleArgumentEasing fromJSON(JsonObject json) {
-        Easing arg1 = Easing.fromJSON(json.get("arg1"));
-        Easing arg2 = Easing.fromJSON(json.get("arg2"));
-        return new DoubleArgumentEasing(arg1, arg2, operation);
-    }
-
-    @Override
-    public DoubleArgumentEasing fromJSON(JsonObject json, LoadResolver<Easing> context) {
+    public DoubleArgumentEasing fromJSON(JsonObject json, LoadingContext context) {
         Easing arg1 = Easing.fromJSON(json.get("arg1"), context);
         Easing arg2 = Easing.fromJSON(json.get("arg2"), context);
         return new DoubleArgumentEasing(arg1, arg2, operation);

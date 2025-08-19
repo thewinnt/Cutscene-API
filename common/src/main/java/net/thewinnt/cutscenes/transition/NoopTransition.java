@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class NoopTransition implements Transition {
     public static final NoopTransition INSTANCE = new NoopTransition();
@@ -55,7 +56,7 @@ public class NoopTransition implements Transition {
         return INSTANCE;
     }
 
-    public static NoopTransition fromJSON(JsonObject json) {
+    public static NoopTransition fromJSON(JsonObject json, LoadingContext context) {
         return INSTANCE;
     }
 }

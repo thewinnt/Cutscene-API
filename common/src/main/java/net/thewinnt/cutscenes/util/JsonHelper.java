@@ -58,7 +58,7 @@ public class JsonHelper {
      * @return a point provider
      */
     @Nullable
-    public static PointProvider pointFromJson(JsonObject json, String name) {
+    public static PointProvider pointFromJson(JsonObject json, String name, LoadingContext context) {
         Vec3 test = vec3FromJson(json, name);
         if (test != null) return new StaticPointProvider(test);
         JsonObject obj;
@@ -73,7 +73,7 @@ public class JsonHelper {
         if (serializer == null) {
             throw new IllegalArgumentException("Unknown point type: " + type);
         }
-        return serializer.fromJSON(obj);
+        return serializer.fromJSON(obj, context);
     }
 
     /**
@@ -84,7 +84,7 @@ public class JsonHelper {
      * @return a point provider
      */
     @Nullable
-    public static PointProvider pointFromJson(JsonElement json) {
+    public static PointProvider pointFromJson(JsonElement json, LoadingContext context) {
         Vec3 test = vec3FromJson(json);
         if (test != null) return new StaticPointProvider(test);
         if (json.isJsonNull()) return null;
@@ -94,7 +94,7 @@ public class JsonHelper {
         if (serializer == null) {
             throw new IllegalArgumentException("Unknown point type: " + type);
         }
-        return serializer.fromJSON(obj);
+        return serializer.fromJSON(obj, context);
     }
 
     /**

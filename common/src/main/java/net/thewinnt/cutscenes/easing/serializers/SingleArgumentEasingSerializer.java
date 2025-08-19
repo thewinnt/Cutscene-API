@@ -10,6 +10,7 @@ import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.DoubleArgumentEasing;
 import net.thewinnt.cutscenes.easing.types.SingleArgumentEasing;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -30,14 +31,8 @@ public record SingleArgumentEasingSerializer(DoubleUnaryOperator operation) impl
     public SingleArgumentEasing fromNetwork(FriendlyByteBuf buf) {
         return new SingleArgumentEasing(Easing.fromNetwork(buf), operation);
     }
-
     @Override
-    public SingleArgumentEasing fromJSON(JsonObject json) {
-        return new SingleArgumentEasing(Easing.fromJSON(json.get("arg")), operation);
-    }
-
-    @Override
-    public SingleArgumentEasing fromJSON(JsonObject json, LoadResolver<Easing> context) {
+    public SingleArgumentEasing fromJSON(JsonObject json, LoadingContext context) {
         return new SingleArgumentEasing(Easing.fromJSON(json.get("arg"), context), operation);
     }
 

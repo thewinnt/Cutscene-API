@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 /**
  * A CutsceneEffect does all the visuals not related to the camera during a cutscene. It can be an overlay,
@@ -67,7 +68,7 @@ public abstract class CutsceneEffect<T> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"}) // java refuses to acknowledge that the ? is the same in serializer and its fromJSON
-    public static ServerEffectWrapper<?> fromJSON(JsonObject json) {
+    public static ServerEffectWrapper<?> fromJSON(JsonObject json, LoadingContext context) {
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(json, "type"));
         CutsceneEffectSerializer<?> serializer = CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS.getValue(type);
         if (serializer == null) {
@@ -75,6 +76,6 @@ public abstract class CutsceneEffect<T> {
         }
         double start = GsonHelper.getAsDouble(json, "start");
         double end = GsonHelper.getAsDouble(json, "end");
-        return new ServerEffectWrapper(start, end, serializer.fromJSON(json), serializer);
+        return new ServerEffectWrapper(start, end, serializer.fromJSON(json, context), serializer);
     }
 }

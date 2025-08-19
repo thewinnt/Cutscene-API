@@ -7,8 +7,6 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.MapCodec;
-
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -16,15 +14,14 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import it.unimi.dsi.fastutil.io.MeasurableInputStream;
 
 /**
  * An easing smoothly transitions from value 0 to value 1. At least, in places it's meant to be an easing.
@@ -113,21 +110,7 @@ public interface Easing {
         easing.toNetwork(buf);
     }
 
-    static Easing fromJSON(@NotNull JsonElement json) {
-        if (json.isJsonPrimitive()) {
-            return fromJSONPrimitive(json.getAsJsonPrimitive());
-        } else if (json.isJsonObject()) {
-            JsonObject obj = json.getAsJsonObject();
-            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.getValue(ResourceLocation.parse(GsonHelper.getAsString(obj, "type")));
-            if (serializer == null) {
-                throw new IllegalArgumentException("Unknown easing type: " + GsonHelper.getAsString(obj, "type"));
-            }
-            return serializer.fromJSON(obj);
-        }
-        throw new IllegalArgumentException("Cannot get Easing from JSON: " + json);
-    }
-
-    static Easing fromJSON(@NotNull JsonElement json, LoadResolver<Easing> context) {
+    static Easing fromJSON(@NotNull JsonElement json, LoadingContext context) {
         if (json.isJsonPrimitive()) {
             return fromJSONPrimitive(json.getAsJsonPrimitive(), context);
         } else if (json.isJsonObject()) {
@@ -142,43 +125,20 @@ public interface Easing {
     }
 
 
-    static Easing fromJSON(@Nullable JsonElement json, Easing fallback) {
+    static Easing fromJSON(@Nullable JsonElement json, LoadingContext context, Easing fallback) {
         if (json == null || json.isJsonNull()) {
             return fallback;
         }
         try {
-            return fromJSON(json);
+            return fromJSON(json, context);
         } catch (RuntimeException e) {
             LOGGER.warn("Exception loading easing, returning fallback: ", e);
             return fallback;
         }
     }
 
-    static Easing fromJSONPrimitive(JsonPrimitive json) {
-        // if it's a number, return that first
-        try {
-            return new ConstantEasing(json.getAsDouble());
-        } catch (NumberFormatException ignored) {}
-
-        // if it's a string, try returning a constant first
-        String value = json.getAsString();
-        if ("t".equals(value)) return SimpleEasing.LINEAR;
-        if ("pi".equals(value)) return ConstantEasing.PI;
-        if ("e".equals(value)) return ConstantEasing.E;
-
-        // then, a legacy easing
-        if (EasingSerializer.LEGACY_COMPAT.containsKey(value)) {
-            return EasingSerializer.LEGACY_COMPAT.get(value);
-        }
-
-        // then, a macro
-        ResourceLocation test = ResourceLocation.parse(value);
-        if (EASING_MACROS.containsKey(test)) {
-            return EASING_MACROS.get(test);
-        } else {
-            // if nothing is found, throw an exception
-            throw new IllegalArgumentException("Invalid or unknown easing: " + json);
-        }
+    static Easing fromJSONPrimitive(JsonPrimitive json, LoadingContext context) {
+        return fromJSONPrimitive(json, context.easings);
     }
 
     static Easing fromJSONPrimitive(JsonPrimitive json, LoadResolver<Easing> context) {
@@ -198,9 +158,21 @@ public interface Easing {
             return EasingSerializer.LEGACY_COMPAT.get(value);
         }
 
+        // then, a preloaded macro
+        final ResourceLocation id = ResourceLocation.parse(value);
+        if (EASING_MACROS.containsKey(id)) {
+            return EASING_MACROS.get(id);
+        }
+
         // then, a macro
-        ResourceLocation test = ResourceLocation.parse(value);
-        return context.resolve(test);
+        if (context == null) {
+            throw new IllegalStateException("Missing easing macro: " + id);
+        }
+        Easing output = context.resolve(id);
+        if (output == null) {
+            throw new IllegalStateException("Missing or invalid easing macro: " + id);
+        }
+        return context.resolve(id);
     }
 
     static Easing fromNetwork(FriendlyByteBuf buf) {

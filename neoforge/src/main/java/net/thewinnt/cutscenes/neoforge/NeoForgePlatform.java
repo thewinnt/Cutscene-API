@@ -2,8 +2,10 @@ package net.thewinnt.cutscenes.neoforge;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SequencedMap;
 import java.util.function.Consumer;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -38,7 +40,7 @@ import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME)
 public class NeoForgePlatform implements PlatformAbstractions {
-    private final Map<PreparableReloadListener, ResourceLocation> reloadListeners = new HashMap<>();
+    private final SequencedMap<PreparableReloadListener, ResourceLocation> reloadListeners = new LinkedHashMap<>();
     protected final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();
     private final List<Consumer<CommandDispatcher<CommandSourceStack>>> commandMakers = new ArrayList<>();
     public final List<Runnable> onLogout = new ArrayList<>();

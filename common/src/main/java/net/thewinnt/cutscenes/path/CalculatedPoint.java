@@ -11,6 +11,7 @@ import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class CalculatedPoint implements PathLike {
     private final StaticPointProvider start;
@@ -49,7 +50,7 @@ public class CalculatedPoint implements PathLike {
     }
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return weight;
     }
 
@@ -69,14 +70,14 @@ public class CalculatedPoint implements PathLike {
     }
 
     @Override
-    public SegmentSerializer<CalculatedPoint> getSerializer() {
+    public SegmentType<CalculatedPoint> getSerializer() {
         return CutsceneManager.CALCULATED_POINT;
     }
 
-    public static CalculatedPoint fromJSON(JsonObject json, Path path) {
-        Easing easingX = Easing.fromJSON(json.get("x"), SimpleEasing.LINEAR);
-        Easing easingY = Easing.fromJSON(json.get("y"), SimpleEasing.LINEAR);
-        Easing easingZ = Easing.fromJSON(json.get("z"), SimpleEasing.LINEAR);
+    public static CalculatedPoint fromJSON(JsonObject json, Path path, LoadingContext context) {
+        Easing easingX = Easing.fromJSON(json.get("x"), context, SimpleEasing.LINEAR);
+        Easing easingY = Easing.fromJSON(json.get("y"), context, SimpleEasing.LINEAR);
+        Easing easingZ = Easing.fromJSON(json.get("z"), context, SimpleEasing.LINEAR);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         return new CalculatedPoint(easingX, easingY, easingZ, weight);
     }

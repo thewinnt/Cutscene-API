@@ -1,5 +1,6 @@
 package net.thewinnt.cutscenes.transition;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.google.gson.JsonObject;
@@ -14,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 /**
  * A Transition provides a smooth change between the player doing their business and watching a cutscene.
@@ -92,21 +94,21 @@ public interface Transition {
      */
     default void onFrame(double progress, CutsceneType cutscene) {}
 
-    public static Transition fromJSON(JsonObject json) {
+    public static Transition fromJSON(JsonObject json, LoadingContext context) {
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(json, "type"));
         TransitionSerializer<?> serializer = CutsceneManager.getTransitionType(type);
         if (serializer == null) {
             throw new IllegalArgumentException("Unknown transition type: " + type);
         }
-        return serializer.fromJSON(json);
+        return serializer.fromJSON(json, context);
     }
 
     /**
      * Returns a Transition from json, or a fallback value if json is null
      */
-    public static Transition fromJSON(JsonObject json, Transition defaultIfNull) {
+    public static Transition fromJSON(JsonObject json, LoadingContext context, Transition defaultIfNull) {
         if (json == null) return defaultIfNull;
-        return fromJSON(json);
+        return fromJSON(json, context);
     }
 
     public static Transition fromNetwork(FriendlyByteBuf buf) {
@@ -133,24 +135,27 @@ public interface Transition {
         /**
          * Loads a transition from a JSON object. The object created from here is stored on the server, and then
          * serialized to network to be reconstructed on the client.
-         * @param json the JSON object with settings for this transition type. It may not be enough to create a
-         *             meaningful object.
+         *
+         * @param json    the JSON object with settings for this transition type. It may not be enough to create a
+         *                meaningful object.
+         * @param context the context for loading this transition, needed by easings for macro loading, as well as
+         *                for potential data upgrades
          * @return a transition created from given JSON.
          * @throws IllegalArgumentException if there's not enough data to create a transition, or it is invalid
          */
-        T fromJSON(JsonObject json);
+        T fromJSON(JsonObject json, LoadingContext context);
 
         MapCodec<T> codec();
 
         /**
          * A helper method to create a segment serializer from 2 functions.
          * @param network a {@link #fromNetwork(FriendlyByteBuf)} implementation
-         * @param json a {@link #fromJSON(JsonObject)} implementation
+         * @param json a {@link #fromJSON(JsonObject, LoadingContext)} implementation
          * @return a segment serializer for the given type
          * @param <T> the class for the segment type
          * @see net.thewinnt.cutscenes.CutsceneManager#BEZIER
          */
-        public static <T extends Transition> TransitionSerializer<T> of(Function<FriendlyByteBuf, T> network, Function<JsonObject, T> json, MapCodec<T> codec) {
+        public static <T extends Transition> TransitionSerializer<T> of(Function<FriendlyByteBuf, T> network, BiFunction<JsonObject, LoadingContext, T> json, MapCodec<T> codec) {
             return new TransitionSerializer<T>() {
                 @Override
                 public T fromNetwork(FriendlyByteBuf buf) {
@@ -158,8 +163,8 @@ public interface Transition {
                 }
 
                 @Override
-                public T fromJSON(JsonObject j) {
-                    return json.apply(j);
+                public T fromJSON(JsonObject j, LoadingContext context) {
+                    return json.apply(j, context);
                 }
 
                 @Override

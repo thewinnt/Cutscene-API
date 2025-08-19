@@ -1,6 +1,7 @@
 package net.thewinnt.cutscenes.client.overlay;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -80,8 +81,14 @@ public class AppearingTextOverlay implements Overlay {
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(soundbite, this.config.pitch().sample(minecraft.player.getRandom()), 1));
         }
         lastT = state.t;
+        float scale = (float) this.config.scale().get(time.getProgress());
+        float rotation = (float) this.config.rotation().get(time.getProgress());
         float x = this.config.rx().get(time.getProgress(), width);
         float y = this.config.ry().get(time.getProgress(), height);
+
+        graphics.pose().scale(scale, scale, scale);
+        graphics.pose().translate(x, y, 0);
+        graphics.pose().mulPose(Axis.ZP.rotationDegrees(rotation));
         int lineWidth = (int)this.config.width().get(time.getProgress(), width);
         // i could've used drawWordWrap() here, but it doesn't do a shadow
         // the code below is copied from GuiGraphics#drawWordWrap

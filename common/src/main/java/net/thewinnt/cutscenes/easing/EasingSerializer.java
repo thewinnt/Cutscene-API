@@ -12,6 +12,7 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.serializers.*;
 import net.thewinnt.cutscenes.easing.types.*;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -89,8 +90,7 @@ public interface EasingSerializer<T extends Easing> {
 
 
     T fromNetwork(FriendlyByteBuf buf);
-    T fromJSON(JsonObject json);
-    T fromJSON(JsonObject json, LoadResolver<Easing> context);
+    T fromJSON(JsonObject json, LoadingContext context);
     default MapCodec<T> codec() {
         return null;
     }

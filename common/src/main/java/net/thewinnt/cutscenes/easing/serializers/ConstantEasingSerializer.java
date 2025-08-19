@@ -9,6 +9,7 @@ import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class ConstantEasingSerializer implements EasingSerializer<ConstantEasing> {
     public static final ConstantEasingSerializer INSTANCE = new ConstantEasingSerializer();
@@ -22,12 +23,7 @@ public class ConstantEasingSerializer implements EasingSerializer<ConstantEasing
     }
 
     @Override
-    public ConstantEasing fromJSON(JsonObject json) {
-        return new ConstantEasing(json.get("value").getAsDouble());
-    }
-
-    @Override
-    public ConstantEasing fromJSON(JsonObject json, LoadResolver<Easing> context) {
+    public ConstantEasing fromJSON(JsonObject json, LoadingContext context) {
         return new ConstantEasing(json.get("value").getAsDouble());
     }
 

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public record VoidEffectSerializer(CutsceneEffectFactory<Void> factory) implements CutsceneEffectSerializer<Void> {
     @Override
@@ -12,7 +13,7 @@ public record VoidEffectSerializer(CutsceneEffectFactory<Void> factory) implemen
     }
 
     @Override
-    public Void fromJSON(JsonObject json) {
+    public Void fromJSON(JsonObject json, LoadingContext context) {
         return null;
     }
 

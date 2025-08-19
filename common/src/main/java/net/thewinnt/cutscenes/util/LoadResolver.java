@@ -11,26 +11,37 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /** Loads some things that may refer to others of their kind. */
 public class LoadResolver<T> {
     public static final Logger LOGGER = LogUtils.getLogger();
-    private final BiFunction<JsonElement, LoadResolver<T>, T> reader;
     private final Map<ResourceLocation, JsonElement> saveData;
     private final Map<ResourceLocation, T> resolved = new HashMap<>();
     private final Set<ResourceLocation> resolvingNow = new HashSet<>();
     private final boolean allowExceptions;
+    private Function<JsonElement, T> reader;
 
     /**
-     * @param reader a function that loads an object from JSON
      * @param saveData the saved items
      * @param allowExceptions if true, will skip items with errors.
      *                        Otherwise, will throw the exception that occured when loading.
      */
-    public LoadResolver(BiFunction<JsonElement, LoadResolver<T>, T> reader, Map<ResourceLocation, JsonElement> saveData, boolean allowExceptions) {
-        this.reader = reader;
+    public LoadResolver(Map<ResourceLocation, JsonElement> saveData, boolean allowExceptions) {
         this.saveData = saveData;
         this.allowExceptions = allowExceptions;
+    }
+
+    /**
+     * Resolves a single object from its ID, also resolving any objects it depends on. Can only be called by
+     * a reader provided to {@link #load(Function)}.
+     * If an exception occurs when loading, returns {@code null} if {@code allowExceptions} is {@code true},
+     * and throws the exception otherwise.
+     * @throws LoopingReferenceException in case of an infinite loop
+     * @throws NullPointerException if called not while executing {@link #load(Function)}
+     */
+    public @Nullable T resolve(ResourceLocation id) {
+        return resolve(id, reader);
     }
 
     /**
@@ -39,7 +50,10 @@ public class LoadResolver<T> {
      * and throws the exception otherwise.
      * @throws LoopingReferenceException in case of an infinite loop
      */
-    public @Nullable T resolve(ResourceLocation id) {
+    public @Nullable T resolve(ResourceLocation id, Function<JsonElement, T> reader) {
+        if (reader == null) {
+            throw new NullPointerException("Missing object reader");
+        }
         if (resolved.containsKey(id)) {
             return resolved.get(id);
         } else {
@@ -47,7 +61,7 @@ public class LoadResolver<T> {
             resolvingNow.add(id);
             T object;
             try {
-                object = reader.apply(saveData.get(id), this);
+                object = reader.apply(saveData.get(id));
             } catch (Exception e) {
                 if (e instanceof LoopingReferenceException) throw e;
                 if (allowExceptions) {
@@ -67,12 +81,14 @@ public class LoadResolver<T> {
      * @return a map of ids to objects
      * @throws LoopingReferenceException in case of an infinite loop
      */
-    public Map<ResourceLocation, T> load() {
+    public Map<ResourceLocation, T> load(Function<JsonElement, T> reader) {
+        this.reader = reader;
         for (ResourceLocation i : saveData.keySet()) {
             if (!resolved.containsKey(i)) {
-                resolve(i);
+                resolve(i, reader);
             }
         }
+        this.reader = null;
         return resolved;
     }
 

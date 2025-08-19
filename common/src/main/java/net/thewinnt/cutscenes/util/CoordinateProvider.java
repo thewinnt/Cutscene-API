@@ -2,14 +2,11 @@ package net.thewinnt.cutscenes.util;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.Easing;
 
-import java.util.Objects;
 import java.util.function.DoubleUnaryOperator;
 
 public record CoordinateProvider(boolean isAbsolute, Easing value, CoordinateAnchor anchor) {
@@ -36,31 +33,31 @@ public record CoordinateProvider(boolean isAbsolute, Easing value, CoordinateAnc
         return new CoordinateProvider(isAbsolute, value, anchor);
     }
 
-    public static CoordinateProvider fromJSON(JsonElement json, Easing fallback) {
+    public static CoordinateProvider fromJSON(JsonElement json, LoadingContext context, Easing fallback) {
         if (json == null) {
             return new CoordinateProvider(false, fallback, CoordinateAnchor.START);
         }
         if (json.isJsonPrimitive()) {
-            return new CoordinateProvider(false, Easing.fromJSON(json, fallback), CoordinateAnchor.START);
+            return new CoordinateProvider(false, Easing.fromJSON(json, context, fallback), CoordinateAnchor.START);
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
             boolean absolute = GsonHelper.getAsBoolean(obj, "absolute", false);
             CoordinateAnchor anchor = CoordinateAnchor.valueOf(GsonHelper.getAsString(obj, "anchor", "start").toUpperCase());
-            return new CoordinateProvider(absolute, Easing.fromJSON(json, fallback), anchor);
+            return new CoordinateProvider(absolute, Easing.fromJSON(json, context, fallback), anchor);
         } else {
             CutsceneAPI.LOGGER.warn("Invalid easing format for coordinate provider: {}", json);
-            return new CoordinateProvider(false, Easing.fromJSON(json, fallback), CoordinateAnchor.START);
+            return new CoordinateProvider(false, Easing.fromJSON(json, context, fallback), CoordinateAnchor.START);
         }
     }
 
-    public static CoordinateProvider fromJSON(JsonElement json) {
+    public static CoordinateProvider fromJSON(JsonElement json, LoadingContext context) {
         if (json.isJsonPrimitive()) {
-            return new CoordinateProvider(false, Easing.fromJSON(json), CoordinateAnchor.START);
+            return new CoordinateProvider(false, Easing.fromJSON(json, context), CoordinateAnchor.START);
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
             boolean absolute = GsonHelper.getAsBoolean(obj, "absolute", false);
             CoordinateAnchor anchor = CoordinateAnchor.valueOf(GsonHelper.getAsString(obj, "anchor", "start").toUpperCase());
-            return new CoordinateProvider(absolute, Easing.fromJSON(json), anchor);
+            return new CoordinateProvider(absolute, Easing.fromJSON(json, context), anchor);
         } else {
             throw new IllegalArgumentException("Illegal JSON for non-fallback CoordinateProvider");
         }

@@ -13,6 +13,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.ConstantFloat;
 import net.minecraft.util.valueproviders.FloatProvider;
 import net.thewinnt.cutscenes.CutsceneAPI;
+import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.chardelays.DelayProvider;
@@ -20,6 +21,7 @@ import net.thewinnt.cutscenes.effect.chardelays.types.UndertaleDelayProvider;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
 import net.thewinnt.cutscenes.effect.type.AppearingTextEffect;
 import net.thewinnt.cutscenes.util.CoordinateProvider;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class AppearingTextSerializer implements CutsceneEffectSerializer<AppearingTextConfiguration> {
     public static final AppearingTextSerializer INSTANCE = new AppearingTextSerializer();
@@ -37,15 +39,17 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         ResourceLocation soundbite = buf.readResourceLocation();
         DelayProvider delayProvider = DelayProvider.fromNetwork(buf);
         FloatProvider pitch = buf.readWithCodecTrusted(NbtOps.INSTANCE, FloatProvider.CODEC);
-        return new AppearingTextConfiguration(text, rx, ry, lineWidth, dropShadow, soundbite, delayProvider, pitch);
+        Easing scale = Easing.fromNetwork(buf);
+        Easing rotation = Easing.fromNetwork(buf);
+        return new AppearingTextConfiguration(text, rx, ry, lineWidth, dropShadow, soundbite, delayProvider, pitch, scale, rotation);
     }
 
     @Override
-    public AppearingTextConfiguration fromJSON(JsonObject json) {
+    public AppearingTextConfiguration fromJSON(JsonObject json, LoadingContext context) {
         Component text = ComponentSerialization.CODEC.decode(JsonOps.INSTANCE, json.get("text")).getOrThrow().getFirst();
-        CoordinateProvider rx = CoordinateProvider.fromJSON(json.get("x"));
-        CoordinateProvider ry = CoordinateProvider.fromJSON(json.get("y"));
-        CoordinateProvider lineWidth = CoordinateProvider.fromJSON(json.get("line_width"), ConstantEasing.ONE);
+        CoordinateProvider rx = CoordinateProvider.fromJSON(json.get("x"), context);
+        CoordinateProvider ry = CoordinateProvider.fromJSON(json.get("y"), context);
+        CoordinateProvider lineWidth = CoordinateProvider.fromJSON(json.get("line_width"), context, ConstantEasing.ONE);
         boolean dropShadow = GsonHelper.getAsBoolean(json, "drop_shadow", true);
         ResourceLocation soundbite = tryGetSoundEffect(json.get("soundbite"));
         DelayProvider delayProvider = DelayProvider.fromJSON(json.get("delays"), UndertaleDelayProvider.INSTANCE);
@@ -53,7 +57,9 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         if (json.has("pitch") && pitch == BACKUP_FLOAT) {
             CutsceneAPI.LOGGER.warn("Error loading float provider, using fallback");
         }
-        return new AppearingTextConfiguration(text, rx, ry, lineWidth, dropShadow, soundbite, delayProvider, pitch);
+        Easing scale = Easing.fromJSON(json.get("scale"), context, ConstantEasing.ONE);
+        Easing rotation = Easing.fromJSON(json.get("rotation"), context, ConstantEasing.ZERO);
+        return new AppearingTextConfiguration(text, rx, ry, lineWidth, dropShadow, soundbite, delayProvider, pitch, scale, rotation);
     }
 
     @Override
@@ -66,6 +72,8 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         buf.writeResourceLocation(config.soundbite());
         DelayProvider.toNetwork(config.delays(), buf);
         buf.writeWithCodec(NbtOps.INSTANCE, FloatProvider.CODEC, config.pitch());
+        Easing.toNetwork(config.scale(), buf);
+        Easing.toNetwork(config.rotation(), buf);
     }
 
     @Override

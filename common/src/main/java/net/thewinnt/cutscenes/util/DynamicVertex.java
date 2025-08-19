@@ -17,10 +17,10 @@ public record DynamicVertex(CoordinateProvider x, CoordinateProvider y, DynamicC
         return new DynamicVertex(x, y, color);
     }
 
-    public static DynamicVertex fromJSON(JsonObject json) {
-        CoordinateProvider x = CoordinateProvider.fromJSON(json.get("x"));
-        CoordinateProvider y = CoordinateProvider.fromJSON(json.get("y"));
-        DynamicColor color = DynamicColor.fromJSON(json.get("color"));
+    public static DynamicVertex fromJSON(JsonObject json, LoadingContext context) {
+        CoordinateProvider x = CoordinateProvider.fromJSON(json.get("x"), context);
+        CoordinateProvider y = CoordinateProvider.fromJSON(json.get("y"), context);
+        DynamicColor color = DynamicColor.fromJSON(json.get("color"), context);
         return new DynamicVertex(x, y, color);
     }
 }

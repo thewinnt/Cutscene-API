@@ -10,6 +10,7 @@ import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.configuration.PlaySoundConfiguration;
 import net.thewinnt.cutscenes.effect.type.PlaySoundEffect;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -30,7 +31,7 @@ public class PlaySoundSerializer implements CutsceneEffectSerializer<PlaySoundCo
     }
 
     @Override
-    public PlaySoundConfiguration fromJSON(JsonObject json) {
+    public PlaySoundConfiguration fromJSON(JsonObject json, LoadingContext context) {
         ResourceLocation sound = ResourceLocation.parse(GsonHelper.getAsString(json, "sound"));
         SoundSource source = SoundSource.valueOf(GsonHelper.getAsString(json, "source", "master").toUpperCase(Locale.ROOT));
         float volume = GsonHelper.getAsFloat(json, "volume", 1);

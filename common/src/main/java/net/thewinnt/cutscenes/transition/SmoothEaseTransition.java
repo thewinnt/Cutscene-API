@@ -16,6 +16,7 @@ import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class SmoothEaseTransition implements Transition {
     public static final MapCodec<SmoothEaseTransition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -208,16 +209,16 @@ public class SmoothEaseTransition implements Transition {
         return new SmoothEaseTransition(length, countTowardsCutsceneTime, easeIn, easingX, easingY, easingZ, easingRotX, easingRotY, easingRotZ);
     }
 
-    public static SmoothEaseTransition fromJSON(JsonObject json) {
+    public static SmoothEaseTransition fromJSON(JsonObject json, LoadingContext context) {
         double length = GsonHelper.getAsDouble(json, "length", 40);
         boolean isStart = GsonHelper.getAsBoolean(json, "is_start");
         boolean countTowardsCutsceneTime = GsonHelper.getAsBoolean(json, "count_towards_cutscene_time", isStart);
-        Easing easingX = Easing.fromJSON(json.get("easing_x"), SimpleEasing.OUT_QUINT);
-        Easing easingY = Easing.fromJSON(json.get("easing_y"), SimpleEasing.OUT_QUINT);
-        Easing easingZ = Easing.fromJSON(json.get("easing_z"), SimpleEasing.OUT_QUINT);
-        Easing easingRotX = Easing.fromJSON(json.get("easing_rot_x"), SimpleEasing.OUT_QUINT);
-        Easing easingRotY = Easing.fromJSON(json.get("easing_rot_y"), SimpleEasing.OUT_QUINT);
-        Easing easingRotZ = Easing.fromJSON(json.get("easing_rot_z"), SimpleEasing.OUT_QUINT);
+        Easing easingX = Easing.fromJSON(json.get("easing_x"), context, SimpleEasing.OUT_QUINT);
+        Easing easingY = Easing.fromJSON(json.get("easing_y"), context, SimpleEasing.OUT_QUINT);
+        Easing easingZ = Easing.fromJSON(json.get("easing_z"), context, SimpleEasing.OUT_QUINT);
+        Easing easingRotX = Easing.fromJSON(json.get("easing_rot_x"), context, SimpleEasing.OUT_QUINT);
+        Easing easingRotY = Easing.fromJSON(json.get("easing_rot_y"), context, SimpleEasing.OUT_QUINT);
+        Easing easingRotZ = Easing.fromJSON(json.get("easing_rot_z"), context, SimpleEasing.OUT_QUINT);
         return new SmoothEaseTransition(length, countTowardsCutsceneTime, isStart, easingX, easingY, easingZ, easingRotX, easingRotY, easingRotZ);
     }
 }

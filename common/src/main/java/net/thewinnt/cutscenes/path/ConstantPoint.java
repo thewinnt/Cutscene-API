@@ -11,6 +11,7 @@ import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class ConstantPoint implements PathLike {
     private final PointProvider point;
@@ -47,7 +48,7 @@ public class ConstantPoint implements PathLike {
     }
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return weight;
     }
 
@@ -58,7 +59,7 @@ public class ConstantPoint implements PathLike {
     }
 
     @Override
-    public SegmentSerializer<?> getSerializer() {
+    public SegmentType<?> getSerializer() {
         return CutsceneManager.CONSTANT;
     }
 
@@ -68,8 +69,8 @@ public class ConstantPoint implements PathLike {
         return new ConstantPoint(point, weight);
     }
 
-    public static ConstantPoint fromJSON(JsonObject json, Path path) {
-        PointProvider point = JsonHelper.pointFromJson(json, "point");
+    public static ConstantPoint fromJSON(JsonObject json, Path path, LoadingContext context) {
+        PointProvider point = JsonHelper.pointFromJson(json, "point", context);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         return new ConstantPoint(point, weight);
     }

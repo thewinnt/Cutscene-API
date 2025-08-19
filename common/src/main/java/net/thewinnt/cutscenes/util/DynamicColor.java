@@ -87,20 +87,20 @@ public record DynamicColor(Easing r, Easing g, Easing b, Easing a) {
         return new DynamicColor(r, g, b, a);
     }
 
-    public static DynamicColor fromJSON(@NotNull JsonElement json) {
+    public static DynamicColor fromJSON(@NotNull JsonElement json, LoadingContext context) {
         if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            Easing r = Easing.fromJSON(GsonHelper.getNonNull(obj, "r"));
-            Easing g = Easing.fromJSON(GsonHelper.getNonNull(obj, "g"));
-            Easing b = Easing.fromJSON(GsonHelper.getNonNull(obj, "b"));
-            Easing a = Easing.fromJSON(obj.get("a"), ConstantEasing.ONE);
+            Easing r = Easing.fromJSON(GsonHelper.getNonNull(obj, "r"), context);
+            Easing g = Easing.fromJSON(GsonHelper.getNonNull(obj, "g"), context);
+            Easing b = Easing.fromJSON(GsonHelper.getNonNull(obj, "b"), context);
+            Easing a = Easing.fromJSON(obj.get("a"), context, ConstantEasing.ONE);
             return new DynamicColor(r, g, b, a);
         } else if (json.isJsonArray()) {
             JsonArray array = json.getAsJsonArray();
-            Easing r = Easing.fromJSON(array.get(0));
-            Easing g = Easing.fromJSON(array.get(1));
-            Easing b = Easing.fromJSON(array.get(2));
-            Easing a = Easing.fromJSON(JsonHelper.getFromArraySafe(array, 3), ConstantEasing.ONE);
+            Easing r = Easing.fromJSON(array.get(0), context);
+            Easing g = Easing.fromJSON(array.get(1), context);
+            Easing b = Easing.fromJSON(array.get(2), context);
+            Easing a = Easing.fromJSON(JsonHelper.getFromArraySafe(array, 3), context, ConstantEasing.ONE);
             return new DynamicColor(r, g, b, a);
         } else {
             String color = json.getAsString();
@@ -116,12 +116,12 @@ public record DynamicColor(Easing r, Easing g, Easing b, Easing a) {
         }
     }
 
-    public static DynamicColor fromJSON(@Nullable JsonElement json, DynamicColor fallback) {
+    public static DynamicColor fromJSON(@Nullable JsonElement json, LoadingContext context, DynamicColor fallback) {
         if (json == null || json.isJsonNull()) {
             return fallback;
         }
         try {
-            return fromJSON(json);
+            return fromJSON(json, context);
         } catch (RuntimeException e) {
             CutsceneAPI.LOGGER.warn("Exception loading DynamicColor, returning fallback: ", e);
             return fallback;

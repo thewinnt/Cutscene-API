@@ -8,6 +8,7 @@ import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.IndependentCoordinateEasing;
 import net.thewinnt.cutscenes.util.CoordinateProvider;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 import java.util.Locale;
 
@@ -25,15 +26,10 @@ public class IndependentCoordinateSerializer implements EasingSerializer<Indepen
     }
 
     @Override
-    public IndependentCoordinateEasing fromJSON(JsonObject json) {
+    public IndependentCoordinateEasing fromJSON(JsonObject json, LoadingContext context) {
         IndependentCoordinateEasing.Axis inAxis = IndependentCoordinateEasing.Axis.valueOf(GsonHelper.getAsString(json, "in_axis").toUpperCase(Locale.ROOT));
         IndependentCoordinateEasing.Axis outAxis = IndependentCoordinateEasing.Axis.valueOf(GsonHelper.getAsString(json, "out_axis").toUpperCase(Locale.ROOT));
-        CoordinateProvider inCoord = CoordinateProvider.fromJSON(json.get("coordinate"));
+        CoordinateProvider inCoord = CoordinateProvider.fromJSON(json.get("coordinate"), context);
         return new IndependentCoordinateEasing(inAxis, outAxis, inCoord);
-    }
-
-    @Override
-    public IndependentCoordinateEasing fromJSON(JsonObject json, LoadResolver<Easing> context) {
-        return fromJSON(json);
     }
 }

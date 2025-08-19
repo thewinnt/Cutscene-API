@@ -22,6 +22,7 @@ import net.thewinnt.cutscenes.effect.serializer.SimpleTextSerializer;
 import net.thewinnt.cutscenes.effect.serializer.TextureAnimationSerializer;
 import net.thewinnt.cutscenes.effect.serializer.TriangleStripSerializer;
 import net.thewinnt.cutscenes.effect.serializer.VoidEffectSerializer;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public interface CutsceneEffectSerializer<T> {
     CutsceneEffectSerializer<AppearingTextConfiguration> APPEARING_TEXT = register(ResourceLocation.parse("cutscenes:appearing_text"), AppearingTextSerializer.INSTANCE);
@@ -35,7 +36,7 @@ public interface CutsceneEffectSerializer<T> {
     CutsceneEffectSerializer<TextureAnimationConfiguration> ANIMATION = register(ResourceLocation.parse("cutscenes:animation"), TextureAnimationSerializer.INSTANCE);
 
     T fromNetwork(FriendlyByteBuf buf);
-    T fromJSON(JsonObject json);
+    T fromJSON(JsonObject json, LoadingContext context);
     void toNetwork(T object, FriendlyByteBuf buf);
     CutsceneEffectFactory<T> factory();
 

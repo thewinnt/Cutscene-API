@@ -15,6 +15,7 @@ import net.thewinnt.cutscenes.effect.SimpleTextEffect;
 import net.thewinnt.cutscenes.effect.configuration.SimpleTextConfiguration;
 import net.thewinnt.cutscenes.util.CoordinateProvider;
 import net.thewinnt.cutscenes.util.DynamicColor;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class SimpleTextSerializer implements CutsceneEffectSerializer<SimpleTextConfiguration> {
     public static final SimpleTextSerializer INSTANCE = new SimpleTextSerializer();
@@ -34,14 +35,14 @@ public class SimpleTextSerializer implements CutsceneEffectSerializer<SimpleText
     }
 
     @Override
-    public SimpleTextConfiguration fromJSON(JsonObject json) {
+    public SimpleTextConfiguration fromJSON(JsonObject json, LoadingContext context) {
         Component text = ComponentSerialization.CODEC.decode(JsonOps.INSTANCE, json.get("text")).getOrThrow().getFirst();
-        CoordinateProvider rx = CoordinateProvider.fromJSON(json.get("x"));
-        CoordinateProvider ry = CoordinateProvider.fromJSON(json.get("y"));
+        CoordinateProvider rx = CoordinateProvider.fromJSON(json.get("x"), context);
+        CoordinateProvider ry = CoordinateProvider.fromJSON(json.get("y"), context);
         boolean centered = GsonHelper.getAsBoolean(json, "centered", false);
-        Easing scale = Easing.fromJSON(json.get("scale"), ConstantEasing.ONE);
-        Easing rotation = Easing.fromJSON(json.get("rotation"), ConstantEasing.ZERO);
-        Optional<DynamicColor> colorOverride = Optional.ofNullable(DynamicColor.fromJSON(json.get("color_override"), null));
+        Easing scale = Easing.fromJSON(json.get("scale"), context, ConstantEasing.ONE);
+        Easing rotation = Easing.fromJSON(json.get("rotation"), context, ConstantEasing.ZERO);
+        Optional<DynamicColor> colorOverride = Optional.ofNullable(DynamicColor.fromJSON(json.get("color_override"), context, null));
         return new SimpleTextConfiguration(text, rx, ry, centered, scale, rotation, colorOverride);
     }
 

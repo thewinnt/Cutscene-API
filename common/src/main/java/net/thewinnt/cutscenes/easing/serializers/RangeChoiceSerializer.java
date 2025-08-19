@@ -7,6 +7,7 @@ import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.RangeChoiceEasing;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class RangeChoiceSerializer implements EasingSerializer<RangeChoiceEasing> {
     public static final RangeChoiceSerializer INSTANCE = new RangeChoiceSerializer();
@@ -23,16 +24,7 @@ public class RangeChoiceSerializer implements EasingSerializer<RangeChoiceEasing
     }
 
     @Override
-    public RangeChoiceEasing fromJSON(JsonObject json) {
-        Easing inRange = Easing.fromJSON(json.get("in_range"));
-        Easing outRange = Easing.fromJSON(json.get("out_range"));
-        double rangeMin = GsonHelper.getAsDouble(json, "range_min");
-        double rangeMax = GsonHelper.getAsDouble(json, "range_max");
-        return new RangeChoiceEasing(inRange, outRange, rangeMin, rangeMax);
-    }
-
-    @Override
-    public RangeChoiceEasing fromJSON(JsonObject json, LoadResolver<Easing> loadResolver) {
+    public RangeChoiceEasing fromJSON(JsonObject json, LoadingContext loadResolver) {
         Easing inRange = Easing.fromJSON(json.get("in_range"), loadResolver);
         Easing outRange = Easing.fromJSON(json.get("out_range"), loadResolver);
         double rangeMin = GsonHelper.getAsDouble(json, "range_min");

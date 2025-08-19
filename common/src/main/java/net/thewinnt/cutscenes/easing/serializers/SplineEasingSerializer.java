@@ -12,6 +12,7 @@ import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.SplineEasing;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class SplineEasingSerializer implements EasingSerializer<SplineEasing> {
     public static final SplineEasingSerializer INSTANCE = new SplineEasingSerializer();
@@ -27,17 +28,7 @@ public class SplineEasingSerializer implements EasingSerializer<SplineEasing> {
     }
 
     @Override
-    public SplineEasing fromJSON(JsonObject json) {
-        JsonArray easings = GsonHelper.getAsJsonArray(json, "points");
-        Easing[] data = new Easing[easings.size()];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = Easing.fromJSON(easings.get(i));
-        }
-        return new SplineEasing(data);
-    }
-
-    @Override
-    public SplineEasing fromJSON(JsonObject json, LoadResolver<Easing> context) {
+    public SplineEasing fromJSON(JsonObject json, LoadingContext context) {
         JsonArray easings = GsonHelper.getAsJsonArray(json, "points");
         Easing[] data = new Easing[easings.size()];
         for (int i = 0; i < data.length; i++) {

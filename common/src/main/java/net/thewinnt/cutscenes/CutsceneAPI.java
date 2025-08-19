@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.thewinnt.cutscenes.util.LoadingContext;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -34,7 +35,7 @@ import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StopCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
-import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
+import net.thewinnt.cutscenes.path.PathLike.SegmentType;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 import net.thewinnt.cutscenes.platform.ClientPlatformAbstractions;
@@ -66,7 +67,7 @@ public class CutsceneAPI {
     // registry keys
     public static final ResourceKey<Registry<EasingSerializer<?>>> EASING_SERIALIZER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:easing_types"));
     public static final ResourceKey<Registry<CutsceneEffectSerializer<?>>> CUTSCENE_EFFECT_SERIALIZER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:effect_serializers"));
-    public static final ResourceKey<Registry<SegmentSerializer<?>>> SEGMENT_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:segment_types"));
+    public static final ResourceKey<Registry<SegmentType<?>>> SEGMENT_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:segment_types"));
     public static final ResourceKey<Registry<PointSerializer<?>>> POINT_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:point_providers"));
     public static final ResourceKey<Registry<TransitionSerializer<?>>> TRANSITION_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:transition_types"));
     public static final ResourceKey<Registry<DelayProviderSerializer<?>>> DELAY_PROVIDER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:delay_providers"));
@@ -75,7 +76,7 @@ public class CutsceneAPI {
     // registries
     public static final MappedRegistry<EasingSerializer<?>> EASING_SERIALIZERS = new MappedRegistry<>(EASING_SERIALIZER_KEY, Lifecycle.stable());
     public static final MappedRegistry<CutsceneEffectSerializer<?>> CUTSCENE_EFFECT_SERIALIZERS = new MappedRegistry<>(CUTSCENE_EFFECT_SERIALIZER_KEY, Lifecycle.stable());
-    public static final MappedRegistry<SegmentSerializer<?>> SEGMENT_TYPES = new MappedRegistry<>(SEGMENT_TYPE_KEY, Lifecycle.stable());
+    public static final MappedRegistry<SegmentType<?>> SEGMENT_TYPES = new MappedRegistry<>(SEGMENT_TYPE_KEY, Lifecycle.stable());
     public static final MappedRegistry<PointSerializer<?>> POINT_TYPES = new MappedRegistry<>(POINT_TYPE_KEY, Lifecycle.stable());
     public static final MappedRegistry<TransitionSerializer<?>> TRANSITION_TYPES = new MappedRegistry<>(TRANSITION_TYPE_KEY, Lifecycle.stable());
     public static final MappedRegistry<DelayProviderSerializer<?>> DELAY_PROVIDERS = new MappedRegistry<>(DELAY_PROVIDER_KEY, Lifecycle.stable());
@@ -130,8 +131,9 @@ public class CutsceneAPI {
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 Easing.EASING_MACROS.clear();
-                LoadResolver<Easing> macroLoader = new LoadResolver<>(Easing::fromJSON, files, true);
-                Easing.EASING_MACROS.putAll(macroLoader.load());
+                LoadResolver<Easing> macroLoader = new LoadResolver<>(files, true);
+                LoadingContext context = new LoadingContext(macroLoader);
+                Easing.EASING_MACROS.putAll(macroLoader.load(json -> Easing.fromJSON(json, context)));
                 LOGGER.info("Loaded {} easing macros", Easing.EASING_MACROS.size());
             }
         }, ResourceLocation.parse("cutscenes:easing_macros"));
@@ -141,10 +143,11 @@ public class CutsceneAPI {
                 CutsceneManager.REGISTRY.clear();
                 PointProvider.POINT_CACHE.clear();
                 AtomicInteger loaded = new AtomicInteger();
+                LoadingContext context = new LoadingContext(null);
                 files.forEach((id, element) -> {
                     try {
                         JsonObject json = GsonHelper.convertToJsonObject(element, "cutscene");
-                        CutsceneManager.registerCutscene(id, CutsceneType.fromJSON(json));
+                        CutsceneManager.registerCutscene(id, CutsceneType.fromJSON(json, context));
                         loaded.getAndIncrement();
                     } catch (RuntimeException e) {
                         LOGGER.error("Exception loading cutscene {}", id);

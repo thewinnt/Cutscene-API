@@ -21,6 +21,8 @@ import net.thewinnt.cutscenes.util.ServerPlayerExt;
 public class ServerPlayerMixin implements ServerPlayerExt {
     @Unique private CutsceneType cutscenes$running;
     @Unique private int cutscenes$ticksRemaining;
+    @Unique private String cutscenes$startReason;
+    @Unique private EndingReason cutscenes$endReason;
 
     @Override
     public int csapi$getCutsceneTicks() {
@@ -49,6 +51,7 @@ public class ServerPlayerMixin implements ServerPlayerExt {
             CutsceneEvents.CUTSCENE_OVER_SERVER.invoke(listener -> listener.accept(cutscenes$running, CutsceneManager.REGISTRY.inverse().get(cutscenes$running), ((ServerPlayer) (Object) this), reason));
             cutscenes$running = null;
             cutscenes$ticksRemaining = 0;
+
         }
     }
 

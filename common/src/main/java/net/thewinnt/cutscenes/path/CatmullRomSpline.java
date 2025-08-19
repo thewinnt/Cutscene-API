@@ -18,6 +18,7 @@ import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class CatmullRomSpline implements PathLike {
     private PointProvider start;
@@ -104,7 +105,7 @@ public class CatmullRomSpline implements PathLike {
     }
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return weight;
     }
 
@@ -139,18 +140,18 @@ public class CatmullRomSpline implements PathLike {
         buf.writeInt(weight);
     }
     
-    public static CatmullRomSpline fromJSON(JsonObject json, Path path) {
+    public static CatmullRomSpline fromJSON(JsonObject json, Path path, LoadingContext context) {
         JsonArray points_j = json.getAsJsonArray("points");
         ArrayList<PointProvider> points = new ArrayList<>();
         for (JsonElement i : points_j) {
-            points.add(JsonHelper.pointFromJson(i));
+            points.add(JsonHelper.pointFromJson(i, context));
         }
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         return new CatmullRomSpline(weight, points.toArray(new PointProvider[0]));
     }
     
     @Override
-    public SegmentSerializer<CatmullRomSpline> getSerializer() {
+    public SegmentType<CatmullRomSpline> getSerializer() {
         return CutsceneManager.CATMULL_ROM;
     }
 

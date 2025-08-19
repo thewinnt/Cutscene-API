@@ -51,7 +51,7 @@ public class PathPreviewRenderer {
             drawPoint(stack, consumer, start, 0.3F, POINT_COLORS.getFirst());
             drawPoint(stack, consumer, end, 0.3F, POINT_COLORS.getFirst());
             double ticksPerWeight = type.length.length() * type.length.manager().ticksPerUnit() * 3 / path.getWeightSum(); // roughly one line per frame at 60 fps
-            int thisLength = (int)(ticksPerWeight * segment.getWeight());
+            int thisLength = (int)(ticksPerWeight * segment.weight());
             for (int j = 0; j < thisLength; j++) {
                 Vec3 a = segment.getPoint(j / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);
                 Vec3 b = segment.getPoint((j + 1) / (double)thisLength, l, s).yRot(yRot).zRot(zRot).xRot(xRot).add(s);

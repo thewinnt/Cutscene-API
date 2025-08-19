@@ -9,6 +9,7 @@ import net.thewinnt.cutscenes.time.CutsceneLength;
 import net.thewinnt.cutscenes.time.GameTickManager;
 import net.thewinnt.cutscenes.rotation.RotationHandler;
 import net.thewinnt.cutscenes.time.TimeManager;
+import net.thewinnt.cutscenes.util.LoadingContext;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonArray;
@@ -175,7 +176,7 @@ public class CutsceneType {
     }
 
     /** Reads a cutscene type from JSON. */
-    public static CutsceneType fromJSON(JsonObject json) {
+    public static CutsceneType fromJSON(JsonObject json, LoadingContext context) {
         int dataVersion;
         JsonElement dataVersionJson = json.get("version");
         if (dataVersionJson != null) {
@@ -189,11 +190,12 @@ public class CutsceneType {
         } else if (dataVersion < CutsceneAPI.DATA_VERSION) {
             CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is earlier than the current one ({}). The cutscene should be updated to the new format to make sure it shows up correctly!", dataVersion, CutsceneAPI.DATA_VERSION);
         }
+        context.setDataVersion(dataVersion);
         CutsceneLength length = CutsceneLength.fromJson(json.get("length"));
-        Path path = Path.fromJSON(JsonHelper.getNullableObject(json, "path"), null);
-        Path rotation = Path.fromJSON(JsonHelper.getNullableObject(json, "rotation"), path);
-        Transition start = Transition.fromJSON(JsonHelper.getNullableObject(json, "start_transition"), TimeManager.DEFAULT_TRANSITIONS.get(length.manager().type()).get(true));
-        Transition end = Transition.fromJSON(JsonHelper.getNullableObject(json, "end_transition"), TimeManager.DEFAULT_TRANSITIONS.get(length.manager().type()).get(false));
+        Path path = Path.fromJSON(JsonHelper.getNullableObject(json, "path"), null, context);
+        Path rotation = Path.fromJSON(JsonHelper.getNullableObject(json, "rotation"), path, context);
+        Transition start = Transition.fromJSON(JsonHelper.getNullableObject(json, "start_transition"), context, TimeManager.DEFAULT_TRANSITIONS.get(length.manager().type()).get(true));
+        Transition end = Transition.fromJSON(JsonHelper.getNullableObject(json, "end_transition"), context, TimeManager.DEFAULT_TRANSITIONS.get(length.manager().type()).get(false));
         boolean blockMovement = GsonHelper.getAsBoolean(json, "block_movement", false) || path != null;
         RotationHandler rotationHandler;
         if (json.has("block_rotation") || !json.has("rotation_handler")) {
@@ -215,7 +217,7 @@ public class CutsceneType {
         JsonArray effectsJson = GsonHelper.getAsJsonArray(json, "effects", new JsonArray());
         ArrayList<CutsceneEffect<?>> effects = new ArrayList<>();
         for (JsonElement i : effectsJson) {
-            effects.add(CutsceneEffect.fromJSON(GsonHelper.convertToJsonObject(i, "effect")));
+            effects.add(CutsceneEffect.fromJSON(GsonHelper.convertToJsonObject(i, "effect"), context));
         }
         return new CutsceneType(path, rotation, length, start, end, blockMovement, rotationHandler, toggles, hideHand, hideBlockOutline, effects);
     }

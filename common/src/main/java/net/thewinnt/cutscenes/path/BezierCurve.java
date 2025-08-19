@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
+import net.thewinnt.cutscenes.util.LoadingContext;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
@@ -110,7 +111,7 @@ public class BezierCurve implements PathLike {
     }
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return weight;
     }
 
@@ -154,11 +155,11 @@ public class BezierCurve implements PathLike {
         return new BezierCurve(start, control_a, control_b, end, weight);
     }
 
-    public static BezierCurve fromJSON(JsonObject json, Path path) {
-        PointProvider start = JsonHelper.pointFromJson(json, "start");
-        PointProvider control_a = JsonHelper.pointFromJson(json, "control_a");
-        PointProvider control_b = JsonHelper.pointFromJson(json, "control_b");
-        PointProvider end = JsonHelper.pointFromJson(json, "end");
+    public static BezierCurve fromJSON(JsonObject json, Path path, LoadingContext context) {
+        PointProvider start = JsonHelper.pointFromJson(json, "start", context);
+        PointProvider control_a = JsonHelper.pointFromJson(json, "control_a", context);
+        PointProvider control_b = JsonHelper.pointFromJson(json, "control_b", context);
+        PointProvider end = JsonHelper.pointFromJson(json, "end", context);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         return new BezierCurve(start, control_a, control_b, end, weight);
     }
@@ -172,7 +173,7 @@ public class BezierCurve implements PathLike {
     }
     
     @Override
-    public SegmentSerializer<BezierCurve> getSerializer() {
+    public SegmentType<BezierCurve> getSerializer() {
         return CutsceneManager.BEZIER;
     }
 }

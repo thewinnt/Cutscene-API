@@ -7,8 +7,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public record StaticPointProvider(Vec3 point) implements PointProvider {
+    public static final StaticPointProvider ZERO = new StaticPointProvider(Vec3.ZERO);
     @Override
     public Vec3 getPoint(Level level, Vec3 cutsceneStart) {
         return point;
@@ -34,7 +36,7 @@ public record StaticPointProvider(Vec3 point) implements PointProvider {
         return new StaticPointProvider(buf.readVec3());
     }
 
-    public static StaticPointProvider fromJSON(JsonObject obj) {
+    public static StaticPointProvider fromJSON(JsonObject obj, LoadingContext context) {
         return new StaticPointProvider(JsonHelper.vec3FromJson(obj, "point"));
     }
 }
