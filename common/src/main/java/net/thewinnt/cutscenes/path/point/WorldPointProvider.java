@@ -30,6 +30,6 @@ public record WorldPointProvider(Vec3 point) implements PointProvider {
     }
 
     public static WorldPointProvider fromJSON(JsonObject obj, LoadingContext context) {
-        return new WorldPointProvider(JsonHelper.vec3FromJson(obj, "point"));
+        return new WorldPointProvider(JsonHelper.vec3FromJson(obj, "point", context));
     }
 }

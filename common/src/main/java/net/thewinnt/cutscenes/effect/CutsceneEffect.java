@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneType;
+import net.thewinnt.cutscenes.util.JsonHelper;
 import net.thewinnt.cutscenes.util.LoadingContext;
 
 /**
@@ -72,10 +73,11 @@ public abstract class CutsceneEffect<T> {
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(json, "type"));
         CutsceneEffectSerializer<?> serializer = CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS.getValue(type);
         if (serializer == null) {
-            throw new IllegalArgumentException("Unknown cutscene type effect: " + type);
+            context.reportError("Unknown cutscene effect type: " + type);
+            return null;
         }
-        double start = GsonHelper.getAsDouble(json, "start");
-        double end = GsonHelper.getAsDouble(json, "end");
-        return new ServerEffectWrapper(start, end, serializer.fromJSON(json, context), serializer);
+        double start = JsonHelper.getAsDouble(json, "start", context);
+        double end = JsonHelper.getAsDouble(json, "end", context);
+        return new ServerEffectWrapper(start, end, context.wrapLoading("data", () -> serializer.fromJSON(json, context)), serializer);
     }
 }

@@ -143,8 +143,10 @@ public class CatmullRomSpline implements PathLike {
     public static CatmullRomSpline fromJSON(JsonObject json, Path path, LoadingContext context) {
         JsonArray points_j = json.getAsJsonArray("points");
         ArrayList<PointProvider> points = new ArrayList<>();
+        int index = 0;
         for (JsonElement i : points_j) {
-            points.add(JsonHelper.pointFromJson(i, context));
+            points.add(context.wrapLoading(String.valueOf(index), () -> JsonHelper.pointFromJson(i, context)));
+            index++;
         }
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         return new CatmullRomSpline(weight, points.toArray(new PointProvider[0]));

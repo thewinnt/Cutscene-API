@@ -110,6 +110,14 @@ public interface Easing {
         easing.toNetwork(buf);
     }
 
+    static Easing loadWrapped(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> fromJSON(json.get(name), context));
+    }
+
+    static Easing loadWrapped(JsonObject json, String name, LoadingContext context, Easing fallback) {
+        return context.wrapLoading(name, () -> fromJSON(json.get(name), context, fallback));
+    }
+
     static Easing fromJSON(@NotNull JsonElement json, LoadingContext context) {
         if (json.isJsonPrimitive()) {
             return fromJSONPrimitive(json.getAsJsonPrimitive(), context);
@@ -138,10 +146,6 @@ public interface Easing {
     }
 
     static Easing fromJSONPrimitive(JsonPrimitive json, LoadingContext context) {
-        return fromJSONPrimitive(json, context.easings);
-    }
-
-    static Easing fromJSONPrimitive(JsonPrimitive json, LoadResolver<Easing> context) {
         // if it's a number, return that first
         try {
             return new ConstantEasing(json.getAsDouble());
@@ -165,14 +169,14 @@ public interface Easing {
         }
 
         // then, a macro
-        if (context == null) {
+        if (context.easings == null) {
             throw new IllegalStateException("Missing easing macro: " + id);
         }
-        Easing output = context.resolve(id);
+        Easing output = context.easings.resolve(id);
         if (output == null) {
             throw new IllegalStateException("Missing or invalid easing macro: " + id);
         }
-        return context.resolve(id);
+        return context.easings.resolve(id);
     }
 
     static Easing fromNetwork(FriendlyByteBuf buf) {

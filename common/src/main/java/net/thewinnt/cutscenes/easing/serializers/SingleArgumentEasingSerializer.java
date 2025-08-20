@@ -33,7 +33,7 @@ public record SingleArgumentEasingSerializer(DoubleUnaryOperator operation) impl
     }
     @Override
     public SingleArgumentEasing fromJSON(JsonObject json, LoadingContext context) {
-        return new SingleArgumentEasing(Easing.fromJSON(json.get("arg"), context), operation);
+        return new SingleArgumentEasing(Easing.loadWrapped(json, "arg", context), operation);
     }
 
     @Override

@@ -31,9 +31,9 @@ public class ClampEasingSerializer implements EasingSerializer<ClampEasing> {
 
     @Override
     public ClampEasing fromJSON(JsonObject json, LoadingContext context) {
-        Easing input = Easing.fromJSON(json.get("input"), context);
-        Easing min = Easing.fromJSON(json.get("min"), context);
-        Easing max = Easing.fromJSON(json.get("max"), context);
+        Easing input = Easing.loadWrapped(json, "input", context);
+        Easing min = Easing.loadWrapped(json, "min", context);
+        Easing max = Easing.loadWrapped(json, "max", context);
         return new ClampEasing(input, min, max);
     }
 

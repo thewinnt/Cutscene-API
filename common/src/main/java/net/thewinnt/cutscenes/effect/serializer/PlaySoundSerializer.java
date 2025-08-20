@@ -32,7 +32,7 @@ public class PlaySoundSerializer implements CutsceneEffectSerializer<PlaySoundCo
 
     @Override
     public PlaySoundConfiguration fromJSON(JsonObject json, LoadingContext context) {
-        ResourceLocation sound = ResourceLocation.parse(GsonHelper.getAsString(json, "sound"));
+        ResourceLocation sound = ResourceLocation.parse(context.wrapLoading("sound", () -> GsonHelper.getAsString(json, "sound"), "loading_error"));
         SoundSource source = SoundSource.valueOf(GsonHelper.getAsString(json, "source", "master").toUpperCase(Locale.ROOT));
         float volume = GsonHelper.getAsFloat(json, "volume", 1);
         float pitch = GsonHelper.getAsFloat(json, "pitch", 1);

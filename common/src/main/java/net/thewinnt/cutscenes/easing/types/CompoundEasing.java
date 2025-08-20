@@ -122,13 +122,13 @@ public class CompoundEasing implements Easing {
 
         public static RangeAppliedEasing fromJSON(JsonElement json, LoadingContext context) {
             if (json.isJsonPrimitive()) {
-                Easing easing = Easing.fromJSONPrimitive(json.getAsJsonPrimitive(), context);
+                Easing easing = context.wrapLoading("easing", () -> Easing.fromJSONPrimitive(json.getAsJsonPrimitive(), context));
                 return new RangeAppliedEasing(0, 1, easing);
             }
             JsonObject obj = json.getAsJsonObject();
             double minValue = GsonHelper.getAsDouble(obj, "from", 0);
             double maxValue = GsonHelper.getAsDouble(obj, "to", 1);
-            Easing easing = Easing.fromJSON(obj.get("easing"), context);
+            Easing easing = Easing.loadWrapped(obj, "easing", context);
             return new RangeAppliedEasing(minValue, maxValue, easing);
         }
     }

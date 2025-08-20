@@ -16,6 +16,7 @@ import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
+import net.thewinnt.cutscenes.util.JsonHelper;
 import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class SmoothEaseTransition implements Transition {
@@ -211,7 +212,7 @@ public class SmoothEaseTransition implements Transition {
 
     public static SmoothEaseTransition fromJSON(JsonObject json, LoadingContext context) {
         double length = GsonHelper.getAsDouble(json, "length", 40);
-        boolean isStart = GsonHelper.getAsBoolean(json, "is_start");
+        boolean isStart = JsonHelper.getAsBoolean(json, "is_start", context);
         boolean countTowardsCutsceneTime = GsonHelper.getAsBoolean(json, "count_towards_cutscene_time", isStart);
         Easing easingX = Easing.fromJSON(json.get("easing_x"), context, SimpleEasing.OUT_QUINT);
         Easing easingY = Easing.fromJSON(json.get("easing_y"), context, SimpleEasing.OUT_QUINT);

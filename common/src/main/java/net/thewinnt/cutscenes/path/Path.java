@@ -212,12 +212,17 @@ public class Path implements PathLike {
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         Path output = new Path(weight);
         JsonArray segments_j = json.getAsJsonArray("segments");
+        int index = 0;
         for (JsonElement i : segments_j) {
+            context.pushElement(String.valueOf(index));
             JsonObject j = i.getAsJsonObject();
-            ResourceLocation id = ResourceLocation.parse(j.get("type").getAsString());
+            ResourceLocation id = context.wrapLoading("type", () -> ResourceLocation.parse(j.get("type").getAsString()));
             SegmentType<?> type = CutsceneManager.getSegmentType(id);
             if (type == null) {
-                throw new IllegalArgumentException("Unknown segment type: " + id);
+                context.reportError("Unknown segment type: " + id);
+                context.popElement();
+                index++;
+                continue;
             }
             if (type.createsRotationFromPath()) {
                 // special handling - look_at_point needs a rotation path, while others need this path
@@ -225,6 +230,8 @@ public class Path implements PathLike {
             } else {
                 output.add(type.fromJSON(j, output, context));
             }
+            context.popElement();
+            index++;
         }
         return output;
     }

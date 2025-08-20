@@ -5,6 +5,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.rotation.RotationSerializer;
 import net.thewinnt.cutscenes.rotation.handler.EaseBackRotation;
+import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class EaseBackSerializer implements RotationSerializer<EaseBackRotation> {
     public static final EaseBackSerializer INSTANCE = new EaseBackSerializer();
@@ -22,7 +24,7 @@ public class EaseBackSerializer implements RotationSerializer<EaseBackRotation> 
     }
 
     @Override
-    public EaseBackRotation fromJson(JsonObject json) {
-        return new EaseBackRotation(GsonHelper.getAsDouble(json, "decay"));
+    public EaseBackRotation fromJson(JsonObject json, LoadingContext context) {
+        return new EaseBackRotation(JsonHelper.getAsDouble(json, "decay", context));
     }
 }

@@ -52,12 +52,12 @@ public record CoordinateProvider(boolean isAbsolute, Easing value, CoordinateAnc
 
     public static CoordinateProvider fromJSON(JsonElement json, LoadingContext context) {
         if (json.isJsonPrimitive()) {
-            return new CoordinateProvider(false, Easing.fromJSON(json, context), CoordinateAnchor.START);
+            return new CoordinateProvider(false, context.wrapLoading("easing", () -> Easing.fromJSON(json, context)), CoordinateAnchor.START);
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
             boolean absolute = GsonHelper.getAsBoolean(obj, "absolute", false);
             CoordinateAnchor anchor = CoordinateAnchor.valueOf(GsonHelper.getAsString(obj, "anchor", "start").toUpperCase());
-            return new CoordinateProvider(absolute, Easing.fromJSON(json, context), anchor);
+            return new CoordinateProvider(absolute, context.wrapLoading("easing", () -> Easing.fromJSON(json, context)), anchor);
         } else {
             throw new IllegalArgumentException("Illegal JSON for non-fallback CoordinateProvider");
         }

@@ -25,8 +25,8 @@ public class RangeChoiceSerializer implements EasingSerializer<RangeChoiceEasing
 
     @Override
     public RangeChoiceEasing fromJSON(JsonObject json, LoadingContext loadResolver) {
-        Easing inRange = Easing.fromJSON(json.get("in_range"), loadResolver);
-        Easing outRange = Easing.fromJSON(json.get("out_range"), loadResolver);
+        Easing inRange = Easing.loadWrapped(json, "in_range", loadResolver);
+        Easing outRange = Easing.loadWrapped(json, "out_range", loadResolver);
         double rangeMin = GsonHelper.getAsDouble(json, "range_min");
         double rangeMax = GsonHelper.getAsDouble(json, "range_max");
         return new RangeChoiceEasing(inRange, outRange, rangeMin, rangeMax);

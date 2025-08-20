@@ -10,6 +10,7 @@ import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.rotation.handler.CutsceneRotation;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 /**
  * Defines how to handle the player's rotation.
@@ -64,7 +65,7 @@ public interface RotationHandler {
         return serializer.fromNetwork(buf);
     }
 
-    static RotationHandler fromJson(JsonElement json) {
+    static RotationHandler fromJson(JsonElement json, LoadingContext context) {
         if (json.isJsonPrimitive()) {
             String id = json.getAsString();
             if (RotationSerializer.SIMPLE_HANDLERS.containsKey(id)) {
@@ -77,7 +78,7 @@ public interface RotationHandler {
             ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
             RotationSerializer<?> serializer = CutsceneAPI.ROTATION_HANDLERS.getValue(id);
             if (serializer != null) {
-                return serializer.fromJson(obj);
+                return serializer.fromJson(obj, context);
             }
             CutsceneAPI.LOGGER.error("Unknown complex rotation handler: {}, returning default (cutscenes:block)", id);
             return CutsceneRotation.INSTANCE;

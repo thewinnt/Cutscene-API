@@ -30,8 +30,8 @@ public class ChainEasingSerializer implements EasingSerializer<ChainEasing> {
 
     @Override
     public ChainEasing fromJSON(JsonObject json, LoadingContext context) {
-        Easing argumentProvider = Easing.fromJSON(json.get("argument"), context);
-        Easing easing = Easing.fromJSON(json.get("easing"), context);
+        Easing argumentProvider = Easing.loadWrapped(json, "argument", context);
+        Easing easing = Easing.loadWrapped(json, "easing", context);
         return new ChainEasing(argumentProvider, easing);
     }
 

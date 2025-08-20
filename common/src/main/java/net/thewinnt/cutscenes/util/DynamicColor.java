@@ -87,19 +87,23 @@ public record DynamicColor(Easing r, Easing g, Easing b, Easing a) {
         return new DynamicColor(r, g, b, a);
     }
 
+    public static DynamicColor loadWrapped(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> fromJSON(json.get(name), context));
+    }
+
     public static DynamicColor fromJSON(@NotNull JsonElement json, LoadingContext context) {
         if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            Easing r = Easing.fromJSON(GsonHelper.getNonNull(obj, "r"), context);
-            Easing g = Easing.fromJSON(GsonHelper.getNonNull(obj, "g"), context);
-            Easing b = Easing.fromJSON(GsonHelper.getNonNull(obj, "b"), context);
+            Easing r = Easing.loadWrapped(obj, "r", context);
+            Easing g = Easing.loadWrapped(obj, "g", context);
+            Easing b = Easing.loadWrapped(obj, "b", context);
             Easing a = Easing.fromJSON(obj.get("a"), context, ConstantEasing.ONE);
             return new DynamicColor(r, g, b, a);
         } else if (json.isJsonArray()) {
             JsonArray array = json.getAsJsonArray();
-            Easing r = Easing.fromJSON(array.get(0), context);
-            Easing g = Easing.fromJSON(array.get(1), context);
-            Easing b = Easing.fromJSON(array.get(2), context);
+            Easing r = context.wrapLoading("r (#0)", () -> Easing.fromJSON(array.get(0), context));
+            Easing g = context.wrapLoading("g (#1)", () -> Easing.fromJSON(array.get(1), context));
+            Easing b = context.wrapLoading("b (#2)", () -> Easing.fromJSON(array.get(2), context));
             Easing a = Easing.fromJSON(JsonHelper.getFromArraySafe(array, 3), context, ConstantEasing.ONE);
             return new DynamicColor(r, g, b, a);
         } else {

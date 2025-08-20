@@ -37,6 +37,6 @@ public record StaticPointProvider(Vec3 point) implements PointProvider {
     }
 
     public static StaticPointProvider fromJSON(JsonObject obj, LoadingContext context) {
-        return new StaticPointProvider(JsonHelper.vec3FromJson(obj, "point"));
+        return new StaticPointProvider(JsonHelper.vec3FromJson(obj, "point", context));
     }
 }

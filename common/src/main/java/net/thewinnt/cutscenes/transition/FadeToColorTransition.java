@@ -24,6 +24,7 @@ import net.thewinnt.cutscenes.easing.types.CompoundEasing;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.util.DynamicColor;
+import net.thewinnt.cutscenes.util.JsonHelper;
 import net.thewinnt.cutscenes.util.LoadingContext;
 
 import java.util.List;
@@ -192,28 +193,28 @@ public class FadeToColorTransition implements Transition {
     }
 
     public static FadeToColorTransition fromJSON(JsonObject json, LoadingContext context) {
-        double lengthA = GsonHelper.getAsDouble(json, "length_a");
+        double lengthA = JsonHelper.getAsDouble(json, "length_a", context);
         double lengthB = GsonHelper.getAsDouble(json, "length_b", lengthA);
         Easing easeIn = Easing.fromJSON(json.get("ease_in"), context, SimpleEasing.LINEAR);
         Easing easeOut = Easing.fromJSON(json.get("ease_out"), context, SimpleEasing.LINEAR);
-        boolean isStart = GsonHelper.getAsBoolean(json, "is_start");
+        boolean isStart = JsonHelper.getAsBoolean(json, "is_start", context);
         String colorType = GsonHelper.getAsString(json, "color_definition", "single_color");
         switch (colorType) {
             case "per_angle" -> {
-                DynamicColor colorBottomLeft = DynamicColor.fromJSON(json.get("bottom_left"), context);
-                DynamicColor colorTopLeft = DynamicColor.fromJSON(json.get("top_left"), context);
-                DynamicColor colorTopRight = DynamicColor.fromJSON(json.get("top_right"), context);
-                DynamicColor colorBottomRight = DynamicColor.fromJSON(json.get("bottom_right"), context);
+                DynamicColor colorBottomLeft = DynamicColor.loadWrapped(json, "bottom_left", context);
+                DynamicColor colorTopLeft = DynamicColor.loadWrapped(json, "top_left", context);
+                DynamicColor colorTopRight = DynamicColor.loadWrapped(json, "top_right", context);
+                DynamicColor colorBottomRight = DynamicColor.loadWrapped(json, "bottom_right", context);
                 return new FadeToColorTransition(colorBottomLeft, colorTopLeft, colorTopRight, colorBottomRight, lengthA, lengthB, easeIn, easeOut, isStart);
             }
             case "horizontal_gradient" -> {
-                DynamicColor color1 = DynamicColor.fromJSON(json.get("color1"), context);
-                DynamicColor color2 = DynamicColor.fromJSON(json.get("color2"), context);
+                DynamicColor color1 = DynamicColor.loadWrapped(json, "color1", context);
+                DynamicColor color2 = DynamicColor.loadWrapped(json, "color2", context);
                 return new FadeToColorTransition(color1, color1, color2, color2, lengthA, lengthB, easeIn, easeOut, isStart);
             }
             case "vertical_gradient" -> {
-                DynamicColor color1 = DynamicColor.fromJSON(json.get("color1"), context);
-                DynamicColor color2 = DynamicColor.fromJSON(json.get("color2"), context);
+                DynamicColor color1 = DynamicColor.loadWrapped(json, "color1", context);
+                DynamicColor color2 = DynamicColor.loadWrapped(json, "color2", context);
                 return new FadeToColorTransition(color1, color2, color2, color1, lengthA, lengthB, easeIn, easeOut, isStart);
             }
             case "four_angles" -> {
@@ -225,21 +226,21 @@ public class FadeToColorTransition implements Transition {
                 return new FadeToColorTransition(color, lengthA, lengthB, easeIn, easeOut, isStart);
             }
             default -> {
-                DynamicColor color = DynamicColor.fromJSON(json.get("color"), context);
+                DynamicColor color = DynamicColor.loadWrapped(json, "color", context);
                 return new FadeToColorTransition(color, lengthA, lengthB, easeIn, easeOut, isStart);
             }
         }
     }
 
     private static ColorConfig legacyFourAngles(JsonObject json, LoadingContext context, double lengthA, double lengthB) {
-        DynamicColor startColorBottomLeft = DynamicColor.fromJSON(json.get("start_color_bottom_left"), context);
-        DynamicColor startColorTopLeft = DynamicColor.fromJSON(json.get("start_color_top_left"), context);
-        DynamicColor startColorTopRight = DynamicColor.fromJSON(json.get("start_color_top_right"), context);
-        DynamicColor startColorBottomRight = DynamicColor.fromJSON(json.get("start_color_bottom_right"), context);
-        DynamicColor endColorBottomLeft = DynamicColor.fromJSON(json.get("end_color_bottom_left"), context);
-        DynamicColor endColorTopLeft = DynamicColor.fromJSON(json.get("end_color_top_left"), context);
-        DynamicColor endColorTopRight = DynamicColor.fromJSON(json.get("end_color_top_right"), context);
-        DynamicColor endColorBottomRight = DynamicColor.fromJSON(json.get("end_color_bottom_right"), context);
+        DynamicColor startColorBottomLeft = DynamicColor.loadWrapped(json, "start_color_bottom_left", context);
+        DynamicColor startColorTopLeft = DynamicColor.loadWrapped(json, "start_color_top_left", context);
+        DynamicColor startColorTopRight = DynamicColor.loadWrapped(json, "start_color_top_right", context);
+        DynamicColor startColorBottomRight = DynamicColor.loadWrapped(json, "start_color_bottom_right", context);
+        DynamicColor endColorBottomLeft = DynamicColor.loadWrapped(json, "end_color_bottom_left", context);
+        DynamicColor endColorTopLeft = DynamicColor.loadWrapped(json, "end_color_top_left", context);
+        DynamicColor endColorTopRight = DynamicColor.loadWrapped(json, "end_color_top_right", context);
+        DynamicColor endColorBottomRight = DynamicColor.loadWrapped(json, "end_color_bottom_right", context);
 
         double gradientTimeA = GsonHelper.getAsDouble(json, "gradient_time_a", lengthA);
         double gradientTimeB = GsonHelper.getAsDouble(json, "gradient_time_b", lengthA);
@@ -280,8 +281,8 @@ public class FadeToColorTransition implements Transition {
     }
 
     private static DynamicColor legacyTwoColors(JsonObject json, LoadingContext context, double lengthA, double lengthB) {
-        DynamicColor color1 = DynamicColor.fromJSON(json.get("color1"), context);
-        DynamicColor color2 = DynamicColor.fromJSON(json.get("color2"), context);
+        DynamicColor color1 = DynamicColor.loadWrapped(json, "color1", context);
+        DynamicColor color2 = DynamicColor.loadWrapped(json, "color2", context);
 
         double gradientTimeA = GsonHelper.getAsDouble(json, "gradient_time_a", lengthA);
         double gradientTimeB = GsonHelper.getAsDouble(json, "gradient_time_b", lengthA);

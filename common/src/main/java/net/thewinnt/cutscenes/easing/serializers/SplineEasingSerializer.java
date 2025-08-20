@@ -1,6 +1,7 @@
 package net.thewinnt.cutscenes.easing.serializers;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -32,7 +33,8 @@ public class SplineEasingSerializer implements EasingSerializer<SplineEasing> {
         JsonArray easings = GsonHelper.getAsJsonArray(json, "points");
         Easing[] data = new Easing[easings.size()];
         for (int i = 0; i < data.length; i++) {
-            data[i] = Easing.fromJSON(easings.get(i), context);
+            JsonElement element = easings.get(i);
+            data[i] = context.wrapLoading(String.valueOf(i), () -> Easing.fromJSON(element, context));
         }
         return new SplineEasing(data);
     }

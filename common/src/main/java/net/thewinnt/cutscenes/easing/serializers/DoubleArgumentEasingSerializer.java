@@ -35,8 +35,8 @@ public record DoubleArgumentEasingSerializer(DoubleBinaryOperator operation) imp
 
     @Override
     public DoubleArgumentEasing fromJSON(JsonObject json, LoadingContext context) {
-        Easing arg1 = Easing.fromJSON(json.get("arg1"), context);
-        Easing arg2 = Easing.fromJSON(json.get("arg2"), context);
+        Easing arg1 = Easing.loadWrapped(json, "arg1", context);
+        Easing arg2 = Easing.loadWrapped(json, "arg2", context);
         return new DoubleArgumentEasing(arg1, arg2, operation);
     }
 

@@ -54,7 +54,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
                     new ServerData("csapi$fakedata", "127.0.0.1", ServerData.Type.OTHER),
                     Minecraft.getInstance().screen,
                     Map.of(),
-                    new ChatComponent.State(List.of(), List.of(), List.of()),
+                    null,
                     Map.of(),
                     new ServerLinks(List.of())
             )

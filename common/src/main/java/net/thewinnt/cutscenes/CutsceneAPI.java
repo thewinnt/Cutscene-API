@@ -1,9 +1,11 @@
 package net.thewinnt.cutscenes;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.netty.channel.nio.AbstractNioByteChannel;
 import net.thewinnt.cutscenes.util.LoadingContext;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -133,7 +135,20 @@ public class CutsceneAPI {
                 Easing.EASING_MACROS.clear();
                 LoadResolver<Easing> macroLoader = new LoadResolver<>(files, true);
                 LoadingContext context = new LoadingContext(macroLoader);
-                Easing.EASING_MACROS.putAll(macroLoader.load(json -> Easing.fromJSON(json, context)));
+                Map<ResourceLocation, Easing> easings = macroLoader.load((json, id) -> context.wrapLoading(id.toString(), () -> Easing.fromJSON(json, context)));
+                List<String> errors = context.getErrors();
+                if (!errors.isEmpty()) {
+                    LOGGER.error("Error loading easing macros - cutscenes may not load correctly");
+                    for (String i : errors) {
+                        LOGGER.error(i);
+                    }
+                }
+                for (var i : easings.entrySet()) {
+                    if (i.getValue() != null) {
+                        Easing.EASING_MACROS.put(i.getKey(), i.getValue());
+                    }
+                }
+                Easing.EASING_MACROS.putAll(easings);
                 LOGGER.info("Loaded {} easing macros", Easing.EASING_MACROS.size());
             }
         }, ResourceLocation.parse("cutscenes:easing_macros"));
@@ -146,9 +161,19 @@ public class CutsceneAPI {
                 LoadingContext context = new LoadingContext(null);
                 files.forEach((id, element) -> {
                     try {
+                        context.clear();
                         JsonObject json = GsonHelper.convertToJsonObject(element, "cutscene");
-                        CutsceneManager.registerCutscene(id, CutsceneType.fromJSON(json, context));
-                        loaded.getAndIncrement();
+                        CutsceneType type = CutsceneType.fromJSON(json, context);
+                        List<String> errors = context.getErrors();
+                        if (errors.isEmpty()) {
+                            CutsceneManager.registerCutscene(id, type);
+                            loaded.getAndIncrement();
+                        } else {
+                            LOGGER.error("Failed to load cutscene {}:", id);
+                            for (String i : errors) {
+                                LOGGER.error(i);
+                            }
+                        }
                     } catch (RuntimeException e) {
                         LOGGER.error("Exception loading cutscene {}", id);
                         LOGGER.error("Caused by: ", e);

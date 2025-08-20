@@ -15,6 +15,8 @@ import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.GenericSignatureFormatError;
+
 /** A class containing some helpful functions for JSON parsing. */
 public class JsonHelper {
     /**
@@ -30,8 +32,38 @@ public class JsonHelper {
         if (element == null || element instanceof JsonNull) {
             return null;
         } else if (element instanceof JsonArray array) {
-            return new Vec3(array.get(0).getAsFloat(), array.get(1).getAsFloat(), array.get(2).getAsFloat());
+            return new Vec3(array.get(0).getAsDouble(), array.get(1).getAsDouble(), array.get(2).getAsDouble());
         } else {
+            return null;
+        }
+    }
+
+
+    /**
+     * Gets a Vec3 from a JSON object, if it's written in the form of [x, y, z], reporting any found
+     * errors
+     * @param json The JSON object to look in
+     * @param name The name of the field
+     * @param context The context to report errors to
+     * @return the Vec3, if it's there and written correctly, or null otherwise
+     */
+    @Nullable
+    public static Vec3 vec3FromJson(JsonObject json, String name, LoadingContext context) {
+        context.pushElement(name);
+        JsonElement element = json.get(name);
+        if (element == null || element instanceof JsonNull) {
+            context.popElement();
+            return null;
+        } else if (element instanceof JsonArray array) {
+            if (array.size() < 3) {
+                context.reportError("Array too short (needs at least 3 elements)");
+                context.popElement();
+                return null;
+            }
+            return new Vec3(array.get(0).getAsDouble(), array.get(1).getAsDouble(), array.get(2).getAsDouble());
+        } else {
+            context.reportError("Not a JSON array");
+            context.popElement();
             return null;
         }
     }
@@ -46,7 +78,7 @@ public class JsonHelper {
     public static Vec3 vec3FromJson(JsonElement json) {
         if (!json.isJsonArray()) return null;
         JsonArray array = json.getAsJsonArray();
-        return new Vec3(array.get(0).getAsFloat(), array.get(1).getAsFloat(), array.get(2).getAsFloat());
+        return new Vec3(array.get(0).getAsDouble(), array.get(1).getAsDouble(), array.get(2).getAsDouble());
     }
 
     /**
@@ -59,6 +91,7 @@ public class JsonHelper {
      */
     @Nullable
     public static PointProvider pointFromJson(JsonObject json, String name, LoadingContext context) {
+        context.pushElement(name);
         Vec3 test = vec3FromJson(json, name);
         if (test != null) return new StaticPointProvider(test);
         JsonObject obj;
@@ -66,6 +99,7 @@ public class JsonHelper {
             obj = GsonHelper.getAsJsonObject(json, name, null);
         } catch (JsonSyntaxException e) {
             obj = null;
+            context.reportError("Json syntax error: " + e.getMessage());
         }
         if (obj == null) return null;
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
@@ -73,7 +107,13 @@ public class JsonHelper {
         if (serializer == null) {
             throw new IllegalArgumentException("Unknown point type: " + type);
         }
-        return serializer.fromJSON(obj, context);
+        try {
+            return serializer.fromJSON(obj, context);
+        } catch (Exception e) {
+            return null;
+        } finally {
+            context.popElement();
+        }
     }
 
     /**
@@ -152,5 +192,25 @@ public class JsonHelper {
         JsonElement output = array.get(index);
         if (output.isJsonNull()) return null;
         return output;
+    }
+
+    public static double getAsDouble(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> GsonHelper.getAsDouble(json, name), 0d);
+    }
+
+    public static float getAsFloat(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> GsonHelper.getAsFloat(json, name), 0f);
+    }
+
+    public static int getAsInt(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> GsonHelper.getAsInt(json, name), 0);
+    }
+
+    public static boolean getAsBoolean(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> GsonHelper.getAsBoolean(json, name), false);
+    }
+
+    public static String getAsString(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> GsonHelper.getAsString(json, name));
     }
 }

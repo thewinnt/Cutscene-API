@@ -80,11 +80,11 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
     }
 
     public static WaypointProvider fromJSON(JsonObject obj, LoadingContext context) {
-        String name = GsonHelper.getAsString(obj, "name");
+        String name = JsonHelper.getAsString(obj, "name", context);
         int searchRadius = GsonHelper.getAsInt(obj, "search_radius", 64);
         SortType sortType;
         try {
-            sortType = SortType.valueOf(GsonHelper.getAsString(obj, "sort_type", "closest").toUpperCase());
+            sortType = SortType.valueOf(GsonHelper.getAsString(obj, "sort_type", "NEAREST").toUpperCase());
         } catch (IllegalArgumentException e) {
             sortType = SortType.NEAREST;
         }
