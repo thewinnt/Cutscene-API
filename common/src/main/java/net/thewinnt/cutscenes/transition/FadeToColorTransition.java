@@ -195,8 +195,8 @@ public class FadeToColorTransition implements Transition {
     public static FadeToColorTransition fromJSON(JsonObject json, LoadingContext context) {
         double lengthA = JsonHelper.getAsDouble(json, "length_a", context);
         double lengthB = GsonHelper.getAsDouble(json, "length_b", lengthA);
-        Easing easeIn = Easing.fromJSON(json.get("ease_in"), context, SimpleEasing.LINEAR);
-        Easing easeOut = Easing.fromJSON(json.get("ease_out"), context, SimpleEasing.LINEAR);
+        Easing easeIn = Easing.loadWrapped(json, "ease_in", context, SimpleEasing.LINEAR);
+        Easing easeOut = Easing.loadWrapped(json, "ease_out", context, SimpleEasing.LINEAR);
         boolean isStart = JsonHelper.getAsBoolean(json, "is_start", context);
         String colorType = GsonHelper.getAsString(json, "color_definition", "single_color");
         switch (colorType) {
@@ -244,7 +244,7 @@ public class FadeToColorTransition implements Transition {
 
         double gradientTimeA = GsonHelper.getAsDouble(json, "gradient_time_a", lengthA);
         double gradientTimeB = GsonHelper.getAsDouble(json, "gradient_time_b", lengthA);
-        Easing colorEase = Easing.fromJSON(json.get("color_ease"), context, SimpleEasing.LINEAR);
+        Easing colorEase = Easing.loadWrapped(json, "color_ease", context, SimpleEasing.LINEAR);
 
         return legacyFourAngles(lengthA, lengthB, gradientTimeA, gradientTimeB, startColorBottomLeft, endColorBottomLeft, colorEase, startColorTopLeft, endColorTopLeft, startColorTopRight, endColorTopRight, startColorBottomRight, endColorBottomRight);
     }
@@ -286,7 +286,7 @@ public class FadeToColorTransition implements Transition {
 
         double gradientTimeA = GsonHelper.getAsDouble(json, "gradient_time_a", lengthA);
         double gradientTimeB = GsonHelper.getAsDouble(json, "gradient_time_b", lengthA);
-        Easing colorEase = Easing.fromJSON(json.get("color_ease"), context, SimpleEasing.LINEAR);
+        Easing colorEase = Easing.loadWrapped(json, "color_ease", context, SimpleEasing.LINEAR);
 
         return legacyTwoColors(lengthA, lengthB, gradientTimeA, gradientTimeB, color1, color2, colorEase);
     }

@@ -32,7 +32,7 @@ public class LerpEasingSerializer implements EasingSerializer<LerpEasing> {
 
     @Override
     public LerpEasing fromJSON(JsonObject json, LoadingContext context) {
-        Easing delta = Easing.loadWrapped(json, "delta", context);
+        Easing delta = Easing.loadWrapped(json, "delta", context, SimpleEasing.LINEAR);
         Easing from = Easing.loadWrapped(json, "from", context);
         Easing to = Easing.loadWrapped(json, "to", context);
         return new LerpEasing(delta, from, to);

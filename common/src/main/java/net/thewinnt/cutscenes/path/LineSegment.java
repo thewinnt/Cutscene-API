@@ -148,7 +148,6 @@ public class LineSegment implements PathLike {
 
     public static LineSegment fromJSON(JsonObject json, Path path, LoadingContext context) {
         /* TODO release 1.7:
-         * - loading contexts everywhere
          * - /execute if/unless cutscene watching <player>
          * - /execute if/unless cutscene startreason <string>
          * - /execute if/unless cutscene endreason <reason>
@@ -156,9 +155,9 @@ public class LineSegment implements PathLike {
          */
         PointProvider start = JsonHelper.pointFromJson(json, "start", context);
         PointProvider end = JsonHelper.pointFromJson(json, "end", context);
-        Easing easingX = Easing.fromJSON(json.get("easing_x"), context, SimpleEasing.LINEAR);
-        Easing easingY = Easing.fromJSON(json.get("easing_y"), context, SimpleEasing.LINEAR);
-        Easing easingZ = Easing.fromJSON(json.get("easing_z"), context, SimpleEasing.LINEAR);
+        Easing easingX = Easing.loadWrapped(json, "easing_x", context, SimpleEasing.LINEAR);
+        Easing easingY = Easing.loadWrapped(json, "easing_y", context, SimpleEasing.LINEAR);
+        Easing easingZ = Easing.loadWrapped(json, "easing_z", context, SimpleEasing.LINEAR);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         boolean isRotation = GsonHelper.getAsBoolean(json, "is_rotation", false);
         return new LineSegment(start, end, easingX, easingY, easingZ, weight, isRotation);

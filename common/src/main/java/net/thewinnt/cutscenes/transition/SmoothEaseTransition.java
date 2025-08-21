@@ -214,12 +214,12 @@ public class SmoothEaseTransition implements Transition {
         double length = GsonHelper.getAsDouble(json, "length", 40);
         boolean isStart = JsonHelper.getAsBoolean(json, "is_start", context);
         boolean countTowardsCutsceneTime = GsonHelper.getAsBoolean(json, "count_towards_cutscene_time", isStart);
-        Easing easingX = Easing.fromJSON(json.get("easing_x"), context, SimpleEasing.OUT_QUINT);
-        Easing easingY = Easing.fromJSON(json.get("easing_y"), context, SimpleEasing.OUT_QUINT);
-        Easing easingZ = Easing.fromJSON(json.get("easing_z"), context, SimpleEasing.OUT_QUINT);
-        Easing easingRotX = Easing.fromJSON(json.get("easing_rot_x"), context, SimpleEasing.OUT_QUINT);
-        Easing easingRotY = Easing.fromJSON(json.get("easing_rot_y"), context, SimpleEasing.OUT_QUINT);
-        Easing easingRotZ = Easing.fromJSON(json.get("easing_rot_z"), context, SimpleEasing.OUT_QUINT);
+        Easing easingX = Easing.loadWrapped(json, "easing_x", context, SimpleEasing.OUT_QUINT);
+        Easing easingY = Easing.loadWrapped(json, "easing_y", context, SimpleEasing.OUT_QUINT);
+        Easing easingZ = Easing.loadWrapped(json, "easing_z", context, SimpleEasing.OUT_QUINT);
+        Easing easingRotX = Easing.loadWrapped(json, "easing_rot_x", context, SimpleEasing.OUT_QUINT);
+        Easing easingRotY = Easing.loadWrapped(json, "easing_rot_y", context, SimpleEasing.OUT_QUINT);
+        Easing easingRotZ = Easing.loadWrapped(json, "easing_rot_z", context, SimpleEasing.OUT_QUINT);
         return new SmoothEaseTransition(length, countTowardsCutsceneTime, isStart, easingX, easingY, easingZ, easingRotX, easingRotY, easingRotZ);
     }
 }

@@ -36,7 +36,7 @@ public class PlaySoundSerializer implements CutsceneEffectSerializer<PlaySoundCo
         SoundSource source = SoundSource.valueOf(GsonHelper.getAsString(json, "source", "master").toUpperCase(Locale.ROOT));
         float volume = GsonHelper.getAsFloat(json, "volume", 1);
         float pitch = GsonHelper.getAsFloat(json, "pitch", 1);
-        Optional<Vec3> pos = Optional.ofNullable(JsonHelper.vec3FromJson(json, "pos"));
+        Optional<Vec3> pos = Optional.ofNullable(JsonHelper.vec3FromJson(json, "pos", context));
         return new PlaySoundConfiguration(sound, source, volume, pitch, pos);
     }
 

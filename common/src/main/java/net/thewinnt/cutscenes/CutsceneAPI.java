@@ -46,6 +46,8 @@ import net.thewinnt.cutscenes.rotation.RotationSerializer;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
 import net.thewinnt.cutscenes.util.JsonLoader;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /** The main class of Cutscene API. Sort of. */
 public class CutsceneAPI {
@@ -130,17 +132,19 @@ public class CutsceneAPI {
 
     public static void addReloadListeners(PlatformAbstractions abstractions) {
         abstractions.registerReloadListener(new JsonLoader(GSON, "easing_macros") {
+            private static final Marker MARKER = MarkerFactory.getMarker("EasingMacroLoader");
+
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 Easing.EASING_MACROS.clear();
                 LoadResolver<Easing> macroLoader = new LoadResolver<>(files, true);
                 LoadingContext context = new LoadingContext(macroLoader);
-                Map<ResourceLocation, Easing> easings = macroLoader.load((json, id) -> context.wrapLoading(id.toString(), () -> Easing.fromJSON(json, context)));
+                Map<ResourceLocation, Easing> easings = macroLoader.load((json, id) -> context.wrapStrict(id.toString(), () -> Easing.fromJSON(json, context)));
                 List<String> errors = context.getErrors();
                 if (!errors.isEmpty()) {
-                    LOGGER.error("Error loading easing macros - cutscenes may not load correctly");
+                    LOGGER.error(MARKER, "Error loading easing macros");
                     for (String i : errors) {
-                        LOGGER.error(i);
+                        LOGGER.error(MARKER, i);
                     }
                 }
                 for (var i : easings.entrySet()) {
@@ -148,11 +152,12 @@ public class CutsceneAPI {
                         Easing.EASING_MACROS.put(i.getKey(), i.getValue());
                     }
                 }
-                Easing.EASING_MACROS.putAll(easings);
-                LOGGER.info("Loaded {} easing macros", Easing.EASING_MACROS.size());
+                LOGGER.info(MARKER, "Loaded {}/{} easing macros", Easing.EASING_MACROS.size(), files.size());
             }
         }, ResourceLocation.parse("cutscenes:easing_macros"));
         abstractions.registerReloadListener(new JsonLoader(GSON, "cutscenes") {
+            private static final Marker MARKER = MarkerFactory.getMarker("CutsceneLoader");
+
             @Override
             protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 CutsceneManager.REGISTRY.clear();
@@ -169,17 +174,17 @@ public class CutsceneAPI {
                             CutsceneManager.registerCutscene(id, type);
                             loaded.getAndIncrement();
                         } else {
-                            LOGGER.error("Failed to load cutscene {}:", id);
+                            LOGGER.error(MARKER, "Failed to load cutscene {}:", id);
                             for (String i : errors) {
-                                LOGGER.error(i);
+                                LOGGER.error(MARKER, i);
                             }
                         }
                     } catch (RuntimeException e) {
-                        LOGGER.error("Exception loading cutscene {}", id);
-                        LOGGER.error("Caused by: ", e);
+                        LOGGER.error(MARKER, "Exception loading cutscene {}", id);
+                        LOGGER.error(MARKER, "Caused by: ", e);
                     }
                 });
-                LOGGER.info("Loaded {} cutscenes", loaded.get());
+                LOGGER.info(MARKER, "Loaded {}/{} cutscenes", loaded.get(), files.size());
             }
         }, ResourceLocation.parse("cutscenes:cutscenes"));
     }

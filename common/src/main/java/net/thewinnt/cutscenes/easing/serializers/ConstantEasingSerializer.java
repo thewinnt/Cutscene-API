@@ -24,7 +24,7 @@ public class ConstantEasingSerializer implements EasingSerializer<ConstantEasing
 
     @Override
     public ConstantEasing fromJSON(JsonObject json, LoadingContext context) {
-        return new ConstantEasing(json.get("value").getAsDouble());
+        return new ConstantEasing(context.wrapLoading("value", () -> json.get("value").getAsDouble()));
     }
 
     @Override

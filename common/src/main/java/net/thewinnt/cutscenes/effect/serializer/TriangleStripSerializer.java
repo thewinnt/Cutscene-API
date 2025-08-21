@@ -1,6 +1,7 @@
 package net.thewinnt.cutscenes.effect.serializer;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
@@ -27,7 +28,8 @@ public class TriangleStripSerializer implements CutsceneEffectSerializer<Triangl
         JsonArray array = GsonHelper.getAsJsonArray(json, "vertices");
         DynamicVertex[] vertices = new DynamicVertex[array.size()];
         for (int i = 0; i < array.size(); i++) {
-            vertices[i] = DynamicVertex.fromJSON(GsonHelper.convertToJsonObject(array.get(i), "vertex"), context);
+            JsonElement element = array.get(i);
+            vertices[i] = context.wrapLoading("vertices[" + i + "]", () -> DynamicVertex.fromJSON(GsonHelper.convertToJsonObject(element, "vertex"), context));
         }
         return new TriangleStripConfiguration(vertices);
     }

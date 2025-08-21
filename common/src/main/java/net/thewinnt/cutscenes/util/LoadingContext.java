@@ -1,8 +1,10 @@
 package net.thewinnt.cutscenes.util;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.easing.Easing;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +55,7 @@ public final class LoadingContext {
 
     public void clear() {
         root.clear();
+        last = root;
     }
 
     public <T> T wrapLoading(String name, Supplier<T> loader) {
@@ -63,6 +66,27 @@ public final class LoadingContext {
         this.pushElement(name);
         try {
             return loader.get();
+        } catch (Exception e) {
+            this.reportError("Uncaught exception: " + e);
+            return fallback;
+        } finally {
+            this.popElement();
+        }
+    }
+
+    public <T> T wrapStrict(String name, Supplier<T> loader) {
+        return this.wrapStrict(name, loader, null);
+    }
+
+    public <T> T wrapStrict(String name, Supplier<T> loader, T fallback) {
+        this.pushElement(name);
+        StackElement element = last;
+        try {
+            T output = loader.get();
+            if (element.createReport(0).isEmpty()) {
+                return output;
+            }
+            return null;
         } catch (Exception e) {
             this.reportError("Uncaught exception: " + e);
             return fallback;
@@ -108,6 +132,12 @@ public final class LoadingContext {
                 }
                 if (local.size() > 1) { // any of the children had errors, or the element has errors
                     output.addAll(local);
+                }
+            }
+            if (depth == 0 && !this.errors.isEmpty()) {
+                output.add("Errors in root element:");
+                for (String i : this.errors) {
+                    output.add("- " + i);
                 }
             }
             return output;

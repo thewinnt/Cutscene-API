@@ -118,18 +118,24 @@ public interface Easing {
         return context.wrapLoading(name, () -> fromJSON(json.get(name), context, fallback));
     }
 
-    static Easing fromJSON(@NotNull JsonElement json, LoadingContext context) {
-        if (json.isJsonPrimitive()) {
+    static Easing fromJSON(JsonElement json, LoadingContext context) {
+        if (json == null || json.isJsonNull()) {
+            context.reportError("Missing required easing");
+            return null;
+        } else if (json.isJsonPrimitive()) {
             return fromJSONPrimitive(json.getAsJsonPrimitive(), context);
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
             EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.getValue(ResourceLocation.parse(obj.get("type").getAsString()));
             if (serializer == null) {
-                throw new IllegalArgumentException("Unknown easing type: " + GsonHelper.getAsString(obj, "type"));
+                context.reportError("Unknown easing type: " + GsonHelper.getAsString(obj, "type"));
+                return null;
             }
             return serializer.fromJSON(obj, context);
+        } else {
+            context.reportError("Invalid object type: " + json);
+            return null;
         }
-        throw new IllegalArgumentException("Cannot get Easing from JSON: " + json);
     }
 
 
@@ -137,12 +143,7 @@ public interface Easing {
         if (json == null || json.isJsonNull()) {
             return fallback;
         }
-        try {
-            return fromJSON(json, context);
-        } catch (RuntimeException e) {
-            LOGGER.warn("Exception loading easing, returning fallback: ", e);
-            return fallback;
-        }
+        return fromJSON(json, context);
     }
 
     static Easing fromJSONPrimitive(JsonPrimitive json, LoadingContext context) {
@@ -170,13 +171,15 @@ public interface Easing {
 
         // then, a macro
         if (context.easings == null) {
-            throw new IllegalStateException("Missing easing macro: " + id);
+            context.reportError("Missing easing macro: " + id);
+            return null;
         }
         Easing output = context.easings.resolve(id);
         if (output == null) {
-            throw new IllegalStateException("Missing or invalid easing macro: " + id);
+            context.reportError("Missing or invalid easing macro: " + id);
+            return null;
         }
-        return context.easings.resolve(id);
+        return output;
     }
 
     static Easing fromNetwork(FriendlyByteBuf buf) {

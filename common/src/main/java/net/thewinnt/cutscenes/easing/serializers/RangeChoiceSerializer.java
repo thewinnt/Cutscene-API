@@ -6,6 +6,7 @@ import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.RangeChoiceEasing;
+import net.thewinnt.cutscenes.util.JsonHelper;
 import net.thewinnt.cutscenes.util.LoadResolver;
 import net.thewinnt.cutscenes.util.LoadingContext;
 
@@ -24,11 +25,11 @@ public class RangeChoiceSerializer implements EasingSerializer<RangeChoiceEasing
     }
 
     @Override
-    public RangeChoiceEasing fromJSON(JsonObject json, LoadingContext loadResolver) {
-        Easing inRange = Easing.loadWrapped(json, "in_range", loadResolver);
-        Easing outRange = Easing.loadWrapped(json, "out_range", loadResolver);
-        double rangeMin = GsonHelper.getAsDouble(json, "range_min");
-        double rangeMax = GsonHelper.getAsDouble(json, "range_max");
+    public RangeChoiceEasing fromJSON(JsonObject json, LoadingContext context) {
+        Easing inRange = Easing.loadWrapped(json, "in_range", context);
+        Easing outRange = Easing.loadWrapped(json, "out_range", context);
+        double rangeMin = JsonHelper.getAsDouble(json, "range_min", context);
+        double rangeMax = JsonHelper.getAsDouble(json, "range_max", context);
         return new RangeChoiceEasing(inRange, outRange, rangeMin, rangeMax);
     }
 }

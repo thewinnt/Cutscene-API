@@ -214,7 +214,7 @@ public class Path implements PathLike {
         JsonArray segments_j = json.getAsJsonArray("segments");
         int index = 0;
         for (JsonElement i : segments_j) {
-            context.pushElement(String.valueOf(index));
+            context.pushElement("segments[" + index+ "]");
             JsonObject j = i.getAsJsonObject();
             ResourceLocation id = context.wrapLoading("type", () -> ResourceLocation.parse(j.get("type").getAsString()));
             SegmentType<?> type = CutsceneManager.getSegmentType(id);
@@ -232,6 +232,10 @@ public class Path implements PathLike {
             }
             context.popElement();
             index++;
+        }
+        if (output.segments.isEmpty()) {
+            context.reportError("No segments in Path");
+            return null;
         }
         return output;
     }

@@ -34,7 +34,7 @@ public record CoordinateProvider(boolean isAbsolute, Easing value, CoordinateAnc
     }
 
     public static CoordinateProvider fromJSON(JsonElement json, LoadingContext context, Easing fallback) {
-        if (json == null) {
+        if (json == null || json.isJsonNull()) {
             return new CoordinateProvider(false, fallback, CoordinateAnchor.START);
         }
         if (json.isJsonPrimitive()) {
@@ -51,7 +51,10 @@ public record CoordinateProvider(boolean isAbsolute, Easing value, CoordinateAnc
     }
 
     public static CoordinateProvider fromJSON(JsonElement json, LoadingContext context) {
-        if (json.isJsonPrimitive()) {
+        if (json == null || json.isJsonNull()) {
+            context.reportError("Missing required coordinate provider");
+            return null;
+        } else if (json.isJsonPrimitive()) {
             return new CoordinateProvider(false, context.wrapLoading("easing", () -> Easing.fromJSON(json, context)), CoordinateAnchor.START);
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
@@ -59,8 +62,17 @@ public record CoordinateProvider(boolean isAbsolute, Easing value, CoordinateAnc
             CoordinateAnchor anchor = CoordinateAnchor.valueOf(GsonHelper.getAsString(obj, "anchor", "start").toUpperCase());
             return new CoordinateProvider(absolute, context.wrapLoading("easing", () -> Easing.fromJSON(json, context)), anchor);
         } else {
-            throw new IllegalArgumentException("Illegal JSON for non-fallback CoordinateProvider");
+            context.reportError("Invalid object type: " + json);
+            return null;
         }
+    }
+
+    public static CoordinateProvider loadWrapped(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> fromJSON(json.get(name), context));
+    }
+
+    public static CoordinateProvider loadWrapped(JsonObject json, String name, LoadingContext context, Easing fallback) {
+        return context.wrapLoading(name, () -> fromJSON(json.get(name), context, fallback));
     }
 
     public enum CoordinateAnchor {

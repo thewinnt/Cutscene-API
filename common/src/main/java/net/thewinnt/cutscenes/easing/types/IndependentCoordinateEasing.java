@@ -1,11 +1,15 @@
 package net.thewinnt.cutscenes.easing.types;
 
+import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.impl.CoordinateSupplierImpl;
 import net.thewinnt.cutscenes.util.CoordinateProvider;
+import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
+import java.util.Locale;
 import java.util.function.Supplier;
 
 public class IndependentCoordinateEasing implements Easing {
@@ -47,7 +51,19 @@ public class IndependentCoordinateEasing implements Easing {
 
     public enum Axis {
         WIDTH,
-        HEIGHT
+        HEIGHT;
+
+        public static Axis fromJSON(JsonObject json, String name, LoadingContext context) {
+            context.pushElement(name);
+            try {
+                return valueOf(json.get(name).getAsString().toUpperCase(Locale.ROOT));
+            } catch (Exception e) {
+                context.reportError("Uncaught exception: " + e);
+                return null;
+            } finally {
+                context.popElement();
+            }
+        }
     }
 
     public interface CoordinateSupplier {

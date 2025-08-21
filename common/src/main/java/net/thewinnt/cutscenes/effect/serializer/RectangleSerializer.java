@@ -28,16 +28,16 @@ public class RectangleSerializer implements CutsceneEffectSerializer<RectangleCo
 
     @Override
     public RectangleConfiguration fromJSON(JsonObject json, LoadingContext context) {
-        CoordinateProvider x = CoordinateProvider.fromJSON(json.get("x"), context, ConstantEasing.ZERO);
-        CoordinateProvider y = CoordinateProvider.fromJSON(json.get("y"), context, ConstantEasing.ZERO);
-        CoordinateProvider width = CoordinateProvider.fromJSON(json.get("width"), context, ConstantEasing.ONE);
-        CoordinateProvider height = CoordinateProvider.fromJSON(json.get("height"), context, ConstantEasing.ONE);
+        CoordinateProvider x = CoordinateProvider.loadWrapped(json, "x", context, ConstantEasing.ZERO);
+        CoordinateProvider y = CoordinateProvider.loadWrapped(json, "y", context, ConstantEasing.ZERO);
+        CoordinateProvider width = CoordinateProvider.loadWrapped(json, "width", context, ConstantEasing.ONE);
+        CoordinateProvider height = CoordinateProvider.loadWrapped(json, "height", context, ConstantEasing.ONE);
         if (json.has("color")) {
-            DynamicColor color = DynamicColor.fromJSON(json.get("color"), context);
+            DynamicColor color = DynamicColor.loadWrapped(json, "color", context);
             return new RectangleConfiguration(x, y, width, height, color, color);
         } else {
-            DynamicColor color1 = DynamicColor.fromJSON(json.get("color_top"), context, DynamicColor.BLACK);
-            DynamicColor color2 = DynamicColor.fromJSON(json.get("color_bottom"), context, DynamicColor.BLACK);
+            DynamicColor color1 = DynamicColor.loadWrapped(json, "color_top", context, DynamicColor.BLACK);
+            DynamicColor color2 = DynamicColor.loadWrapped(json, "color_bottom", context, DynamicColor.BLACK);
             return new RectangleConfiguration(x, y, width, height, color1, color2);
         }
     }

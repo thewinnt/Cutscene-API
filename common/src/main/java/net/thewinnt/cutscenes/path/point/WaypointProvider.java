@@ -86,9 +86,10 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
         try {
             sortType = SortType.valueOf(GsonHelper.getAsString(obj, "sort_type", "NEAREST").toUpperCase());
         } catch (IllegalArgumentException e) {
+            context.reportError("Unknown sorting type: " + e);
             sortType = SortType.NEAREST;
         }
-        Vec3 searchOffset = Objects.requireNonNullElse(JsonHelper.vec3FromJson(obj, "search_offset"), Vec3.ZERO);
+        Vec3 searchOffset = Objects.requireNonNullElse(JsonHelper.vec3FromJson(obj, "search_offset", context), Vec3.ZERO);
         PointProvider offset = Objects.requireNonNullElse(JsonHelper.pointFromJson(obj, "offset", context), StaticPointProvider.ZERO);
         PointProvider fallback = JsonHelper.pointFromJson(obj, "fallback", context);
         return new WaypointProvider(name, searchRadius, sortType, searchOffset, offset, Optional.ofNullable(fallback));

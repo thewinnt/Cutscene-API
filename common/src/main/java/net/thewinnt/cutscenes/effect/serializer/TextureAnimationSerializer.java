@@ -12,6 +12,7 @@ import net.thewinnt.cutscenes.effect.TextureAnimationEffect;
 import net.thewinnt.cutscenes.effect.configuration.TextureAnimationConfiguration;
 import net.thewinnt.cutscenes.util.CoordinateProvider;
 import net.thewinnt.cutscenes.util.DynamicColor;
+import net.thewinnt.cutscenes.util.JsonHelper;
 import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class TextureAnimationSerializer implements CutsceneEffectSerializer<TextureAnimationConfiguration> {
@@ -40,19 +41,19 @@ public class TextureAnimationSerializer implements CutsceneEffectSerializer<Text
 
     @Override
     public TextureAnimationConfiguration fromJSON(JsonObject json, LoadingContext context) {
-        String texture = GsonHelper.getAsString(json, "texture");
-        int frameCount = GsonHelper.getAsInt(json, "frames");
+        String texture = JsonHelper.getAsString(json, "texture", context);
+        int frameCount = JsonHelper.getAsInt(json, "frames", context);
         int frameOffset = GsonHelper.getAsInt(json, "frame_offset", 0);
-        Easing timeWarp = Easing.fromJSON(json.get("time_warp"), context, SimpleEasing.LINEAR);
-        CoordinateProvider x1 = CoordinateProvider.fromJSON(json.get("x1"), context, ConstantEasing.ZERO);
-        CoordinateProvider y1 = CoordinateProvider.fromJSON(json.get("y1"), context, ConstantEasing.ZERO);
-        CoordinateProvider x2 = CoordinateProvider.fromJSON(json.get("x2"), context, ConstantEasing.ONE);
-        CoordinateProvider y2 = CoordinateProvider.fromJSON(json.get("y2"), context, ConstantEasing.ONE);
-        CoordinateProvider u1 = CoordinateProvider.fromJSON(json.get("u1"), context, ConstantEasing.ZERO);
-        CoordinateProvider v1 = CoordinateProvider.fromJSON(json.get("v1"), context, ConstantEasing.ZERO);
-        CoordinateProvider u2 = CoordinateProvider.fromJSON(json.get("u2"), context, ConstantEasing.ONE);
-        CoordinateProvider v2 = CoordinateProvider.fromJSON(json.get("v2"), context, ConstantEasing.ONE);
-        DynamicColor tint = DynamicColor.fromJSON(json.get("tint"), context, DynamicColor.WHITE);
+        Easing timeWarp = Easing.loadWrapped(json, "time_warp", context, SimpleEasing.LINEAR);
+        CoordinateProvider x1 = CoordinateProvider.loadWrapped(json, "x1", context, ConstantEasing.ZERO);
+        CoordinateProvider y1 = CoordinateProvider.loadWrapped(json, "y1", context, ConstantEasing.ZERO);
+        CoordinateProvider x2 = CoordinateProvider.loadWrapped(json, "x2", context, ConstantEasing.ONE);
+        CoordinateProvider y2 = CoordinateProvider.loadWrapped(json, "y2", context, ConstantEasing.ONE);
+        CoordinateProvider u1 = CoordinateProvider.loadWrapped(json, "u1", context, ConstantEasing.ZERO);
+        CoordinateProvider v1 = CoordinateProvider.loadWrapped(json, "v1", context, ConstantEasing.ZERO);
+        CoordinateProvider u2 = CoordinateProvider.loadWrapped(json, "u2", context, ConstantEasing.ONE);
+        CoordinateProvider v2 = CoordinateProvider.loadWrapped(json, "v2", context, ConstantEasing.ONE);
+        DynamicColor tint = DynamicColor.loadWrapped(json, "tint", context, DynamicColor.WHITE);
         float zIndex = GsonHelper.getAsFloat(json, "z", 0);
         return new TextureAnimationConfiguration(texture, frameCount, frameOffset, timeWarp, x1, y1, x2, y2, u1, v1, u2, v2, tint, zIndex);
     }

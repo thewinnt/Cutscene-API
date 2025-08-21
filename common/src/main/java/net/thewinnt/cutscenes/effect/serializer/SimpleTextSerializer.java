@@ -37,12 +37,12 @@ public class SimpleTextSerializer implements CutsceneEffectSerializer<SimpleText
     @Override
     public SimpleTextConfiguration fromJSON(JsonObject json, LoadingContext context) {
         Component text = ComponentSerialization.CODEC.decode(JsonOps.INSTANCE, json.get("text")).getOrThrow().getFirst();
-        CoordinateProvider rx = CoordinateProvider.fromJSON(json.get("x"), context);
-        CoordinateProvider ry = CoordinateProvider.fromJSON(json.get("y"), context);
+        CoordinateProvider rx = CoordinateProvider.loadWrapped(json, "x", context);
+        CoordinateProvider ry = CoordinateProvider.loadWrapped(json, "y", context);
         boolean centered = GsonHelper.getAsBoolean(json, "centered", false);
-        Easing scale = Easing.fromJSON(json.get("scale"), context, ConstantEasing.ONE);
-        Easing rotation = Easing.fromJSON(json.get("rotation"), context, ConstantEasing.ZERO);
-        Optional<DynamicColor> colorOverride = Optional.ofNullable(DynamicColor.fromJSON(json.get("color_override"), context, null));
+        Easing scale = Easing.loadWrapped(json, "scale", context, ConstantEasing.ONE);
+        Easing rotation = Easing.loadWrapped(json, "rotation", context, ConstantEasing.ZERO);
+        Optional<DynamicColor> colorOverride = Optional.ofNullable(DynamicColor.loadWrapped(json, "color_override", context, null));
         return new SimpleTextConfiguration(text, rx, ry, centered, scale, rotation, colorOverride);
     }
 

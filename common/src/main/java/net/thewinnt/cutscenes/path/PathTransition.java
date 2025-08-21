@@ -114,9 +114,9 @@ public class PathTransition implements PathLike {
     }
 
     public static PathTransition fromJSON(JsonObject json, Path path, LoadingContext context) {
-        Easing easingX = Easing.fromJSON(json.get("easing_x"), context, SimpleEasing.LINEAR);
-        Easing easingY = Easing.fromJSON(json.get("easing_y"), context, SimpleEasing.LINEAR);
-        Easing easingZ = Easing.fromJSON(json.get("easing_z"), context, SimpleEasing.LINEAR);
+        Easing easingX = Easing.loadWrapped(json, "easing_x", context, SimpleEasing.LINEAR);
+        Easing easingY = Easing.loadWrapped(json, "easing_y", context, SimpleEasing.LINEAR);
+        Easing easingZ = Easing.loadWrapped(json, "easing_z", context, SimpleEasing.LINEAR);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         boolean isRotation = GsonHelper.getAsBoolean(json, "is_rotation", false);
         return new PathTransition(path, path.size(), easingX, easingY, easingZ, isRotation, weight);

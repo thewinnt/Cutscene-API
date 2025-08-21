@@ -3,6 +3,7 @@ package net.thewinnt.cutscenes;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mojang.logging.LogUtils;
 import net.thewinnt.cutscenes.effect.ServerEffectWrapper;
 import net.thewinnt.cutscenes.rotation.handler.CutsceneRotation;
 import net.thewinnt.cutscenes.rotation.handler.PlayerRotation;
@@ -29,6 +30,7 @@ import net.thewinnt.cutscenes.transition.Transition;
 import net.thewinnt.cutscenes.util.ActionToggles;
 import net.thewinnt.cutscenes.util.ActionToggles.Builder;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import org.slf4j.Logger;
 
 /**
  * A cutscene type consists of a camera path, rotation, transitions and some parameters. A cutscene has a fixed length,
@@ -37,6 +39,7 @@ import net.thewinnt.cutscenes.util.JsonHelper;
  * rotated by some amount.
  */
 public class CutsceneType {
+    public static final Logger LOGGER = LogUtils.getLogger();
     public final CutsceneLength length;
     public final @Nullable Path path;
     public final @Nullable Path rotationProvider;
@@ -183,13 +186,13 @@ public class CutsceneType {
         if (dataVersionJson != null) {
             dataVersion = dataVersionJson.getAsInt();
         } else {
-            CutsceneAPI.LOGGER.info("Loading a cutscene type with no version specified, assuming it is 0. Current version is {}.", CutsceneAPI.DATA_VERSION);
+            LOGGER.info("Loading a cutscene with no version, assuming it is 0. Current version is {}.", CutsceneAPI.DATA_VERSION);
             dataVersion = 0;
         }
         if (dataVersion > CutsceneAPI.DATA_VERSION) {
-            CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is newer than the current one ({}). Things may break!", dataVersion, CutsceneAPI.DATA_VERSION);
+            LOGGER.warn("Loading a cutscene with version {}, which is newer than the current one ({}). Things may break!", dataVersion, CutsceneAPI.DATA_VERSION);
         } else if (dataVersion < CutsceneAPI.DATA_VERSION) {
-            CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is earlier than the current one ({}). The cutscene should be updated to the new format to make sure it shows up correctly!", dataVersion, CutsceneAPI.DATA_VERSION);
+            LOGGER.warn("Loading a cutscene with version {}, which is earlier than the current one ({}). The cutscene should be updated to the new format to make sure it works correctly!", dataVersion, CutsceneAPI.DATA_VERSION);
         }
         context.setDataVersion(dataVersion);
         CutsceneLength length = CutsceneLength.fromJson(json.get("length"));
@@ -203,7 +206,7 @@ public class CutsceneType {
             boolean blockRotation = GsonHelper.getAsBoolean(json, "block_rotation", false) || rotation != null;
             rotationHandler = blockRotation ? CutsceneRotation.INSTANCE : PlayerRotation.INSTANCE;
         } else {
-            rotationHandler = RotationHandler.fromJson(json.get("rotation_handler"), context);
+            rotationHandler = context.wrapLoading("rotation_handler", () -> RotationHandler.fromJson(json.get("rotation_handler"), context));
         }
         ActionToggles toggles;
         if (json.has("disable_actions")) {

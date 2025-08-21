@@ -93,18 +93,30 @@ public class JsonHelper {
     public static PointProvider pointFromJson(JsonObject json, String name, LoadingContext context) {
         context.pushElement(name);
         Vec3 test = vec3FromJson(json, name);
-        if (test != null) return new StaticPointProvider(test);
+        if (test != null) {
+            context.popElement();
+            return new StaticPointProvider(test);
+        }
         JsonObject obj;
         try {
-            obj = GsonHelper.getAsJsonObject(json, name, null);
+            JsonElement element = json.get(name);
+            if (element == null || element.isJsonNull()) {
+                obj = null;
+            } else {
+                obj = GsonHelper.getAsJsonObject(json, name, null);
+            }
         } catch (JsonSyntaxException e) {
             obj = null;
-            context.reportError("Json syntax error: " + e.getMessage());
+            context.reportError("JSON error: " + e.getMessage());
         }
-        if (obj == null) return null;
+        if (obj == null) {
+            context.popElement();
+            return null;
+        }
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
         PointSerializer<?> serializer = CutsceneManager.getPointType(type);
         if (serializer == null) {
+            context.popElement();
             throw new IllegalArgumentException("Unknown point type: " + type);
         }
         try {

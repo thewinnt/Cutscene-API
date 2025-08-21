@@ -46,8 +46,8 @@ public class CompoundEasingSerializer implements EasingSerializer<CompoundEasing
         JsonObject obj = GsonHelper.getAsJsonObject(json, "entries");
         List<TimedEasingEntry> entries = new ArrayList<>();
         for (var i : obj.asMap().entrySet()) {
-            double time = Double.parseDouble(i.getKey());
-            RangeAppliedEasing easing = RangeAppliedEasing.fromJSON(i.getValue(), context);
+            double time = context.wrapLoading("time", () -> Double.parseDouble(i.getKey()), 0d);
+            RangeAppliedEasing easing = context.wrapLoading("entry@" + time, () -> RangeAppliedEasing.fromJSON(i.getValue(), context));
             entries.add(new TimedEasingEntry(time, easing));
         }
         return new CompoundEasing(entries);

@@ -2,6 +2,7 @@ package net.thewinnt.cutscenes.effect.serializer;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.nbt.NbtOps;
@@ -46,19 +47,27 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
 
     @Override
     public AppearingTextConfiguration fromJSON(JsonObject json, LoadingContext context) {
-        Component text = ComponentSerialization.CODEC.decode(JsonOps.INSTANCE, json.get("text")).getOrThrow().getFirst();
-        CoordinateProvider rx = CoordinateProvider.fromJSON(json.get("x"), context);
-        CoordinateProvider ry = CoordinateProvider.fromJSON(json.get("y"), context);
-        CoordinateProvider lineWidth = CoordinateProvider.fromJSON(json.get("line_width"), context, ConstantEasing.ONE);
+        Component text = context.wrapLoading("text", () -> ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, json.get("text")).getOrThrow());
+        CoordinateProvider rx = CoordinateProvider.loadWrapped(json, "x", context);
+        CoordinateProvider ry = CoordinateProvider.loadWrapped(json, "y", context);
+        CoordinateProvider lineWidth = CoordinateProvider.loadWrapped(json, "line_width", context, ConstantEasing.ONE);
         boolean dropShadow = GsonHelper.getAsBoolean(json, "drop_shadow", true);
         ResourceLocation soundbite = tryGetSoundEffect(json.get("soundbite"));
-        DelayProvider delayProvider = DelayProvider.fromJSON(json.get("delays"), UndertaleDelayProvider.INSTANCE);
-        FloatProvider pitch = FloatProvider.CODEC.parse(JsonOps.INSTANCE, json.get("pitch")).result().orElse(BACKUP_FLOAT);
-        if (json.has("pitch") && pitch == BACKUP_FLOAT) {
-            CutsceneAPI.LOGGER.warn("Error loading float provider, using fallback");
+        DelayProvider delayProvider = context.wrapLoading("delays", () -> DelayProvider.fromJSON(json.get("delays"), UndertaleDelayProvider.INSTANCE));
+        DataResult<FloatProvider> pitchResult = FloatProvider.CODEC.parse(JsonOps.INSTANCE, json.get("pitch"));
+        FloatProvider pitch;
+        if (json.has("pitch") && !json.get("pitch").isJsonNull()) {
+            if (pitchResult.isSuccess()) {
+                pitch = pitchResult.resultOrPartial().orElseThrow();
+            } else {
+                context.reportError("Invalid float provider: " + pitchResult.error().orElseThrow());
+                pitch = BACKUP_FLOAT;
+            }
+        } else {
+            pitch = BACKUP_FLOAT;
         }
-        Easing scale = Easing.fromJSON(json.get("scale"), context, ConstantEasing.ONE);
-        Easing rotation = Easing.fromJSON(json.get("rotation"), context, ConstantEasing.ZERO);
+        Easing scale = Easing.loadWrapped(json, "scale", context, ConstantEasing.ONE);
+        Easing rotation = Easing.loadWrapped(json, "rotation", context, ConstantEasing.ZERO);
         return new AppearingTextConfiguration(text, rx, ry, lineWidth, dropShadow, soundbite, delayProvider, pitch, scale, rotation);
     }
 
