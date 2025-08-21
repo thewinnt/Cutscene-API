@@ -156,10 +156,10 @@ public class BezierCurve implements PathLike {
     }
 
     public static BezierCurve fromJSON(JsonObject json, Path path, LoadingContext context) {
-        PointProvider start = JsonHelper.pointFromJson(json, "start", context);
-        PointProvider control_a = JsonHelper.pointFromJson(json, "control_a", context);
-        PointProvider control_b = JsonHelper.pointFromJson(json, "control_b", context);
-        PointProvider end = JsonHelper.pointFromJson(json, "end", context);
+        PointProvider start = JsonHelper.pointFromJson(json, "start", context, true);
+        PointProvider control_a = JsonHelper.pointFromJson(json, "control_a", context, false);
+        PointProvider control_b = JsonHelper.pointFromJson(json, "control_b", context, false);
+        PointProvider end = JsonHelper.pointFromJson(json, "end", context, true);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         return new BezierCurve(start, control_a, control_b, end, weight);
     }

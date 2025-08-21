@@ -14,6 +14,10 @@ jobs:
         # bash pattern expansion to grab branch name without slashes
         run: ref="${GITHUB_REF#refs/heads/}" && echo "branch=${ref////-}" >> $GITHUB_OUTPUT
         id: ref
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
       - name: Checkout sources
         uses: actions/checkout@v4
 

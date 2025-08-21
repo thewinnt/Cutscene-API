@@ -15,8 +15,6 @@ import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.GenericSignatureFormatError;
-
 /** A class containing some helpful functions for JSON parsing. */
 public class JsonHelper {
     /**
@@ -85,12 +83,15 @@ public class JsonHelper {
      * Returns a point provider from a JSON object. If it's an inlined vector, like this: {@code "point": [1, 2, 3]},
      * returns a static provider. Otherwise, looks for a {@code type} field and returns the PointProvider corresponding
      * to that type.
-     * @param json The JSON object to look for
-     * @param name The name of the field
+     *
+     * @param json     The JSON object to look for
+     * @param name     The name of the field
+     * @param context  The loading context to report errors to
+     * @param required Whether to report an error if the point is missing
      * @return a point provider
      */
     @Nullable
-    public static PointProvider pointFromJson(JsonObject json, String name, LoadingContext context) {
+    public static PointProvider pointFromJson(JsonObject json, String name, LoadingContext context, boolean required) {
         context.pushElement(name);
         Vec3 test = vec3FromJson(json, name);
         if (test != null) {
@@ -101,13 +102,16 @@ public class JsonHelper {
         try {
             JsonElement element = json.get(name);
             if (element == null || element.isJsonNull()) {
-                obj = null;
+                if (required) context.reportError("Missing required point");
+                context.popElement();
+                return null;
             } else {
                 obj = GsonHelper.getAsJsonObject(json, name, null);
             }
         } catch (JsonSyntaxException e) {
-            obj = null;
             context.reportError("JSON error: " + e.getMessage());
+            context.popElement();
+            return null;
         }
         if (obj == null) {
             context.popElement();
@@ -116,8 +120,9 @@ public class JsonHelper {
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
         PointSerializer<?> serializer = CutsceneManager.getPointType(type);
         if (serializer == null) {
+            context.reportError("Unknown point type: " + type);
             context.popElement();
-            throw new IllegalArgumentException("Unknown point type: " + type);
+            return null;
         }
         try {
             return serializer.fromJSON(obj, context);
@@ -132,19 +137,26 @@ public class JsonHelper {
      * Returns a point provider from a JSON object. If it's an inlined vector, like this: {@code "point": [1, 2, 3]},
      * returns a static provider. Otherwise, looks for a {@code type} field and returns the PointProvider corresponding
      * to that type.
-     * @param json The JSON object to look for
+     *
+     * @param json     The JSON object to look for
+     * @param context  The loading context to report errors to
+     * @param required Whether to report an error if the point is missing
      * @return a point provider
      */
     @Nullable
-    public static PointProvider pointFromJson(JsonElement json, LoadingContext context) {
+    public static PointProvider pointFromJson(JsonElement json, LoadingContext context, boolean required) {
+        if (json == null || json.isJsonNull()) {
+            if (required) context.reportError("Missing required point");
+            return null;
+        }
         Vec3 test = vec3FromJson(json);
         if (test != null) return new StaticPointProvider(test);
-        if (json.isJsonNull()) return null;
         JsonObject obj = json.getAsJsonObject();
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
         PointSerializer<?> serializer = CutsceneManager.getPointType(type);
         if (serializer == null) {
-            throw new IllegalArgumentException("Unknown point type: " + type);
+            context.reportError("Unknown point type: " + type);
+            return null;
         }
         return serializer.fromJSON(obj, context);
     }

@@ -79,7 +79,7 @@ public record LookAtPoint(PointProvider point, PathLike pathSupplier, int weight
     }
 
     public static LookAtPoint fromJSON(JsonObject json, Path path, LoadingContext context) {
-        PointProvider point = JsonHelper.pointFromJson(json, "point", context);
+        PointProvider point = JsonHelper.pointFromJson(json, "point", context, true);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         return new LookAtPoint(point, path, weight);
     }

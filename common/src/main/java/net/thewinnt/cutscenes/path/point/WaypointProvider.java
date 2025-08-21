@@ -13,7 +13,6 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
-import net.thewinnt.cutscenes.path.ConstantPoint;
 import net.thewinnt.cutscenes.util.JsonHelper;
 import net.thewinnt.cutscenes.util.LoadingContext;
 import net.thewinnt.cutscenes.util.MathHelper;
@@ -90,8 +89,8 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
             sortType = SortType.NEAREST;
         }
         Vec3 searchOffset = Objects.requireNonNullElse(JsonHelper.vec3FromJson(obj, "search_offset", context), Vec3.ZERO);
-        PointProvider offset = Objects.requireNonNullElse(JsonHelper.pointFromJson(obj, "offset", context), StaticPointProvider.ZERO);
-        PointProvider fallback = JsonHelper.pointFromJson(obj, "fallback", context);
+        PointProvider offset = Objects.requireNonNullElse(JsonHelper.pointFromJson(obj, "offset", context, false), StaticPointProvider.ZERO);
+        PointProvider fallback = JsonHelper.pointFromJson(obj, "fallback", context, false);
         return new WaypointProvider(name, searchRadius, sortType, searchOffset, offset, Optional.ofNullable(fallback));
     }
 

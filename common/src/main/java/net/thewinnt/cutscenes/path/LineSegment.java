@@ -153,8 +153,8 @@ public class LineSegment implements PathLike {
          * - /execute if/unless cutscene endreason <reason>
          * - /cutscene start ... [reason]
          */
-        PointProvider start = JsonHelper.pointFromJson(json, "start", context);
-        PointProvider end = JsonHelper.pointFromJson(json, "end", context);
+        PointProvider start = JsonHelper.pointFromJson(json, "start", context, true);
+        PointProvider end = JsonHelper.pointFromJson(json, "end", context, true);
         Easing easingX = Easing.loadWrapped(json, "easing_x", context, SimpleEasing.LINEAR);
         Easing easingY = Easing.loadWrapped(json, "easing_y", context, SimpleEasing.LINEAR);
         Easing easingZ = Easing.loadWrapped(json, "easing_z", context, SimpleEasing.LINEAR);

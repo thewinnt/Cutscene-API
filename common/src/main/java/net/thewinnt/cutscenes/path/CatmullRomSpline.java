@@ -129,7 +129,7 @@ public class CatmullRomSpline implements PathLike {
             points.add(CutsceneNetworkHandler.readPointProvider(buf));
         }
         int weight = buf.readInt();
-        return new CatmullRomSpline(weight, points.toArray(new PointProvider[0]));
+        return new CatmullRomSpline(weight, points.toArray(PointProvider[]::new));
     }
 
     public void toNetwork(FriendlyByteBuf buf) {
@@ -145,11 +145,11 @@ public class CatmullRomSpline implements PathLike {
         ArrayList<PointProvider> points = new ArrayList<>();
         int index = 0;
         for (JsonElement i : points_j) {
-            points.add(context.wrapLoading("points[" + index + "]", () -> JsonHelper.pointFromJson(i, context)));
+            points.add(context.wrapLoading("points[" + index + "]", () -> JsonHelper.pointFromJson(i, context, true)));
             index++;
         }
         int weight = GsonHelper.getAsInt(json, "weight", 1);
-        return new CatmullRomSpline(weight, points.toArray(new PointProvider[0]));
+        return new CatmullRomSpline(weight, points.toArray(PointProvider[]::new));
     }
     
     @Override
