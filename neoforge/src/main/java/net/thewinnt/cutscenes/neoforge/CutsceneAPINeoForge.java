@@ -16,6 +16,7 @@ public final class CutsceneAPINeoForge {
         // Run our common setup.
         CutsceneAPI.onInitialize(PLATFORM);
         CutsceneAPIEntities.REGISTRY.register(bus);
+        CutsceneAPIArgumentTypes.REGISTRY.register(bus);
         CutsceneEvents.CUTSCENE_OVER_SERVER.addListener((type, id, player, reason) -> {
             NeoForge.EVENT_BUS.post(new CutsceneOverEvent.Server(player, type, id, reason));
         });

@@ -15,9 +15,6 @@ jobs:
         run: ref="${GITHUB_REF#refs/heads/}" && echo "branch=${ref////-}" >> $GITHUB_OUTPUT
         id: ref
 
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
-
       - name: Checkout sources
         uses: actions/checkout@v4
 
@@ -36,7 +33,7 @@ jobs:
           cache-read-only: false
 
       - name: Execute Gradle build
-        run: ./gradlew build
+        run: chmod +x ./gradlew; ./gradlew build
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

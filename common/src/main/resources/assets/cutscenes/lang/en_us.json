@@ -12,5 +12,6 @@
   "commands.cutscene.preview.tracking": "Previewing the camera path of cutscene %1$s from %2$s\u0027s live position",
   "commands.cutscene.showing": "Showing cutscene %1$s to %2$s",
   "commands.cutscene.stopped": "%1$s is no longer watching a cutscene",
-  "commands.cutscene.warning.cutscene_mismatch": "Warning: the cutscene you\u0027re playing doesn\u0027t match the one being previewed"
+  "commands.cutscene.warning.cutscene_mismatch": "Warning: the cutscene you\u0027re playing doesn\u0027t match the one being previewed",
+  "commands.cutscene.get.start_reason": "%s is watching a cutscene because \"%s\""
 }

@@ -147,12 +147,6 @@ public class LineSegment implements PathLike {
     }
 
     public static LineSegment fromJSON(JsonObject json, Path path, LoadingContext context) {
-        /* TODO release 1.7:
-         * - /execute if/unless cutscene watching <player>
-         * - /execute if/unless cutscene startreason <string>
-         * - /execute if/unless cutscene endreason <reason>
-         * - /cutscene start ... [reason]
-         */
         PointProvider start = JsonHelper.pointFromJson(json, "start", context, true);
         PointProvider end = JsonHelper.pointFromJson(json, "end", context, true);
         Easing easingX = Easing.loadWrapped(json, "easing_x", context, SimpleEasing.LINEAR);

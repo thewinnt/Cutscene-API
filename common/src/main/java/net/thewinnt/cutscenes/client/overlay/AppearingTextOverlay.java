@@ -1,5 +1,6 @@
 package net.thewinnt.cutscenes.client.overlay;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
@@ -86,9 +87,11 @@ public class AppearingTextOverlay implements Overlay {
         float x = this.config.rx().get(time.getProgress(), width);
         float y = this.config.ry().get(time.getProgress(), height);
 
-        graphics.pose().scale(scale, scale, scale);
-        graphics.pose().translate(x, y, 0);
-        graphics.pose().mulPose(Axis.ZP.rotationDegrees(rotation));
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        pose.scale(scale, scale, scale);
+        pose.translate(x, y, 0);
+        pose.mulPose(Axis.ZP.rotationDegrees(rotation));
         int lineWidth = (int)this.config.width().get(time.getProgress(), width);
         // i could've used drawWordWrap() here, but it doesn't do a shadow
         // the code below is copied from GuiGraphics#drawWordWrap
@@ -97,6 +100,7 @@ public class AppearingTextOverlay implements Overlay {
             graphics.drawString(minecraft.font, j, (int)x, (int)y, 0xffffff, this.config.dropShadow());
             y += minecraft.font.lineHeight;
         }
+        pose.popPose();
         Profiler.get().pop();
         Profiler.get().pop();
     }

@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 public record ActionToggles(
     boolean disableDamage, // depends on considerSpectator
@@ -13,7 +14,7 @@ public record ActionToggles(
     boolean disableUsingItems,
     boolean disableBlockInteractions, // depends on usingItems
     boolean disableEntityInteractions,
-    @Deprecated boolean disablePerspectiveChanging, // use cutscene type variant instead!
+    @ApiStatus.Internal boolean disablePerspectiveChanging, // use cutscene type variant instead!
     boolean considerSpectator,
     boolean hideSelf
 ) {

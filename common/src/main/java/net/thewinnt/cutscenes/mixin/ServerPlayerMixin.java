@@ -8,6 +8,7 @@ import net.thewinnt.cutscenes.event.CutsceneEvents;
 import net.thewinnt.cutscenes.event.EndingReason;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,7 +22,7 @@ import net.thewinnt.cutscenes.util.ServerPlayerExt;
 public class ServerPlayerMixin implements ServerPlayerExt {
     @Unique private CutsceneType cutscenes$running;
     @Unique private int cutscenes$ticksRemaining;
-    @Unique private String cutscenes$startReason;
+    @Unique private String cutscenes$startReason = "";
     @Unique private EndingReason cutscenes$endReason;
 
     @Override
@@ -41,17 +42,18 @@ public class ServerPlayerMixin implements ServerPlayerExt {
     }
 
     @Override
-    public void csapi$setRunningCutscene(CutsceneType type) {
-        cutscenes$running = type;
+    public void csapi$setRunningCutscene(CutsceneType type, String startingReason) {
+        this.cutscenes$running = type;
+        this.cutscenes$startReason = startingReason;
     }
 
     @Override
     public void csapi$finishCutscene(EndingReason reason) {
         if (cutscenes$running != null) {
+            this.cutscenes$endReason = reason;
             CutsceneEvents.CUTSCENE_OVER_SERVER.invoke(listener -> listener.accept(cutscenes$running, CutsceneManager.REGISTRY.inverse().get(cutscenes$running), ((ServerPlayer) (Object) this), reason));
-            cutscenes$running = null;
-            cutscenes$ticksRemaining = 0;
-
+            this.cutscenes$running = null;
+            this.cutscenes$ticksRemaining = 0;
         }
     }
 
@@ -62,6 +64,10 @@ public class ServerPlayerMixin implements ServerPlayerExt {
             if (cutscenes$ticksRemaining == 0) {
                 this.csapi$finishCutscene(EndingReason.FINISH);
             }
+        } else if (cutscenes$ticksRemaining == 0) {
+            cutscenes$startReason = "";
+            cutscenes$endReason = null;
+            cutscenes$ticksRemaining--;
         }
     }
 
@@ -77,5 +83,20 @@ public class ServerPlayerMixin implements ServerPlayerExt {
         if (cutscenes$running != null && cutscenes$running.actionToggles.disableDamage()) {
             callback.setReturnValue(false);
         }
+    }
+
+    @Override
+    public boolean csapi$isWatchingCutscene() {
+        return cutscenes$ticksRemaining > 0;
+    }
+
+    @Override
+    public String csapi$getStartReason() {
+        return cutscenes$startReason;
+    }
+
+    @Override
+    public EndingReason csapi$getEndReason() {
+        return cutscenes$endReason;
     }
 }

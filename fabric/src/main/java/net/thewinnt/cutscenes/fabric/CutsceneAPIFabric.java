@@ -1,8 +1,10 @@
 package net.thewinnt.cutscenes.fabric;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
@@ -14,6 +16,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
+import net.thewinnt.cutscenes.command.EndingReasonArgument;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
@@ -78,6 +81,12 @@ public final class CutsceneAPIFabric implements ModInitializer {
         CutsceneEffectSerializer.init();
         DelayProviderSerializer.init();
         RotationSerializer.init();
+
+        ArgumentTypeRegistry.registerArgumentType(
+            ResourceLocation.fromNamespaceAndPath("cutscenes", "ending_reason"),
+            EndingReasonArgument.class,
+            SingletonArgumentInfo.contextFree(EndingReasonArgument::endingReason)
+        );
 
         PLATFORM.clientboundPackets.forEach(FabricPlatform::registerClientboundPacket);
         PLATFORM.serverboundPackets.forEach(FabricPlatform::registerServerboundPacket);

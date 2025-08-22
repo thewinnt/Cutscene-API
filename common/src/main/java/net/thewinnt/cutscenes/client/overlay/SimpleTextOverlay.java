@@ -1,5 +1,6 @@
 package net.thewinnt.cutscenes.client.overlay;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.Minecraft;
@@ -19,7 +20,8 @@ public class SimpleTextOverlay implements Overlay {
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object cfg) {
         Profiler.get().push("cutscenes:text");
-        graphics.pose().pushPose();
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
         TimeProvider time = ((TimeProvider) cfg);
         double progress = time.getProgress();
 
@@ -27,13 +29,13 @@ public class SimpleTextOverlay implements Overlay {
         float rotation = (float) config.rotation().get(progress);
         int x = (int)config.rx().get(progress, width / scale);
         int y = (int)config.ry().get(progress, height / scale);
-
-        graphics.pose().scale(scale, scale, scale);
-        graphics.pose().translate(x, y, 0);
-        graphics.pose().mulPose(Axis.ZP.rotationDegrees(rotation));
         if (config.centered()) {
             y -= (int) (minecraft.font.lineHeight * minecraft.getWindow().getGuiScale() / (2.0 * scale));
         }
+
+        pose.scale(scale, scale, scale);
+        pose.translate(x, y, 0);
+        pose.mulPose(Axis.ZP.rotationDegrees(rotation));
         int color;
         if (config.colorOverride().isPresent()) {
             color = config.colorOverride().get().toARGB(progress);
@@ -41,7 +43,7 @@ public class SimpleTextOverlay implements Overlay {
             color = -1;
         }
         graphics.drawCenteredString(minecraft.font, config.text(), 0, 0, color);
-        graphics.pose().popPose();
+        pose.popPose();
         Profiler.get().pop();
     }
 }

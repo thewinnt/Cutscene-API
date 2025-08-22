@@ -67,7 +67,7 @@ public class CutsceneManager {
     /** A segment always returning a single point. */
     public static final SegmentType<ConstantPoint> CONSTANT = SegmentType.of(ConstantPoint::fromNetwork, ConstantPoint::fromJSON);
     /** A segment returning a look direction so that the player is looking at the specified point. */
-    public static final SegmentType<LookAtPoint> LOOK_AT_POINT = SegmentType.of(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
+    public static final SegmentType<LookAtPoint> LOOK_AT_POINT = SegmentType.usingRotationPath(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
     /** A transition between two segments - the one before and the one after this. */
     public static final SegmentType<PathTransition> PATH_TRANSITION = SegmentType.of(PathTransition::fromNetwork, PathTransition::fromJSON);
     /** A segment getting its coordinates from easings. */
@@ -205,7 +205,7 @@ public class CutsceneManager {
      * @param player The player to play the cutscene to
      * @see CutsceneManager#KEEP_ROTATION
      */
-    public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
+    public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player, String startingReason) {
         CutsceneType type = REGISTRY.get(id);
         ServerPlayerExt ext = (ServerPlayerExt) player;
         ext.csapi$finishCutscene(EndingReason.INTERRUPT);
@@ -215,19 +215,43 @@ public class CutsceneManager {
         } else {
             ext.csapi$setCutsceneTicks(Integer.MAX_VALUE);
         }
-        ext.csapi$setRunningCutscene(type);
+        ext.csapi$setRunningCutscene(type, startingReason);
         player.setCamera(null);
         CutsceneAPI.platform().sendPacketToPlayer(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), player);
     }
 
     /**
-     * Starts a cutscene for a player from their position with no preset rotation
+     * Starts a cutscene for a player
+     * @param id The ID of the cutscene to start
+     * @param startPos The starting position for the cutscene
+     * @param camRot The initial camera rotation of the player as a vector of (yaw, pitch, roll)
+     * @param pathRot The path rotation as a vector of (yaw, pitch, roll)
+     * @param player The player to play the cutscene to
+     * @see CutsceneManager#KEEP_ROTATION
+     */
+    public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
+        startCutscene(id, startPos, camRot, pathRot, player, "unspecified");
+    }
+
+    /**
+     * Starts a cutscene for a player from their position with no preset rotation and starting reason {@code unspecified}
      * @param id The ID of the cutscene to start
      * @param player The player to play the cutscene to
-     * @see CutsceneManager#startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer)
+     * @see CutsceneManager#startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer, String)
      */
     public static void startCutscene(ResourceLocation id, ServerPlayer player) {
         startCutscene(id, player.position(), Vec3.ZERO, Vec3.ZERO, player);
+    }
+
+    /**
+     * Starts a cutscene for a player from their position with no preset rotation and starting reason {@code unspecified}
+     * @param id The ID of the cutscene to start
+     * @param player The player to play the cutscene to
+     * @param camRot The initial camera rotation of the player as a vector of (yaw, pitch, roll)
+     * @see CutsceneManager#startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer, String)
+     */
+    public static void startCutscene(ResourceLocation id, ServerPlayer player, Vec3 camRot) {
+        startCutscene(id, player.position(), camRot, Vec3.ZERO, player);
     }
 
     /**

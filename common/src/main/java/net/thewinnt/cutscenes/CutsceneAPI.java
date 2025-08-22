@@ -1,12 +1,19 @@
 package net.thewinnt.cutscenes;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.netty.channel.nio.AbstractNioByteChannel;
-import net.thewinnt.cutscenes.util.LoadingContext;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.functions.CommandFunction;
+import net.minecraft.server.ServerFunctionManager;
+import net.thewinnt.cutscenes.command.ExecuteCommands;
+import net.thewinnt.cutscenes.event.CutsceneEvents;
+import net.thewinnt.cutscenes.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -44,8 +51,6 @@ import net.thewinnt.cutscenes.platform.ClientPlatformAbstractions;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 import net.thewinnt.cutscenes.rotation.RotationSerializer;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
-import net.thewinnt.cutscenes.util.JsonLoader;
-import net.thewinnt.cutscenes.util.LoadResolver;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
@@ -99,6 +104,42 @@ public class CutsceneAPI {
         // other stuff
         addReloadListeners(abstractions);
         abstractions.submitOnRegisterCommand(CutsceneCommand::register);
+        abstractions.submitOnRegisterCommand(ExecuteCommands::register);
+
+        // event listeners
+        CutsceneEvents.CUTSCENE_OVER_SERVER.addListener((type, id, player, reason) -> {
+            ServerFunctionManager manager = player.server.getFunctions();
+            ResourceOrTag resourceOrTag = type.onOver;
+            ServerPlayerExt ext = (ServerPlayerExt) player;
+            LOGGER.info("Cutscene over - dumping data");
+            LOGGER.info("Starting reason: {}", ext.csapi$getStartReason());
+            LOGGER.info("Ending reason: event {}, player {}", reason, ext.csapi$getEndReason());
+            if (resourceOrTag == null) return;
+
+            CommandSourceStack stack;
+            if (type.logCommands) {
+                stack = player.createCommandSourceStack();
+            } else {
+                stack = new CommandSourceStack(
+                    CommandSource.NULL,
+                    player.position(),
+                    player.getRotationVector(),
+                    player.serverLevel(),
+                    player.getPermissionLevel(),
+                    player.getName().getString(),
+                    player.getDisplayName(),
+                    player.server,
+                    player
+                );
+            }
+            Collection<CommandFunction<CommandSourceStack>> functions;
+            if (resourceOrTag.isTag()) {
+                functions = manager.getTag(resourceOrTag.id());
+            } else {
+                functions = manager.get(resourceOrTag.id()).map(List::of).orElseGet(List::of);
+            }
+            functions.forEach(i -> manager.execute(i, stack));
+        });
     }
 
     public static void onInitializeClient(@NotNull ClientPlatformAbstractions abstractions) {

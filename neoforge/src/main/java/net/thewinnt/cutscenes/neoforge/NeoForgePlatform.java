@@ -38,7 +38,7 @@ import net.thewinnt.cutscenes.platform.CameraAngleSetter;
 import net.thewinnt.cutscenes.platform.PacketType;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber
 public class NeoForgePlatform implements PlatformAbstractions {
     private final SequencedMap<PreparableReloadListener, ResourceLocation> reloadListeners = new LinkedHashMap<>();
     protected final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();

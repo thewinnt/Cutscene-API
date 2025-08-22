@@ -12,6 +12,7 @@ import net.thewinnt.cutscenes.time.GameTickManager;
 import net.thewinnt.cutscenes.rotation.RotationHandler;
 import net.thewinnt.cutscenes.time.TimeManager;
 import net.thewinnt.cutscenes.util.LoadingContext;
+import net.thewinnt.cutscenes.util.ResourceOrTag;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonArray;
@@ -52,9 +53,11 @@ public class CutsceneType {
     public final boolean hideBlockOutline;
     public final boolean disableF5;
     public final List<CutsceneEffect<?>> effects;
+    public final @Nullable ResourceOrTag onOver;
+    public final boolean logCommands;
 
     /** Constructs a cutscene type with all parameters specified. */
-    public CutsceneType(PathLike path, Path rotationProvider, CutsceneLength length, Transition start, Transition end, boolean blockMovement, RotationHandler rotationHandler, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects) {
+    public CutsceneType(PathLike path, @Nullable Path rotationProvider, CutsceneLength length, Transition start, Transition end, boolean blockMovement, RotationHandler rotationHandler, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects, @Nullable ResourceOrTag onOver, boolean logCommands) {
         if (path instanceof Path pth) {
             this.path = pth;
         } else if (path != null) {
@@ -73,10 +76,12 @@ public class CutsceneType {
         this.hideBlockOutline = hideBlockOutline;
         this.effects = effects;
         this.disableF5 = path != null || rotationProvider != null || actionToggles.disablePerspectiveChanging();
+        this.logCommands = logCommands;
+        this.onOver = onOver;
     }
 
     /** Constructs a simple cutscene type with default parameters for most settings. */
-    public CutsceneType(PathLike path, Path rotationProvider, int length) {
+    public CutsceneType(PathLike path, @Nullable Path rotationProvider, int length) {
         if (path instanceof Path pth) {
             this.path = pth;
         } else if (path != null) {
@@ -95,6 +100,8 @@ public class CutsceneType {
         this.hideBlockOutline = false;
         this.effects = List.of();
         this.disableF5 = path != null || rotationProvider != null;
+        this.onOver = null;
+        this.logCommands = false;
     }
 
     /**
@@ -176,7 +183,7 @@ public class CutsceneType {
         boolean hideHand = buf.readBoolean();
         boolean hideBlockOutline = buf.readBoolean();
         List<CutsceneEffect<?>> effects = buf.readCollection(ArrayList::new, CutsceneEffect::fromNetwork);
-        return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, rotationHandler, actionToggles, hideHand, hideBlockOutline, effects);
+        return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, rotationHandler, actionToggles, hideHand, hideBlockOutline, effects, null, false);
     }
 
     /** Reads a cutscene type from JSON. */
@@ -229,6 +236,8 @@ public class CutsceneType {
             }
             context.popElement();
         }
-        return new CutsceneType(path, rotation, length, start, end, blockMovement, rotationHandler, toggles, hideHand, hideBlockOutline, effects);
+        ResourceOrTag postFunctions = context.wrapLoading("when_over", () -> ResourceOrTag.parse(GsonHelper.getAsString(json, "when_over", null)));
+        boolean logCommands = GsonHelper.getAsBoolean(json, "log_commands", false);
+        return new CutsceneType(path, rotation, length, start, end, blockMovement, rotationHandler, toggles, hideHand, hideBlockOutline, effects, postFunctions, logCommands);
     }
 }
