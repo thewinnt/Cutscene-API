@@ -18,7 +18,7 @@ import net.thewinnt.cutscenes.rotation.RotationSerializer;
 public class ModEventListener {
     @SubscribeEvent
     public static void registerNetwork(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar("cutscenes").versioned("1.6");
+        final PayloadRegistrar registrar = event.registrar("cutscenes").versioned("1.7");
         CutsceneAPINeoForge.PLATFORM.clientboundPackets.forEach(type -> NeoForgePlatform.registerClientboundPacket(registrar, type));
         CutsceneAPINeoForge.PLATFORM.serverboundPackets.forEach(type -> NeoForgePlatform.registerServerboundPacket(registrar, type));
     }

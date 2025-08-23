@@ -1,4 +1,5 @@
 {
+  "version": 0,
   "length": 20,
   "start_transition": {
     "type": "cutscenes:no_op"

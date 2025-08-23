@@ -111,9 +111,6 @@ public class CutsceneAPI {
             ServerFunctionManager manager = player.server.getFunctions();
             ResourceOrTag resourceOrTag = type.onOver;
             ServerPlayerExt ext = (ServerPlayerExt) player;
-            LOGGER.info("Cutscene over - dumping data");
-            LOGGER.info("Starting reason: {}", ext.csapi$getStartReason());
-            LOGGER.info("Ending reason: event {}, player {}", reason, ext.csapi$getEndReason());
             if (resourceOrTag == null) return;
 
             CommandSourceStack stack;

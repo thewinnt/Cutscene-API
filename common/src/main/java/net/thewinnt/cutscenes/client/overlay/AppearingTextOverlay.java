@@ -97,8 +97,8 @@ public class AppearingTextOverlay implements Overlay {
         // the code below is copied from GuiGraphics#drawWordWrap
         Profiler.get().popPush("draw");
         for (FormattedCharSequence j : minecraft.font.split(FormattedText.composite(result), lineWidth)) {
-            graphics.drawString(minecraft.font, j, (int)x, (int)y, 0xffffff, this.config.dropShadow());
-            y += minecraft.font.lineHeight;
+            graphics.drawString(minecraft.font, j, 0, 0, 0xffffff, this.config.dropShadow());
+            pose.translate(0, minecraft.font.lineHeight, 0);
         }
         pose.popPose();
         Profiler.get().pop();

@@ -29,7 +29,8 @@ public class BlitSerializer implements CutsceneEffectSerializer<BlitConfiguratio
         CoordinateProvider u2 = CoordinateProvider.fromNetwork(buf);
         CoordinateProvider v2 = CoordinateProvider.fromNetwork(buf);
         DynamicColor tint = DynamicColor.fromNetwork(buf);
-        return new BlitConfiguration(texture, x1, y1, x2, y2, u1, v1, u2, v2, tint);
+        float z = buf.readFloat();
+        return new BlitConfiguration(texture, x1, y1, x2, y2, u1, v1, u2, v2, tint, z);
     }
 
     @Override
@@ -44,7 +45,8 @@ public class BlitSerializer implements CutsceneEffectSerializer<BlitConfiguratio
         CoordinateProvider u2 = CoordinateProvider.loadWrapped(json, "u2", context, ConstantEasing.ONE);
         CoordinateProvider v2 = CoordinateProvider.loadWrapped(json, "v2", context, ConstantEasing.ONE);
         DynamicColor tint = DynamicColor.loadWrapped(json, "tint", context, DynamicColor.WHITE);
-        return new BlitConfiguration(texture, x1, y1, x2, y2, u1, v1, u2, v2, tint);
+        float z = GsonHelper.getAsFloat(json, "z", 0);
+        return new BlitConfiguration(texture, x1, y1, x2, y2, u1, v1, u2, v2, tint, z);
     }
 
     @Override
@@ -59,6 +61,7 @@ public class BlitSerializer implements CutsceneEffectSerializer<BlitConfiguratio
         object.u2().toNetwork(buf);
         object.v2().toNetwork(buf);
         object.tint().toNetwork(buf);
+        buf.writeFloat(object.z());
     }
 
     @Override

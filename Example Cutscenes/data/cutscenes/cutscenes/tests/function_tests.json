@@ -12,7 +12,7 @@
   "when_over": "cutscenes:init_battle",
   "effects": [
     {
-      "type": "cutscenes:simple_text",
+      "type": "cutscenes:text",
       "start": 0,
       "end": 60,
       "text": {
@@ -24,7 +24,7 @@
       "centered": true
     },
     {
-      "type": "cutscenes:simple_text",
+      "type": "cutscenes:text",
       "start": 60,
       "end": 120,
       "text": {
@@ -36,7 +36,7 @@
       "centered": true
     },
     {
-      "type": "cutscenes:simple_text",
+      "type": "cutscenes:text",
       "start": 120,
       "end": 140,
       "text": {
@@ -49,7 +49,7 @@
       "scale": 4
     },
     {
-      "type": "cutscenes:simple_text",
+      "type": "cutscenes:text",
       "start": 140,
       "end": 160,
       "text": {
@@ -62,7 +62,7 @@
       "scale": 4
     },
     {
-      "type": "cutscenes:simple_text",
+      "type": "cutscenes:text",
       "start": 160,
       "end": 180,
       "text": {
@@ -75,7 +75,7 @@
       "scale": 4
     },
     {
-      "type": "cutscenes:simple_text",
+      "type": "cutscenes:text",
       "start": 180,
       "end": 200,
       "text": {
@@ -88,7 +88,7 @@
       "scale": 4
     },
     {
-      "type": "cutscenes:simple_text",
+      "type": "cutscenes:text",
       "start": 200,
       "end": 220,
       "text": {
