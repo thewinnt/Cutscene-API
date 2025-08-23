@@ -6,7 +6,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.event.EndingReason;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
@@ -18,7 +17,7 @@ import net.thewinnt.cutscenes.path.ConstantPoint;
 import net.thewinnt.cutscenes.path.LineSegment;
 import net.thewinnt.cutscenes.path.LookAtPoint;
 import net.thewinnt.cutscenes.path.Path;
-import net.thewinnt.cutscenes.path.PathLike.SegmentSerializer;
+import net.thewinnt.cutscenes.path.PathLike.SegmentType;
 import net.thewinnt.cutscenes.path.PathTransition;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
@@ -53,98 +52,26 @@ public class CutsceneManager {
     /** The z rotation of the preview path */
     public static float previewPathRoll;
 
-    // BUILT-IN CUTSCENES //
-    // They're not used anywhere and are here to show how you can make some yourself with code
-    // You can also use datapacks to create cutscenes, it has all the same functionality, except it's better
-
-    public static final ResourceLocation ASCEND_ID = ResourceLocation.parse("cutscenes:tests/ascend");
-    public static final ResourceLocation COOL_PATH_ID = ResourceLocation.parse("cutscenes:tests/cool_path");
-    public static final ResourceLocation MULTI_TYPE_ID = ResourceLocation.parse("cutscenes:tests/multi_type");
-    public static final ResourceLocation HORIZONTAL_LINE_ID = ResourceLocation.parse("cutscenes:tests/horizontal_line");
-    public static final ResourceLocation CATMULL_ROM_TEST_ID = ResourceLocation.parse("cutscenes:tests/catmull_rom_test");
-
-    /** Ascends you 25 blocks up with a little twist */
-    public static final CutsceneType ASCEND = new CutsceneType(
-        new Path(new BezierCurve(new Vec3(0, 0, 0), new Vec3(10, 12.5, 10), null, new Vec3(0, 25, 0))),
-        new Path(new ConstantPoint(Vec3.ZERO)),
-        100
-    );
-
-    /** A cool path made of continuous Bézier curves, also features rotation changes */
-    public static final CutsceneType COOL_PATH = new CutsceneType(
-        new Path(new BezierCurve(new Vec3(0, 0, 0), null, null, new Vec3(0, 10, 0)))
-                .continueBezier(new Vec3(-50, 1, 0), new Vec3(-50, 10, 25)) // adds a new Bezier curve with arguments: (see below)
-                .continueBezier(new Vec3(-25, 50, 0), new Vec3(-25, 30, 10), 10) // start = prev.end; control_a = prev.control_b.lerp(prev.end, 2); control_b and end are specified by user
-                .continueBezier(new Vec3(-25, 0, 10), new Vec3(0, 0, 0)), // if previous is not Bezier or doesn't have control_b, args are: start = prev.end; control_b; null; end
-        new Path(new LineSegment(new Vec3(-30, 30, 0), new Vec3(20, -20, 0), SimpleEasing.LINEAR, SimpleEasing.IN_CUBIC, SimpleEasing.LINEAR, true)),
-        500
-    );
-
-    /** A path that combines some Bézier curve configurations */
-    public static final CutsceneType MULTI_TYPE = new CutsceneType(
-        new Path(new BezierCurve(new Vec3(0, 0, 0), new Vec3(10, 0, 0), new Vec3(0, 10, 0), new Vec3(10, 10, 0)))
-                .continueBezier(null, new Vec3(10, 10, 10)) // +/-
-                .continueBezier(new Vec3(15, 30, 15), new Vec3(20, 20, 20)) // -/+
-                .continueBezier(null, new Vec3(30, 20, 30)) // +/-
-                .continueBezier(null, new Vec3(30, 30, 30)), // -/-
-        new Path(new ConstantPoint(Vec3.ZERO)),
-        500
-    );
-
-    /** A horizontal line going 12 blocks towards +X */
-    public static final CutsceneType HORIZONTAL_LINE = new CutsceneType(
-        new Path(new LineSegment(new Vec3(-6, 0, 0), new Vec3(6, 0, 0))),
-        new Path(new ConstantPoint(Vec3.ZERO)), 
-        200
-    );
-
-    /** A path consisting of a Catmull-Rom spline with a lot of random points */
-    public static final CutsceneType CATMULL_ROM_TEST = new CutsceneType(
-        new Path(new CatmullRomSpline(
-            new Vec3(0, 0, 0),
-            new Vec3(0, 10, 0),
-            new Vec3(5, 4, 9),
-            new Vec3(-6, 19.3, -8.37),
-            new Vec3(-9.71, -8.98, -7.5), // starting from here, the points were generated using a script
-            new Vec3(-17.89, -11.57, -17.17),
-            new Vec3(0.1, -10.19, 6.9),
-            new Vec3(12.87, -21.55, -9.95),
-            new Vec3(-17.36, 23.98, 14.78),
-            new Vec3(-16.87, -23.58, -23.87),
-            new Vec3(-6.15, 14.8, -3.45),
-            new Vec3(-16.72, 16.56, -16.24),
-            new Vec3(-1.63, -17.64, 16.57),
-            new Vec3(-3.98, 4.25, 11.01),
-            new Vec3(-19.31, -16.89, -8.79),
-            new Vec3(-12.12, 18.33, -1.0),
-            new Vec3(-4.78, 16.29, -8.53),
-            new Vec3(-8.76, 19.35, 21.01),
-            new Vec3(0.8, 8.73, 10.65)
-        )),
-        new Path(new ConstantPoint(Vec3.ZERO)),
-        200
-    );
-
     // SEGMENT TYPES //
     // Segment serializers are used to identify and read segment types. The writing is performed on instances of
     // segments obtained from these serializers.
 
     /** A line, consisting of 2 point, interpolated between each other with some easings. */
-    public static final SegmentSerializer<LineSegment> LINE = SegmentSerializer.of(LineSegment::fromNetwork, LineSegment::fromJSON);
+    public static final SegmentType<LineSegment> LINE = SegmentType.of(LineSegment::fromNetwork, LineSegment::fromJSON);
     /** A cubic or quadratic Bézier curve, depending on the points supplied. */
-    public static final SegmentSerializer<BezierCurve> BEZIER = SegmentSerializer.of(BezierCurve::fromNetwork, BezierCurve::fromJSON);
+    public static final SegmentType<BezierCurve> BEZIER = SegmentType.of(BezierCurve::fromNetwork, BezierCurve::fromJSON);
     /** A Catmull-Rom spline, made of 2 or more points. */
-    public static final SegmentSerializer<CatmullRomSpline> CATMULL_ROM = SegmentSerializer.of(CatmullRomSpline::fromNetwork, CatmullRomSpline::fromJSON);
+    public static final SegmentType<CatmullRomSpline> CATMULL_ROM = SegmentType.of(CatmullRomSpline::fromNetwork, CatmullRomSpline::fromJSON);
     /** A segment made of other segments. */
-    public static final SegmentSerializer<Path> PATH = SegmentSerializer.of(Path::fromNetwork, Path::fromJSON);
+    public static final SegmentType<Path> PATH = SegmentType.of(Path::fromNetwork, Path::fromJSON);
     /** A segment always returning a single point. */
-    public static final SegmentSerializer<ConstantPoint> CONSTANT = SegmentSerializer.of(ConstantPoint::fromNetwork, ConstantPoint::fromJSON);
+    public static final SegmentType<ConstantPoint> CONSTANT = SegmentType.of(ConstantPoint::fromNetwork, ConstantPoint::fromJSON);
     /** A segment returning a look direction so that the player is looking at the specified point. */
-    public static final SegmentSerializer<LookAtPoint> LOOK_AT_POINT = SegmentSerializer.of(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
+    public static final SegmentType<LookAtPoint> LOOK_AT_POINT = SegmentType.usingRotationPath(LookAtPoint::fromNetwork, LookAtPoint::fromJSON);
     /** A transition between two segments - the one before and the one after this. */
-    public static final SegmentSerializer<PathTransition> PATH_TRANSITION = SegmentSerializer.of(PathTransition::fromNetwork, PathTransition::fromJSON);
+    public static final SegmentType<PathTransition> PATH_TRANSITION = SegmentType.of(PathTransition::fromNetwork, PathTransition::fromJSON);
     /** A segment getting its coordinates from easings. */
-    public static final SegmentSerializer<CalculatedPoint> CALCULATED_POINT = SegmentSerializer.of(CalculatedPoint::fromNetwork, CalculatedPoint::fromJSON);
+    public static final SegmentType<CalculatedPoint> CALCULATED_POINT = SegmentType.of(CalculatedPoint::fromNetwork, CalculatedPoint::fromJSON);
 
     // POINT TYPES //
     // Point serializers are used to identify and read point types. A point type gets a Level in and returns
@@ -161,11 +88,11 @@ public class CutsceneManager {
     // Transitions make you enter and leave a cutscene with beauty, instead of simply snapping into it.
 
     /** Does nothing. */
-    public static final TransitionSerializer<NoopTransition> NO_OP = TransitionSerializer.of(NoopTransition::fromNetwork, NoopTransition::fromJSON);
+    public static final TransitionSerializer<NoopTransition> NO_OP = TransitionSerializer.of(NoopTransition::fromNetwork, NoopTransition::fromJSON, NoopTransition.CODEC);
     /** Smoothly transitions your camera from the starting point to the current point you should be at. */
-    public static final TransitionSerializer<SmoothEaseTransition> SMOOTH_EASE = TransitionSerializer.of(SmoothEaseTransition::fromNetwork, SmoothEaseTransition::fromJSON);
+    public static final TransitionSerializer<SmoothEaseTransition> SMOOTH_EASE = TransitionSerializer.of(SmoothEaseTransition::fromNetwork, SmoothEaseTransition::fromJSON, SmoothEaseTransition.CODEC);
     /** Fades the screen to a color (or several colors that may change too) */
-    public static final TransitionSerializer<FadeToColorTransition> FADE = TransitionSerializer.of(FadeToColorTransition::fromNetwork, FadeToColorTransition::fromJSON);
+    public static final TransitionSerializer<FadeToColorTransition> FADE = TransitionSerializer.of(FadeToColorTransition::fromNetwork, FadeToColorTransition::fromJSON, FadeToColorTransition.CODEC);
 
     // UTILITY CONSTANTS //
     // Some constants of variable usefulness.
@@ -189,7 +116,7 @@ public class CutsceneManager {
      * @param id The ID of the segment type that will be used in datapacks
      * @param type The serializer to register
      */
-    public static void registerSegmentType(ResourceLocation id, SegmentSerializer<?> type) {
+    public static void registerSegmentType(ResourceLocation id, SegmentType<?> type) {
         Registry.register(CutsceneAPI.SEGMENT_TYPES, id, type);
     }
 
@@ -212,13 +139,13 @@ public class CutsceneManager {
     }
 
     /** Returns the ID of the specified serializer, or {@code null} if it's not registered */
-    public static ResourceLocation getSegmentTypeId(SegmentSerializer<?> type) {
+    public static ResourceLocation getSegmentTypeId(SegmentType<?> type) {
         return CutsceneAPI.SEGMENT_TYPES.getKey(type);
     }
 
     /** Returns the segment serializer with this ID, or {@code null} if it doesn't exist */
-    public static SegmentSerializer<?> getSegmentType(ResourceLocation id) {
-        return CutsceneAPI.SEGMENT_TYPES.get(id);
+    public static SegmentType<?> getSegmentType(ResourceLocation id) {
+        return CutsceneAPI.SEGMENT_TYPES.getValue(id);
     }
 
     /** Returns the ID of the specified point type, or {@code null} if it's not registered */
@@ -229,7 +156,7 @@ public class CutsceneManager {
     /** Returns the point serializer with this ID, or {@code null} if it doesn't exist */
     @Nullable
     public static PointSerializer<?> getPointType(ResourceLocation id) {
-        return CutsceneAPI.POINT_TYPES.get(id);
+        return CutsceneAPI.POINT_TYPES.getValue(id);
     }
 
     /** Returns the ID of the specified transition type, or {@code null} if it's not registered */
@@ -241,7 +168,7 @@ public class CutsceneManager {
     /** Returns the transition serializer with this ID, or {@code null} if it doesn't exist */
     @Nullable
     public static TransitionSerializer<?> getTransitionType(ResourceLocation id) {
-        return CutsceneAPI.TRANSITION_TYPES.get(id);
+        return CutsceneAPI.TRANSITION_TYPES.getValue(id);
     }
 
     /** Sets the currently previewed cutscene and tells the clients */
@@ -278,7 +205,7 @@ public class CutsceneManager {
      * @param player The player to play the cutscene to
      * @see CutsceneManager#KEEP_ROTATION
      */
-    public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
+    public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player, String startingReason) {
         CutsceneType type = REGISTRY.get(id);
         ServerPlayerExt ext = (ServerPlayerExt) player;
         ext.csapi$finishCutscene(EndingReason.INTERRUPT);
@@ -288,9 +215,43 @@ public class CutsceneManager {
         } else {
             ext.csapi$setCutsceneTicks(Integer.MAX_VALUE);
         }
-        ext.csapi$setRunningCutscene(type);
+        ext.csapi$setRunningCutscene(type, startingReason);
         player.setCamera(null);
         CutsceneAPI.platform().sendPacketToPlayer(new StartCutscenePacket(id, startPos, (float)camRot.x, (float)camRot.y, (float)camRot.z, (float)pathRot.x, (float)pathRot.y, (float)pathRot.z), player);
+    }
+
+    /**
+     * Starts a cutscene for a player
+     * @param id The ID of the cutscene to start
+     * @param startPos The starting position for the cutscene
+     * @param camRot The initial camera rotation of the player as a vector of (yaw, pitch, roll)
+     * @param pathRot The path rotation as a vector of (yaw, pitch, roll)
+     * @param player The player to play the cutscene to
+     * @see CutsceneManager#KEEP_ROTATION
+     */
+    public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
+        startCutscene(id, startPos, camRot, pathRot, player, "unspecified");
+    }
+
+    /**
+     * Starts a cutscene for a player from their position with no preset rotation and starting reason {@code unspecified}
+     * @param id The ID of the cutscene to start
+     * @param player The player to play the cutscene to
+     * @see CutsceneManager#startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer, String)
+     */
+    public static void startCutscene(ResourceLocation id, ServerPlayer player) {
+        startCutscene(id, player.position(), Vec3.ZERO, Vec3.ZERO, player);
+    }
+
+    /**
+     * Starts a cutscene for a player from their position with no preset rotation and starting reason {@code unspecified}
+     * @param id The ID of the cutscene to start
+     * @param player The player to play the cutscene to
+     * @param camRot The initial camera rotation of the player as a vector of (yaw, pitch, roll)
+     * @see CutsceneManager#startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer, String)
+     */
+    public static void startCutscene(ResourceLocation id, ServerPlayer player, Vec3 camRot) {
+        startCutscene(id, player.position(), camRot, Vec3.ZERO, player);
     }
 
     /**

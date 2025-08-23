@@ -30,8 +30,38 @@ public class JsonHelper {
         if (element == null || element instanceof JsonNull) {
             return null;
         } else if (element instanceof JsonArray array) {
-            return new Vec3(array.get(0).getAsFloat(), array.get(1).getAsFloat(), array.get(2).getAsFloat());
+            return new Vec3(array.get(0).getAsDouble(), array.get(1).getAsDouble(), array.get(2).getAsDouble());
         } else {
+            return null;
+        }
+    }
+
+
+    /**
+     * Gets a Vec3 from a JSON object, if it's written in the form of [x, y, z], reporting any found
+     * errors
+     * @param json The JSON object to look in
+     * @param name The name of the field
+     * @param context The context to report errors to
+     * @return the Vec3, if it's there and written correctly, or null otherwise
+     */
+    @Nullable
+    public static Vec3 vec3FromJson(JsonObject json, String name, LoadingContext context) {
+        context.pushElement(name);
+        JsonElement element = json.get(name);
+        if (element == null || element instanceof JsonNull) {
+            context.popElement();
+            return null;
+        } else if (element instanceof JsonArray array) {
+            if (array.size() < 3) {
+                context.reportError("Array too short (needs at least 3 elements)");
+                context.popElement();
+                return null;
+            }
+            return new Vec3(array.get(0).getAsDouble(), array.get(1).getAsDouble(), array.get(2).getAsDouble());
+        } else {
+            context.reportError("Not a JSON array");
+            context.popElement();
             return null;
         }
     }
@@ -46,55 +76,89 @@ public class JsonHelper {
     public static Vec3 vec3FromJson(JsonElement json) {
         if (!json.isJsonArray()) return null;
         JsonArray array = json.getAsJsonArray();
-        return new Vec3(array.get(0).getAsFloat(), array.get(1).getAsFloat(), array.get(2).getAsFloat());
+        return new Vec3(array.get(0).getAsDouble(), array.get(1).getAsDouble(), array.get(2).getAsDouble());
     }
 
     /**
      * Returns a point provider from a JSON object. If it's an inlined vector, like this: {@code "point": [1, 2, 3]},
      * returns a static provider. Otherwise, looks for a {@code type} field and returns the PointProvider corresponding
      * to that type.
-     * @param json The JSON object to look for
-     * @param name The name of the field
+     *
+     * @param json     The JSON object to look for
+     * @param name     The name of the field
+     * @param context  The loading context to report errors to
+     * @param required Whether to report an error if the point is missing
      * @return a point provider
      */
     @Nullable
-    public static PointProvider pointFromJson(JsonObject json, String name) {
+    public static PointProvider pointFromJson(JsonObject json, String name, LoadingContext context, boolean required) {
+        context.pushElement(name);
         Vec3 test = vec3FromJson(json, name);
-        if (test != null) return new StaticPointProvider(test);
+        if (test != null) {
+            context.popElement();
+            return new StaticPointProvider(test);
+        }
         JsonObject obj;
         try {
-            obj = GsonHelper.getAsJsonObject(json, name, null);
+            JsonElement element = json.get(name);
+            if (element == null || element.isJsonNull()) {
+                if (required) context.reportError("Missing required point");
+                context.popElement();
+                return null;
+            } else {
+                obj = GsonHelper.getAsJsonObject(json, name, null);
+            }
         } catch (JsonSyntaxException e) {
-            obj = null;
+            context.reportError("JSON error: " + e.getMessage());
+            context.popElement();
+            return null;
         }
-        if (obj == null) return null;
+        if (obj == null) {
+            context.popElement();
+            return null;
+        }
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
         PointSerializer<?> serializer = CutsceneManager.getPointType(type);
         if (serializer == null) {
-            throw new IllegalArgumentException("Unknown point type: " + type);
+            context.reportError("Unknown point type: " + type);
+            context.popElement();
+            return null;
         }
-        return serializer.fromJSON(obj);
+        try {
+            return serializer.fromJSON(obj, context);
+        } catch (Exception e) {
+            return null;
+        } finally {
+            context.popElement();
+        }
     }
 
     /**
      * Returns a point provider from a JSON object. If it's an inlined vector, like this: {@code "point": [1, 2, 3]},
      * returns a static provider. Otherwise, looks for a {@code type} field and returns the PointProvider corresponding
      * to that type.
-     * @param json The JSON object to look for
+     *
+     * @param json     The JSON object to look for
+     * @param context  The loading context to report errors to
+     * @param required Whether to report an error if the point is missing
      * @return a point provider
      */
     @Nullable
-    public static PointProvider pointFromJson(JsonElement json) {
+    public static PointProvider pointFromJson(JsonElement json, LoadingContext context, boolean required) {
+        if (json == null || json.isJsonNull()) {
+            if (required) context.reportError("Missing required point");
+            return null;
+        }
         Vec3 test = vec3FromJson(json);
         if (test != null) return new StaticPointProvider(test);
-        if (json.isJsonNull()) return null;
         JsonObject obj = json.getAsJsonObject();
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
         PointSerializer<?> serializer = CutsceneManager.getPointType(type);
         if (serializer == null) {
-            throw new IllegalArgumentException("Unknown point type: " + type);
+            context.reportError("Unknown point type: " + type);
+            return null;
         }
-        return serializer.fromJSON(obj);
+        return serializer.fromJSON(obj, context);
     }
 
     /**
@@ -152,5 +216,25 @@ public class JsonHelper {
         JsonElement output = array.get(index);
         if (output.isJsonNull()) return null;
         return output;
+    }
+
+    public static double getAsDouble(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> GsonHelper.getAsDouble(json, name), 0d);
+    }
+
+    public static float getAsFloat(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> GsonHelper.getAsFloat(json, name), 0f);
+    }
+
+    public static int getAsInt(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> GsonHelper.getAsInt(json, name), 0);
+    }
+
+    public static boolean getAsBoolean(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> GsonHelper.getAsBoolean(json, name), false);
+    }
+
+    public static String getAsString(JsonObject json, String name, LoadingContext context) {
+        return context.wrapLoading(name, () -> GsonHelper.getAsString(json, name));
     }
 }

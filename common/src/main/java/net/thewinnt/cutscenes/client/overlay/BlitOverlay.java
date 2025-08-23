@@ -1,18 +1,17 @@
 package net.thewinnt.cutscenes.client.overlay;
 
+import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.renderer.RenderType;
+import org.joml.Matrix4f;
+
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.CoreShaders;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.BlitConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
-import org.joml.Matrix4f;
 
 public class BlitOverlay implements Overlay {
     private final BlitConfiguration config;
@@ -34,16 +33,15 @@ public class BlitOverlay implements Overlay {
         float u2 = config.u2().get(t, 1);
         float v2 = config.v2().get(t, 1);
         int color = config.tint().toARGB(t);
-        RenderSystem.setShaderTexture(0, config.texture());
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.enableBlend();
-        Matrix4f matrix4f = graphics.pose().last().pose();
-        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(matrix4f, x1, y1, 0).setColor(color).setUv(u1, v1);
-        bufferbuilder.addVertex(matrix4f, x1, y2, 0).setColor(color).setUv(u1, v2);
-        bufferbuilder.addVertex(matrix4f, x2, y2, 0).setColor(color).setUv(u2, v2);
-        bufferbuilder.addVertex(matrix4f, x2, y1, 0).setColor(color).setUv(u2, v1);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
-        RenderSystem.disableBlend();
+        float z = config.z();
+        graphics.drawSpecial(source -> {
+            RenderType rendertype = RenderType.guiTextured(config.texture());
+            Matrix4f matrix4f = graphics.pose().last().pose();
+            VertexConsumer vertexconsumer = source.getBuffer(rendertype);
+            vertexconsumer.addVertex(matrix4f, x1, y1, z).setUv(u1, v1).setColor(color);
+            vertexconsumer.addVertex(matrix4f, x1, y2, z).setUv(u1, v2).setColor(color);
+            vertexconsumer.addVertex(matrix4f, x2, y2, z).setUv(u2, v2).setColor(color);
+            vertexconsumer.addVertex(matrix4f, x2, y1, z).setUv(u2, v1).setColor(color);
+        });
     }
 }

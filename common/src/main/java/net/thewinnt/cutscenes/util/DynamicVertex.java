@@ -2,6 +2,7 @@ package net.thewinnt.cutscenes.util;
 
 import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.GsonHelper;
 
 public record DynamicVertex(CoordinateProvider x, CoordinateProvider y, DynamicColor color) {
     public void toNetwork(FriendlyByteBuf buf) {
@@ -17,10 +18,10 @@ public record DynamicVertex(CoordinateProvider x, CoordinateProvider y, DynamicC
         return new DynamicVertex(x, y, color);
     }
 
-    public static DynamicVertex fromJSON(JsonObject json) {
-        CoordinateProvider x = CoordinateProvider.fromJSON(json.get("x"));
-        CoordinateProvider y = CoordinateProvider.fromJSON(json.get("y"));
-        DynamicColor color = DynamicColor.fromJSON(json.get("color"));
+    public static DynamicVertex fromJSON(JsonObject json, LoadingContext context) {
+        CoordinateProvider x = CoordinateProvider.loadWrapped(json, "x", context);
+        CoordinateProvider y = CoordinateProvider.loadWrapped(json, "y", context);
+        DynamicColor color = DynamicColor.loadWrapped(json, "color", context);
         return new DynamicVertex(x, y, color);
     }
 }

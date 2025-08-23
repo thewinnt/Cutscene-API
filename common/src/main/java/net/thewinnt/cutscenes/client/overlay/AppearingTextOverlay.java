@@ -1,6 +1,8 @@
 package net.thewinnt.cutscenes.client.overlay;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -9,6 +11,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
@@ -28,8 +31,8 @@ public class AppearingTextOverlay implements Overlay {
 
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object config) {
-        minecraft.getProfiler().push("cutscenes:appearing_text");
-        minecraft.getProfiler().push("prepare");
+        Profiler.get().push("cutscenes:appearing_text");
+        Profiler.get().push("prepare");
         TimeProvider time = (TimeProvider) config;
         Component text = this.config.text();
         double tickrate = ClientCutsceneManager.runningCutscene.cutscene.length.manager().ticksPerUnit();
@@ -79,18 +82,27 @@ public class AppearingTextOverlay implements Overlay {
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(soundbite, this.config.pitch().sample(minecraft.player.getRandom()), 1));
         }
         lastT = state.t;
+        float scale = (float) this.config.scale().get(time.getProgress());
+        float rotation = (float) this.config.rotation().get(time.getProgress());
         float x = this.config.rx().get(time.getProgress(), width);
         float y = this.config.ry().get(time.getProgress(), height);
+
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        pose.scale(scale, scale, scale);
+        pose.translate(x, y, 0);
+        pose.mulPose(Axis.ZP.rotationDegrees(rotation));
         int lineWidth = (int)this.config.width().get(time.getProgress(), width);
         // i could've used drawWordWrap() here, but it doesn't do a shadow
         // the code below is copied from GuiGraphics#drawWordWrap
-        minecraft.getProfiler().popPush("draw");
+        Profiler.get().popPush("draw");
         for (FormattedCharSequence j : minecraft.font.split(FormattedText.composite(result), lineWidth)) {
-            graphics.drawString(minecraft.font, j, (int)x, (int)y, 0xffffff, this.config.dropShadow());
-            y += minecraft.font.lineHeight;
+            graphics.drawString(minecraft.font, j, 0, 0, 0xffffff, this.config.dropShadow());
+            pose.translate(0, minecraft.font.lineHeight, 0);
         }
-        minecraft.getProfiler().pop();
-        minecraft.getProfiler().pop();
+        pose.popPose();
+        Profiler.get().pop();
+        Profiler.get().pop();
     }
 
     private static class DrawingState {

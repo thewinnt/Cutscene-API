@@ -10,6 +10,7 @@ import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.configuration.PlaySoundConfiguration;
 import net.thewinnt.cutscenes.effect.type.PlaySoundEffect;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -25,17 +26,17 @@ public class PlaySoundSerializer implements CutsceneEffectSerializer<PlaySoundCo
         SoundSource source = buf.readEnum(SoundSource.class);
         float volume = buf.readFloat();
         float pitch = buf.readFloat();
-        Optional<Vec3> pos = buf.readOptional(FriendlyByteBuf::readVec3);
+        Optional<Vec3> pos = buf.readOptional(object -> object.readVec3());
         return new PlaySoundConfiguration(sound, source, volume, pitch, pos);
     }
 
     @Override
-    public PlaySoundConfiguration fromJSON(JsonObject json) {
-        ResourceLocation sound = ResourceLocation.parse(GsonHelper.getAsString(json, "sound"));
+    public PlaySoundConfiguration fromJSON(JsonObject json, LoadingContext context) {
+        ResourceLocation sound = ResourceLocation.parse(context.wrapLoading("sound", () -> GsonHelper.getAsString(json, "sound"), "loading_error"));
         SoundSource source = SoundSource.valueOf(GsonHelper.getAsString(json, "source", "master").toUpperCase(Locale.ROOT));
         float volume = GsonHelper.getAsFloat(json, "volume", 1);
         float pitch = GsonHelper.getAsFloat(json, "pitch", 1);
-        Optional<Vec3> pos = Optional.ofNullable(JsonHelper.vec3FromJson(json, "pos"));
+        Optional<Vec3> pos = Optional.ofNullable(JsonHelper.vec3FromJson(json, "pos", context));
         return new PlaySoundConfiguration(sound, source, volume, pitch, pos);
     }
 
@@ -45,7 +46,7 @@ public class PlaySoundSerializer implements CutsceneEffectSerializer<PlaySoundCo
         buf.writeEnum(data.source());
         buf.writeFloat(data.volume());
         buf.writeFloat(data.pitch());
-        buf.writeOptional(data.pos(), FriendlyByteBuf::writeVec3);
+        buf.writeOptional(data.pos(), (object, object2) -> object.writeVec3(object2));
     }
 
     @Override

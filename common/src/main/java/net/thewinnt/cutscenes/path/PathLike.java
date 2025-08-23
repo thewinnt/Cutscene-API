@@ -12,6 +12,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.client.preview.PathPreviewRenderer.Line;
 import net.thewinnt.cutscenes.path.point.PointProvider;
+import net.thewinnt.cutscenes.util.LoadingContext;
+import org.apache.commons.lang3.function.TriFunction;
 
 /**
  * A PathLike is the base interface responsible for camera positioning and rotating in a cutscene.
@@ -61,12 +63,12 @@ public interface PathLike {
      * it runs, and vice versa.
      * @return this segment's weight
      */
-    int getWeight();
+    int weight();
 
     /**
      * Writes this segment's parameters to the provided {@link FriendlyByteBuf}.
      * This data should be enough to fully reconstruct this segment on the client.
-     * @see SegmentSerializer#fromNetwork(FriendlyByteBuf, Path)
+     * @see SegmentType#fromNetwork(FriendlyByteBuf, Path)
      */
     void toNetwork(FriendlyByteBuf buf);
 
@@ -75,7 +77,7 @@ public interface PathLike {
      * this should return the same object every time it's called.
      * @return a serializer for this segment's type
      */
-    SegmentSerializer<?> getSerializer();
+    SegmentType<?> getSerializer();
 
     /**
      * Returns a list of {@link Line lines} representing the utility points used for
@@ -104,7 +106,7 @@ public interface PathLike {
     }
 
     /** An object that constructs path segments from JSON and network. */
-    public static interface SegmentSerializer<T extends PathLike> {
+    interface SegmentType<T extends PathLike> {
         /**
          * Reconstructs a segment from network, matching its server companion as closely as possible.
          * @param buf the buffer to read from. The data in this buffer is enough to fully recreate the
@@ -112,6 +114,8 @@ public interface PathLike {
          * @param path the path this segment belongs on. <b>DO NOT ADD THE RESULTING SEGMENT TO THIS PATH!</b>
          *             At the moment of construction, the constructed element is the last in the path, so its
          *             future index is equal to the current size of the path.
+         *             If {@link #createsRotationFromPath()} returns true, this is the camera path for the current
+         *             cutscene, or {@code null} if it's only being built here.
          * @return a segment reconstructed from network.
          */
         T fromNetwork(FriendlyByteBuf buf, Path path);
@@ -124,29 +128,71 @@ public interface PathLike {
          * @param path the path this segment belongs on. <b>DO NOT ADD THE RESULTING SEGMENT TO THIS PATH!</b>
          *             At the moment of construction, the constructed element is the last in the path, so its
          *             future index is equal to the current size of the path.
+         *             If {@link #createsRotationFromPath()} returns true, this is the camera path for the current
+         *             cutscene, or {@code null} if it's only being built here.
+         * @param context the context for loading the current cutscene.
          * @return a segment created from the given JSON object.
          * @throws IllegalArgumentException if there's not enough data to create a segment, or it is invalid
          */
-        T fromJSON(JsonObject json, Path path);
+        T fromJSON(JsonObject json, Path path, LoadingContext context);
+
+        /**
+         * Indicates whether segments of this type use the camera path to provide rotation.
+         * @return whether the path supplied to {@link #fromNetwork(FriendlyByteBuf, Path)}
+         * and {@link #fromJSON(JsonObject, Path, LoadingContext)} is the built camera path
+         * and not the path being built.
+         * @see LookAtPoint
+         */
+        default boolean createsRotationFromPath() {
+            return false;
+        }
 
         /**
          * A helper method to create a segment serializer from 2 functions.
          * @param network a {@link #fromNetwork(FriendlyByteBuf, Path)} implementation
-         * @param json a {@link #fromJSON(JsonObject, Path)} implementation
+         * @param json a {@link #fromJSON(JsonObject, Path, LoadingContext)} implementation
          * @return a segment serializer for the given type
          * @param <T> the class for the segment type
          * @see net.thewinnt.cutscenes.CutsceneManager#BEZIER
          */
-        public static <T extends PathLike> SegmentSerializer<T> of(BiFunction<FriendlyByteBuf, Path, T> network, BiFunction<JsonObject, Path, T> json) {
-            return new SegmentSerializer<T>() {
+        static <T extends PathLike> SegmentType<T> of(BiFunction<FriendlyByteBuf, Path, T> network, TriFunction<JsonObject, Path, LoadingContext, T> json) {
+            return new SegmentType<>() {
                 @Override
                 public T fromNetwork(FriendlyByteBuf buf, Path path) {
                     return network.apply(buf, path);
                 }
 
                 @Override
-                public T fromJSON(JsonObject j, Path path) {
-                    return json.apply(j, path);
+                public T fromJSON(JsonObject j, Path path, LoadingContext context) {
+                    return json.apply(j, path, context);
+                }
+            };
+        }
+
+        /**
+         * A helper method to create a segment serializer from 2 functions, that reads
+         * a segment type that needs a rotation path instead of the current path.
+         * @param network a {@link #fromNetwork(FriendlyByteBuf, Path)} implementation
+         * @param json a {@link #fromJSON(JsonObject, Path, LoadingContext)} implementation
+         * @return a segment serializer for the given type
+         * @param <T> the class for the segment type
+         * @see net.thewinnt.cutscenes.CutsceneManager#BEZIER
+         */
+        static <T extends PathLike> SegmentType<T> usingRotationPath(BiFunction<FriendlyByteBuf, Path, T> network, TriFunction<JsonObject, Path, LoadingContext, T> json) {
+            return new SegmentType<>() {
+                @Override
+                public T fromNetwork(FriendlyByteBuf buf, Path path) {
+                    return network.apply(buf, path);
+                }
+
+                @Override
+                public T fromJSON(JsonObject j, Path path, LoadingContext context) {
+                    return json.apply(j, path, context);
+                }
+
+                @Override
+                public boolean createsRotationFromPath() {
+                    return true;
                 }
             };
         }

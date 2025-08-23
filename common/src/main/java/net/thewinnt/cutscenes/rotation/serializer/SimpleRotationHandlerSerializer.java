@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
 import net.thewinnt.cutscenes.rotation.RotationHandler;
 import net.thewinnt.cutscenes.rotation.RotationSerializer;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class SimpleRotationHandlerSerializer<T extends RotationHandler> implements RotationSerializer<T> {
     private final T handler;
@@ -21,7 +22,7 @@ public class SimpleRotationHandlerSerializer<T extends RotationHandler> implemen
     }
 
     @Override
-    public T fromJson(JsonObject json) {
+    public T fromJson(JsonObject json, LoadingContext context) {
         return handler;
     }
 }

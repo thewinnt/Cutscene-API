@@ -1,7 +1,11 @@
 package net.thewinnt.cutscenes.easing.serializers;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.easing.Easing;
@@ -9,9 +13,13 @@ import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.easing.types.SplineEasing;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class SplineEasingSerializer implements EasingSerializer<SplineEasing> {
     public static final SplineEasingSerializer INSTANCE = new SplineEasingSerializer();
+    public static final MapCodec<SplineEasing> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        Easing.CODEC.listOf().fieldOf("points").forGetter(SplineEasing::asList)
+    ).apply(instance, SplineEasing::new));
 
     private SplineEasingSerializer() {}
 
@@ -21,22 +29,18 @@ public class SplineEasingSerializer implements EasingSerializer<SplineEasing> {
     }
 
     @Override
-    public SplineEasing fromJSON(JsonObject json) {
+    public SplineEasing fromJSON(JsonObject json, LoadingContext context) {
         JsonArray easings = GsonHelper.getAsJsonArray(json, "points");
         Easing[] data = new Easing[easings.size()];
         for (int i = 0; i < data.length; i++) {
-            data[i] = Easing.fromJSON(easings.get(i));
+            JsonElement element = easings.get(i);
+            data[i] = context.wrapLoading(String.valueOf(i), () -> Easing.fromJSON(element, context));
         }
         return new SplineEasing(data);
     }
 
     @Override
-    public SplineEasing fromJSON(JsonObject json, LoadResolver<Easing> context) {
-        JsonArray easings = GsonHelper.getAsJsonArray(json, "points");
-        Easing[] data = new Easing[easings.size()];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = Easing.fromJSON(easings.get(i), context);
-        }
-        return new SplineEasing(data);
+    public MapCodec<SplineEasing> codec() {
+        return CODEC;
     }
 }

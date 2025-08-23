@@ -2,23 +2,42 @@ package net.thewinnt.cutscenes.easing.types;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
+import java.sql.Time;
 import java.util.*;
+import java.util.function.Function;
 
 public class CompoundEasing implements Easing {
     private final List<TimedEasingEntry> times;
+    private Map<String, RangeAppliedEasing> asMap;
 
     public CompoundEasing(List<TimedEasingEntry> times) {
         if (times.isEmpty()) {
             throw new IllegalArgumentException("A CompoundEasing must have at least 1 argument");
         }
         this.times = times;
+    }
+
+    public CompoundEasing(Map<String, RangeAppliedEasing> asMap) {
+        if (asMap.isEmpty()) {
+            throw new IllegalArgumentException("A CompoundEasing must have at least 1 argument");
+        }
+        this.times = new ArrayList<>();
+        for (var i : asMap.entrySet()) {
+            times.add(new TimedEasingEntry(Double.parseDouble(i.getKey()), i.getValue()));
+        }
     }
 
     @Override
@@ -58,7 +77,31 @@ public class CompoundEasing implements Easing {
         }
     }
 
+    public Map<String, RangeAppliedEasing> asMap() {
+        if (asMap == null) {
+            asMap = new HashMap<>();
+            for (TimedEasingEntry i : this.times) {
+                asMap.put(Double.toString(i.time), i.easing);
+            }
+        }
+        return asMap;
+    }
+
     public record RangeAppliedEasing(double minValue, double maxValue, Easing easing) {
+        public static final Codec<RangeAppliedEasing> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.DOUBLE.fieldOf("from").orElse(0d).forGetter(RangeAppliedEasing::minValue),
+                Codec.DOUBLE.fieldOf("to").orElse(1d).forGetter(RangeAppliedEasing::maxValue),
+                Easing.CODEC.fieldOf("easing").forGetter(RangeAppliedEasing::easing)
+        ).apply(instance, RangeAppliedEasing::new));
+        public static final Codec<RangeAppliedEasing> CODEC = Codec.either(Easing.CODEC, DIRECT_CODEC).xmap(
+                either -> either.map(easing1 -> new RangeAppliedEasing(0, 1, easing1), Function.identity()),
+                object -> {
+                    if (object.minValue == 0 && object.maxValue == 1) {
+                        return Either.left(object.easing);
+                    }
+                    return Either.right(object);
+                }
+        );
         public double get(double t) {
             t = minValue + t * (maxValue - minValue);
             return easing.get(t);
@@ -77,27 +120,15 @@ public class CompoundEasing implements Easing {
             return new RangeAppliedEasing(minValue, maxValue, easing);
         }
 
-        public static RangeAppliedEasing fromJSON(JsonElement json) {
+        public static RangeAppliedEasing fromJSON(JsonElement json, LoadingContext context) {
             if (json.isJsonPrimitive()) {
-                Easing easing = Easing.fromJSONPrimitive(json.getAsJsonPrimitive());
+                Easing easing = context.wrapLoading("easing", () -> Easing.fromJSONPrimitive(json.getAsJsonPrimitive(), context));
                 return new RangeAppliedEasing(0, 1, easing);
             }
             JsonObject obj = json.getAsJsonObject();
             double minValue = GsonHelper.getAsDouble(obj, "from", 0);
             double maxValue = GsonHelper.getAsDouble(obj, "to", 1);
-            Easing easing = Easing.fromJSON(obj.get("easing"));
-            return new RangeAppliedEasing(minValue, maxValue, easing);
-        }
-
-        public static RangeAppliedEasing fromJSON(JsonElement json, LoadResolver<Easing> context) {
-            if (json.isJsonPrimitive()) {
-                Easing easing = Easing.fromJSONPrimitive(json.getAsJsonPrimitive(), context);
-                return new RangeAppliedEasing(0, 1, easing);
-            }
-            JsonObject obj = json.getAsJsonObject();
-            double minValue = GsonHelper.getAsDouble(obj, "from", 0);
-            double maxValue = GsonHelper.getAsDouble(obj, "to", 1);
-            Easing easing = Easing.fromJSON(obj.get("easing"), context);
+            Easing easing = Easing.loadWrapped(obj, "easing", context);
             return new RangeAppliedEasing(minValue, maxValue, easing);
         }
     }

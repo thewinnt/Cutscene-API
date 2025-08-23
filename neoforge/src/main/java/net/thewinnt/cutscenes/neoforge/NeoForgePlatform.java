@@ -1,7 +1,11 @@
 package net.thewinnt.cutscenes.neoforge;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SequencedMap;
 import java.util.function.Consumer;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -15,7 +19,7 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -34,9 +38,9 @@ import net.thewinnt.cutscenes.platform.CameraAngleSetter;
 import net.thewinnt.cutscenes.platform.PacketType;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber
 public class NeoForgePlatform implements PlatformAbstractions {
-    private final List<PreparableReloadListener> reloadListeners = new ArrayList<>();
+    private final SequencedMap<PreparableReloadListener, ResourceLocation> reloadListeners = new LinkedHashMap<>();
     protected final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();
     private final List<Consumer<CommandDispatcher<CommandSourceStack>>> commandMakers = new ArrayList<>();
     public final List<Runnable> onLogout = new ArrayList<>();
@@ -46,13 +50,13 @@ public class NeoForgePlatform implements PlatformAbstractions {
 
     @Override
     public void registerReloadListener(PreparableReloadListener listener, ResourceLocation id) {
-        reloadListeners.add(listener);
+        reloadListeners.put(listener, id);
     }
 
     @SubscribeEvent
-    public static void addReloadListeners(AddReloadListenerEvent event) {
+    public static void addReloadListeners(AddServerReloadListenersEvent event) {
         NeoForgePlatform platform = CutsceneAPINeoForge.PLATFORM;
-        platform.reloadListeners.forEach(event::addListener);
+        platform.reloadListeners.forEach((listener, id) -> event.addListener(id, listener));
     }
 
     @Override

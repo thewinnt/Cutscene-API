@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public record WorldPointProvider(Vec3 point) implements PointProvider {
     @Override
@@ -28,7 +29,7 @@ public record WorldPointProvider(Vec3 point) implements PointProvider {
         return new WorldPointProvider(buf.readVec3());
     }
 
-    public static WorldPointProvider fromJSON(JsonObject obj) {
-        return new WorldPointProvider(JsonHelper.vec3FromJson(obj, "point"));
+    public static WorldPointProvider fromJSON(JsonObject obj, LoadingContext context) {
+        return new WorldPointProvider(JsonHelper.vec3FromJson(obj, "point", context));
     }
 }

@@ -19,6 +19,7 @@ import net.thewinnt.cutscenes.client.preview.PathPreviewRenderer.Line;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
+import net.thewinnt.cutscenes.util.LoadingContext;
 import oshi.util.tuples.Pair;
 
 public class Path implements PathLike {
@@ -36,7 +37,7 @@ public class Path implements PathLike {
         }
         this.segments = new ArrayList<>(List.of(segments));
         for (PathLike i : segments) {
-            this.weightSum += i.getWeight();
+            this.weightSum += i.weight();
         }
         this.weight = weight;
     }
@@ -54,14 +55,14 @@ public class Path implements PathLike {
         if (delta >= 1) return PointProvider.getPoint(this.getEnd(l, s), l, s);
         double val = delta * weightSum;
         int i; // define the variable outside the loop to use it later
-        for (i = 0; i < this.segments.size() && val >= this.segments.get(i).getWeight(); i++) {
-            val -= this.segments.get(i).getWeight();
+        for (i = 0; i < this.segments.size() && val >= this.segments.get(i).weight(); i++) {
+            val -= this.segments.get(i).weight();
         }
         PathLike segment = this.segments.get(i);
         if (segment instanceof LookAtPoint) { // special handling!
             return segment.getPoint(delta, l, s);
         } else {
-            return segment.getPoint(val / segment.getWeight(), l, s);
+            return segment.getPoint(val / segment.weight(), l, s);
         }
     }
 
@@ -76,7 +77,7 @@ public class Path implements PathLike {
     }
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return weight;
     }
 
@@ -153,14 +154,14 @@ public class Path implements PathLike {
 
     public Path add(PathLike segment) {
         this.segments.add(segment);
-        this.weightSum += segment.getWeight();
+        this.weightSum += segment.weight();
         return this;
     }
 
     public Path set(PathLike segment, int index) {
-        this.weightSum -= segments.get(index).getWeight();
+        this.weightSum -= segments.get(index).weight();
         this.segments.set(index, segment);
-        this.weightSum += segment.getWeight();
+        this.weightSum += segment.weight();
         return this;
     }
 
@@ -169,7 +170,7 @@ public class Path implements PathLike {
     }
     
     @Override
-    public SegmentSerializer<Path> getSerializer() {
+    public SegmentType<Path> getSerializer() {
         return CutsceneManager.PATH;
     }
     
@@ -178,15 +179,16 @@ public class Path implements PathLike {
         int length = buf.readInt();
         for (int i = 0; i < length; i++) {
             ResourceLocation id = buf.readResourceLocation();
-            if (CutsceneManager.getSegmentType(id) == null) {
+            SegmentType<?> type = CutsceneManager.getSegmentType(id);
+            if (type == null) {
                 throw new IllegalArgumentException("Unknown segment type: " + id);
             }
             try {
-                if (id.equals(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"))) {
+                if (type.createsRotationFromPath()) {
                     // special handling - look_at_point needs a rotation path, while others need this path
-                    output.add(CutsceneManager.LOOK_AT_POINT.fromNetwork(buf, path));
+                    output.add(type.fromNetwork(buf, path));
                 } else {
-                    output.add(CutsceneManager.getSegmentType(id).fromNetwork(buf, output));
+                    output.add(type.fromNetwork(buf, output));
                 }
             } catch (Exception e) {
                 CutsceneAPI.LOGGER.error("Error loading element: {}", id);
@@ -205,23 +207,35 @@ public class Path implements PathLike {
         }
     }
 
-    public static Path fromJSON(JsonObject json, Path path) {
+    public static Path fromJSON(JsonObject json, Path path, LoadingContext context) {
         if (json == null) return null;
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         Path output = new Path(weight);
         JsonArray segments_j = json.getAsJsonArray("segments");
+        int index = 0;
         for (JsonElement i : segments_j) {
+            context.pushElement("segments[" + index+ "]");
             JsonObject j = i.getAsJsonObject();
-            ResourceLocation id = ResourceLocation.parse(j.get("type").getAsString());
-            if (CutsceneManager.getSegmentType(id) == null) {
-                throw new IllegalArgumentException("Unknown segment type: " + id);
+            ResourceLocation id = context.wrapLoading("type", () -> ResourceLocation.parse(j.get("type").getAsString()));
+            SegmentType<?> type = CutsceneManager.getSegmentType(id);
+            if (type == null) {
+                context.reportError("Unknown segment type: " + id);
+                context.popElement();
+                index++;
+                continue;
             }
-            if (id.equals(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"))) {
+            if (type.createsRotationFromPath()) {
                 // special handling - look_at_point needs a rotation path, while others need this path
-                output.add(CutsceneManager.LOOK_AT_POINT.fromJSON(j, path));
+                output.add(type.fromJSON(j, path, context));
             } else {
-                output.add(CutsceneManager.getSegmentType(id).fromJSON(j, output));
+                output.add(type.fromJSON(j, output, context));
             }
+            context.popElement();
+            index++;
+        }
+        if (output.segments.isEmpty()) {
+            context.reportError("No segments in Path");
+            return null;
         }
         return output;
     }
@@ -245,9 +259,9 @@ public class Path implements PathLike {
             throw new IllegalArgumentException("Attempted to get a range of values for a missing segment");
         }
         for (int i = 0; i < targetIndex; i++) {
-            previousSum += this.segments.get(i).getWeight();
+            previousSum += this.segments.get(i).weight();
         }
         double rangeStart = previousSum / weightSum;
-        return new Pair<>(rangeStart, rangeStart + (double) segment.getWeight() / weightSum);
+        return new Pair<>(rangeStart, rangeStart + (double) segment.weight() / weightSum);
     }
 }

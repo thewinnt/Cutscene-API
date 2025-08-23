@@ -15,7 +15,7 @@ public class ClientPacketListenerMixin {
     @Inject(method = "handleSetTime", at = @At("RETURN"))
     private void handleSetTime(ClientboundSetTimePacket packet, CallbackInfo ci) {
         if (ClientCutsceneManager.isCutsceneRunning()) {
-            ClientCutsceneManager.runningCutscene.getTimeManager().syncGameTime(packet.getGameTime());
+            ClientCutsceneManager.runningCutscene.getTimeManager().syncGameTime(packet.gameTime());
         }
     }
 

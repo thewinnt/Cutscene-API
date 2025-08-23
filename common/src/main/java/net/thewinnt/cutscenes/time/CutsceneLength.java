@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
-import net.thewinnt.cutscenes.CutsceneAPI;
 import org.slf4j.Logger;
 
 public record CutsceneLength(double length, TimeManager manager) {

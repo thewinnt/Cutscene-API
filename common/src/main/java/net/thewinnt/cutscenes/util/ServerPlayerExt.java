@@ -30,7 +30,11 @@ public interface ServerPlayerExt {
      * a cutscene there.</b>
      * @param type the cutscene to start watching
      */
-    void csapi$setRunningCutscene(CutsceneType type);
+    void csapi$setRunningCutscene(CutsceneType type, String startReason);
 
     void csapi$finishCutscene(EndingReason reason);
+
+    boolean csapi$isWatchingCutscene();
+    String csapi$getStartReason();
+    EndingReason csapi$getEndReason();
 }

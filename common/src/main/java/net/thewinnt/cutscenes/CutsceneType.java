@@ -3,13 +3,16 @@ package net.thewinnt.cutscenes;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.thewinnt.cutscenes.client.ClientCutsceneManager;
+import com.mojang.logging.LogUtils;
+import net.thewinnt.cutscenes.effect.ServerEffectWrapper;
 import net.thewinnt.cutscenes.rotation.handler.CutsceneRotation;
 import net.thewinnt.cutscenes.rotation.handler.PlayerRotation;
 import net.thewinnt.cutscenes.time.CutsceneLength;
 import net.thewinnt.cutscenes.time.GameTickManager;
 import net.thewinnt.cutscenes.rotation.RotationHandler;
 import net.thewinnt.cutscenes.time.TimeManager;
+import net.thewinnt.cutscenes.util.LoadingContext;
+import net.thewinnt.cutscenes.util.ResourceOrTag;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonArray;
@@ -28,6 +31,7 @@ import net.thewinnt.cutscenes.transition.Transition;
 import net.thewinnt.cutscenes.util.ActionToggles;
 import net.thewinnt.cutscenes.util.ActionToggles.Builder;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import org.slf4j.Logger;
 
 /**
  * A cutscene type consists of a camera path, rotation, transitions and some parameters. A cutscene has a fixed length,
@@ -36,6 +40,7 @@ import net.thewinnt.cutscenes.util.JsonHelper;
  * rotated by some amount.
  */
 public class CutsceneType {
+    public static final Logger LOGGER = LogUtils.getLogger();
     public final CutsceneLength length;
     public final @Nullable Path path;
     public final @Nullable Path rotationProvider;
@@ -48,10 +53,11 @@ public class CutsceneType {
     public final boolean hideBlockOutline;
     public final boolean disableF5;
     public final List<CutsceneEffect<?>> effects;
+    public final @Nullable ResourceOrTag onOver;
+    public final boolean logCommands;
 
     /** Constructs a cutscene type with all parameters specified. */
-    @SuppressWarnings("deprecation")
-    public CutsceneType(PathLike path, Path rotationProvider, CutsceneLength length, Transition start, Transition end, boolean blockMovement, RotationHandler rotationHandler, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects) {
+    public CutsceneType(PathLike path, @Nullable Path rotationProvider, CutsceneLength length, Transition start, Transition end, boolean blockMovement, RotationHandler rotationHandler, ActionToggles toggles, boolean hideHand, boolean hideBlockOutline, List<CutsceneEffect<?>> effects, @Nullable ResourceOrTag onOver, boolean logCommands) {
         if (path instanceof Path pth) {
             this.path = pth;
         } else if (path != null) {
@@ -70,10 +76,12 @@ public class CutsceneType {
         this.hideBlockOutline = hideBlockOutline;
         this.effects = effects;
         this.disableF5 = path != null || rotationProvider != null || actionToggles.disablePerspectiveChanging();
+        this.logCommands = logCommands;
+        this.onOver = onOver;
     }
 
     /** Constructs a simple cutscene type with default parameters for most settings. */
-    public CutsceneType(PathLike path, Path rotationProvider, int length) {
+    public CutsceneType(PathLike path, @Nullable Path rotationProvider, int length) {
         if (path instanceof Path pth) {
             this.path = pth;
         } else if (path != null) {
@@ -92,6 +100,8 @@ public class CutsceneType {
         this.hideBlockOutline = false;
         this.effects = List.of();
         this.disableF5 = path != null || rotationProvider != null;
+        this.onOver = null;
+        this.logCommands = false;
     }
 
     /**
@@ -173,36 +183,37 @@ public class CutsceneType {
         boolean hideHand = buf.readBoolean();
         boolean hideBlockOutline = buf.readBoolean();
         List<CutsceneEffect<?>> effects = buf.readCollection(ArrayList::new, CutsceneEffect::fromNetwork);
-        return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, rotationHandler, actionToggles, hideHand, hideBlockOutline, effects);
+        return new CutsceneType(path, rotationProvider, length, start, end, blockMovement, rotationHandler, actionToggles, hideHand, hideBlockOutline, effects, null, false);
     }
 
     /** Reads a cutscene type from JSON. */
-    public static CutsceneType fromJSON(JsonObject json) {
+    public static CutsceneType fromJSON(JsonObject json, LoadingContext context) {
         int dataVersion;
         JsonElement dataVersionJson = json.get("version");
         if (dataVersionJson != null) {
             dataVersion = dataVersionJson.getAsInt();
         } else {
-            CutsceneAPI.LOGGER.info("Loading a cutscene type with no version specified, assuming it is 0. Current version is {}.", CutsceneAPI.DATA_VERSION);
+            LOGGER.info("Loading a cutscene with no version, assuming it is 0. Current version is {}.", CutsceneAPI.DATA_VERSION);
             dataVersion = 0;
         }
         if (dataVersion > CutsceneAPI.DATA_VERSION) {
-            CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is newer than the current one ({}). Things may break!", dataVersion, CutsceneAPI.DATA_VERSION);
+            LOGGER.warn("Loading a cutscene with version {}, which is newer than the current one ({}). Things may break!", dataVersion, CutsceneAPI.DATA_VERSION);
         } else if (dataVersion < CutsceneAPI.DATA_VERSION) {
-            CutsceneAPI.LOGGER.warn("Loading a cutscene type with version {} specified, which is earlier than the current one ({}). The cutscene should be updated to the new format to make sure it shows up correctly!", dataVersion, CutsceneAPI.DATA_VERSION);
+            LOGGER.warn("Loading a cutscene with version {}, which is earlier than the current one ({}). The cutscene should be updated to the new format to make sure it works correctly!", dataVersion, CutsceneAPI.DATA_VERSION);
         }
+        context.setDataVersion(dataVersion);
         CutsceneLength length = CutsceneLength.fromJson(json.get("length"));
-        Path path = Path.fromJSON(JsonHelper.getNullableObject(json, "path"), null);
-        Path rotation = Path.fromJSON(JsonHelper.getNullableObject(json, "rotation"), path);
-        Transition start = Transition.fromJSON(JsonHelper.getNullableObject(json, "start_transition"), TimeManager.DEFAULT_TRANSITIONS.get(length.manager().type()).get(true));
-        Transition end = Transition.fromJSON(JsonHelper.getNullableObject(json, "end_transition"), TimeManager.DEFAULT_TRANSITIONS.get(length.manager().type()).get(false));
+        Path path = context.wrapLoading("path", () -> Path.fromJSON(JsonHelper.getNullableObject(json, "path"), null, context));
+        Path rotation = context.wrapLoading("rotation", () -> Path.fromJSON(JsonHelper.getNullableObject(json, "rotation"), path, context));
+        Transition start = context.wrapLoading("start_transition", () -> Transition.fromJSON(JsonHelper.getNullableObject(json, "start_transition"), context, TimeManager.DEFAULT_TRANSITIONS.get(length.manager().type()).get(true)));
+        Transition end = context.wrapLoading("end_transition", () -> Transition.fromJSON(JsonHelper.getNullableObject(json, "end_transition"), context, TimeManager.DEFAULT_TRANSITIONS.get(length.manager().type()).get(false)));
         boolean blockMovement = GsonHelper.getAsBoolean(json, "block_movement", false) || path != null;
         RotationHandler rotationHandler;
         if (json.has("block_rotation") || !json.has("rotation_handler")) {
             boolean blockRotation = GsonHelper.getAsBoolean(json, "block_rotation", false) || rotation != null;
             rotationHandler = blockRotation ? CutsceneRotation.INSTANCE : PlayerRotation.INSTANCE;
         } else {
-            rotationHandler = RotationHandler.fromJson(json.get("rotation_handler"));
+            rotationHandler = context.wrapLoading("rotation_handler", () -> RotationHandler.fromJson(json.get("rotation_handler"), context));
         }
         ActionToggles toggles;
         if (json.has("disable_actions")) {
@@ -216,9 +227,17 @@ public class CutsceneType {
         boolean hideBlockOutline = GsonHelper.getAsBoolean(json, "hide_block_outline", defaultHideBlockOutline);
         JsonArray effectsJson = GsonHelper.getAsJsonArray(json, "effects", new JsonArray());
         ArrayList<CutsceneEffect<?>> effects = new ArrayList<>();
+        int index = 0;
         for (JsonElement i : effectsJson) {
-            effects.add(CutsceneEffect.fromJSON(GsonHelper.convertToJsonObject(i, "effect")));
+            context.pushElement("effects[" + (index++) + ']');
+            ServerEffectWrapper<?> effect = CutsceneEffect.fromJSON(GsonHelper.convertToJsonObject(i, "effect"), context);
+            if (effect != null) {
+                effects.add(effect);
+            }
+            context.popElement();
         }
-        return new CutsceneType(path, rotation, length, start, end, blockMovement, rotationHandler, toggles, hideHand, hideBlockOutline, effects);
+        ResourceOrTag postFunctions = context.wrapLoading("when_over", () -> ResourceOrTag.parse(GsonHelper.getAsString(json, "when_over", null)));
+        boolean logCommands = GsonHelper.getAsBoolean(json, "log_commands", false);
+        return new CutsceneType(path, rotation, length, start, end, blockMovement, rotationHandler, toggles, hideHand, hideBlockOutline, effects, postFunctions, logCommands);
     }
 }

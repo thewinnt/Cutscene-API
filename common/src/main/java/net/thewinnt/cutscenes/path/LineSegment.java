@@ -15,6 +15,7 @@ import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class LineSegment implements PathLike {
     private final PointProvider a;
@@ -115,7 +116,7 @@ public class LineSegment implements PathLike {
     }
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return weight;
     }
 
@@ -141,16 +142,16 @@ public class LineSegment implements PathLike {
     }
     
     @Override
-    public SegmentSerializer<LineSegment> getSerializer() {
+    public SegmentType<LineSegment> getSerializer() {
         return CutsceneManager.LINE;
     }
 
-    public static LineSegment fromJSON(JsonObject json, Path path) {
-        PointProvider start = JsonHelper.pointFromJson(json, "start");
-        PointProvider end = JsonHelper.pointFromJson(json, "end");
-        Easing easingX = Easing.fromJSON(json.get("easing_x"), SimpleEasing.LINEAR);
-        Easing easingY = Easing.fromJSON(json.get("easing_y"), SimpleEasing.LINEAR);
-        Easing easingZ = Easing.fromJSON(json.get("easing_z"), SimpleEasing.LINEAR);
+    public static LineSegment fromJSON(JsonObject json, Path path, LoadingContext context) {
+        PointProvider start = JsonHelper.pointFromJson(json, "start", context, true);
+        PointProvider end = JsonHelper.pointFromJson(json, "end", context, true);
+        Easing easingX = Easing.loadWrapped(json, "easing_x", context, SimpleEasing.LINEAR);
+        Easing easingY = Easing.loadWrapped(json, "easing_y", context, SimpleEasing.LINEAR);
+        Easing easingZ = Easing.loadWrapped(json, "easing_z", context, SimpleEasing.LINEAR);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         boolean isRotation = GsonHelper.getAsBoolean(json, "is_rotation", false);
         return new LineSegment(start, end, easingX, easingY, easingZ, weight, isRotation);

@@ -13,20 +13,15 @@ import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 import java.util.Objects;
 
-public class LookAtPoint implements PathLike {
-    private final PointProvider point;
-    private final PathLike pathSupplier;
-    private final int weight;
-
+public record LookAtPoint(PointProvider point, PathLike pathSupplier, int weight) implements PathLike {
     public LookAtPoint(PointProvider point, PathLike pathSupplier) {
-        this.point = point;
-        this.pathSupplier = Objects.requireNonNull(pathSupplier);
-        this.weight = 1;
+        this(point, Objects.requireNonNull(pathSupplier), 1);
     }
-    
+
     public LookAtPoint(PointProvider point, PathLike pathSupplier, int weight) {
         this.point = point;
         this.pathSupplier = Objects.requireNonNull(pathSupplier);
@@ -34,23 +29,19 @@ public class LookAtPoint implements PathLike {
     }
 
     public LookAtPoint(Vec3 point, PathLike pathSupplier) {
-        this.point = new StaticPointProvider(point);
-        this.pathSupplier = Objects.requireNonNull(pathSupplier);
-        this.weight = 1;
+        this(new StaticPointProvider(point), Objects.requireNonNull(pathSupplier), 1);
     }
-    
+
     public LookAtPoint(Vec3 point, PathLike pathSupplier, int weight) {
-        this.point = new StaticPointProvider(point);
-        this.pathSupplier = Objects.requireNonNull(pathSupplier);
-        this.weight = weight;
+        this(new StaticPointProvider(point), Objects.requireNonNull(pathSupplier), weight);
     }
 
     @Override
     public Vec3 getPoint(double t, Level l, Vec3 s) {
         Vec3 start = pathSupplier.getPoint(t, l, s);
-        start = start.yRot((float)Math.toRadians(ClientCutsceneManager.startPathYaw));
-        start = start.zRot((float)Math.toRadians(ClientCutsceneManager.startPathPitch));
-        start = start.xRot((float)Math.toRadians(ClientCutsceneManager.startPathRoll));
+        start = start.yRot((float) Math.toRadians(ClientCutsceneManager.startPathYaw));
+        start = start.zRot((float) Math.toRadians(ClientCutsceneManager.startPathPitch));
+        start = start.xRot((float) Math.toRadians(ClientCutsceneManager.startPathRoll));
         double d0 = PointProvider.getPoint(point, l, s).x - start.x;
         double d1 = PointProvider.getPoint(point, l, s).y - start.y;
         double d2 = PointProvider.getPoint(point, l, s).z - start.z;
@@ -71,18 +62,13 @@ public class LookAtPoint implements PathLike {
     }
 
     @Override
-    public int getWeight() {
-        return weight;
-    }
-
-    @Override
     public void toNetwork(FriendlyByteBuf buf) {
         CutsceneNetworkHandler.writePointProvider(buf, point);
         buf.writeInt(weight);
     }
 
     @Override
-    public SegmentSerializer<?> getSerializer() {
+    public SegmentType<?> getSerializer() {
         return CutsceneManager.LOOK_AT_POINT;
     }
 
@@ -92,8 +78,9 @@ public class LookAtPoint implements PathLike {
         return new LookAtPoint(point, path, weight);
     }
 
-    public static LookAtPoint fromJSON(JsonObject json, Path path) {
-        PointProvider point = JsonHelper.pointFromJson(json, "point");
+    public static LookAtPoint fromJSON(JsonObject json, Path path, LoadingContext context) {
+        if (path == null) context.reportError("look_at_point used in camera path");
+        PointProvider point = JsonHelper.pointFromJson(json, "point", context, true);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         return new LookAtPoint(point, path, weight);
     }

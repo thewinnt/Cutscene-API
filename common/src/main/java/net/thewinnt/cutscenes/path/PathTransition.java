@@ -12,6 +12,7 @@ import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.path.point.PointProvider;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class PathTransition implements PathLike {
     private final Path path;
@@ -85,7 +86,7 @@ public class PathTransition implements PathLike {
         return path.getSegment(index + 1).getStart(l, s);
     }
     @Override
-    public int getWeight() {
+    public int weight() {
         return weight;
     }
 
@@ -99,7 +100,7 @@ public class PathTransition implements PathLike {
     }
 
     @Override
-    public SegmentSerializer<?> getSerializer() {
+    public SegmentType<?> getSerializer() {
         return CutsceneManager.PATH_TRANSITION;
     }
 
@@ -112,10 +113,10 @@ public class PathTransition implements PathLike {
         return new PathTransition(path, path.size(), easingX, easingY, easingZ, isRotation, weight);
     }
 
-    public static PathTransition fromJSON(JsonObject json, Path path) {
-        Easing easingX = Easing.fromJSON(json.get("easing_x"), SimpleEasing.LINEAR);
-        Easing easingY = Easing.fromJSON(json.get("easing_y"), SimpleEasing.LINEAR);
-        Easing easingZ = Easing.fromJSON(json.get("easing_z"), SimpleEasing.LINEAR);
+    public static PathTransition fromJSON(JsonObject json, Path path, LoadingContext context) {
+        Easing easingX = Easing.loadWrapped(json, "easing_x", context, SimpleEasing.LINEAR);
+        Easing easingY = Easing.loadWrapped(json, "easing_y", context, SimpleEasing.LINEAR);
+        Easing easingZ = Easing.loadWrapped(json, "easing_z", context, SimpleEasing.LINEAR);
         int weight = GsonHelper.getAsInt(json, "weight", 1);
         boolean isRotation = GsonHelper.getAsBoolean(json, "is_rotation", false);
         return new PathTransition(path, path.size(), easingX, easingY, easingZ, isRotation, weight);

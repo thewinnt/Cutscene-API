@@ -1,6 +1,10 @@
 package net.thewinnt.cutscenes.easing;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -8,6 +12,7 @@ import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.serializers.*;
 import net.thewinnt.cutscenes.easing.types.*;
 import net.thewinnt.cutscenes.util.LoadResolver;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +20,7 @@ import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
 
 public interface EasingSerializer<T extends Easing> {
-    Map<String, Easing> LEGACY_COMPAT = new HashMap<>();
+    BiMap<String, Easing> LEGACY_COMPAT = HashBiMap.create();
     Map<String, SimpleEasingSerializer> SIMPLE_EASINGS = new HashMap<>();
     Map<DoubleUnaryOperator, SingleArgumentEasingSerializer> SINGLE_ARGUMENT_EASINGS = new HashMap<>();
     Map<DoubleBinaryOperator, DoubleArgumentEasingSerializer> DOUBLE_ARGUMENT_EASINGS = new HashMap<>();
@@ -79,11 +84,16 @@ public interface EasingSerializer<T extends Easing> {
     EasingSerializer<SplineEasing> SPLINE = register(ResourceLocation.parse("cutscenes:spline"), SplineEasingSerializer.INSTANCE);
     EasingSerializer<LerpEasing> LERP = register(ResourceLocation.parse("cutscenes:lerp"), LerpEasingSerializer.INSTANCE);
     EasingSerializer<ColorEasing> COLOR = register(ResourceLocation.parse("cutscenes:color"), ColorEasingSerializer.INSTANCE);
+    EasingSerializer<IndependentCoordinateEasing> COORDINATE = register(ResourceLocation.parse("cutscenes:coordinate"), IndependentCoordinateSerializer.INSTANCE);
+    EasingSerializer<RangeChoiceEasing> RANGE_CHOICE = register(ResourceLocation.parse("cutscenes:range_choice"), RangeChoiceSerializer.INSTANCE);
+    EasingSerializer<RandomEasing> RANDOM = register(ResourceLocation.parse("cutscenes:random"), RandomEasingSerializer.INSTANCE);
 
 
     T fromNetwork(FriendlyByteBuf buf);
-    T fromJSON(JsonObject json);
-    T fromJSON(JsonObject json, LoadResolver<Easing> context);
+    T fromJSON(JsonObject json, LoadingContext context);
+    default MapCodec<T> codec() {
+        return null;
+    }
 
     static <T extends Easing> EasingSerializer<T> register(ResourceLocation id, EasingSerializer<T> serializer) {
         return Registry.register(CutsceneAPI.EASING_SERIALIZERS, id, serializer);

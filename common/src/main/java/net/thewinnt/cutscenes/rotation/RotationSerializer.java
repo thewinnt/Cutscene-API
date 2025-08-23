@@ -11,6 +11,7 @@ import net.thewinnt.cutscenes.rotation.handler.EaseBackRotation;
 import net.thewinnt.cutscenes.rotation.handler.PlayerRotation;
 import net.thewinnt.cutscenes.rotation.serializer.EaseBackSerializer;
 import net.thewinnt.cutscenes.rotation.serializer.SimpleRotationHandlerSerializer;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +26,7 @@ public interface RotationSerializer<T extends RotationHandler> {
 
     void toNetwork(FriendlyByteBuf buf, T handler);
     T fromNetwork(FriendlyByteBuf buf);
-    T fromJson(JsonObject json);
+    T fromJson(JsonObject json, LoadingContext context);
 
     static <T extends RotationHandler> RotationSerializer<T> registerSimple(T singleton, ResourceLocation id) {
         SimpleRotationHandlerSerializer<T> serializer = new SimpleRotationHandlerSerializer<>(singleton);

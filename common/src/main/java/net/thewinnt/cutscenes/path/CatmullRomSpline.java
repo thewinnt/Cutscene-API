@@ -18,6 +18,7 @@ import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 import net.thewinnt.cutscenes.util.JsonHelper;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class CatmullRomSpline implements PathLike {
     private PointProvider start;
@@ -104,7 +105,7 @@ public class CatmullRomSpline implements PathLike {
     }
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return weight;
     }
 
@@ -128,7 +129,7 @@ public class CatmullRomSpline implements PathLike {
             points.add(CutsceneNetworkHandler.readPointProvider(buf));
         }
         int weight = buf.readInt();
-        return new CatmullRomSpline(weight, points.toArray(new PointProvider[0]));
+        return new CatmullRomSpline(weight, points.toArray(PointProvider[]::new));
     }
 
     public void toNetwork(FriendlyByteBuf buf) {
@@ -139,18 +140,20 @@ public class CatmullRomSpline implements PathLike {
         buf.writeInt(weight);
     }
     
-    public static CatmullRomSpline fromJSON(JsonObject json, Path path) {
+    public static CatmullRomSpline fromJSON(JsonObject json, Path path, LoadingContext context) {
         JsonArray points_j = json.getAsJsonArray("points");
         ArrayList<PointProvider> points = new ArrayList<>();
+        int index = 0;
         for (JsonElement i : points_j) {
-            points.add(JsonHelper.pointFromJson(i));
+            points.add(context.wrapLoading("points[" + index + "]", () -> JsonHelper.pointFromJson(i, context, true)));
+            index++;
         }
         int weight = GsonHelper.getAsInt(json, "weight", 1);
-        return new CatmullRomSpline(weight, points.toArray(new PointProvider[0]));
+        return new CatmullRomSpline(weight, points.toArray(PointProvider[]::new));
     }
     
     @Override
-    public SegmentSerializer<CatmullRomSpline> getSerializer() {
+    public SegmentType<CatmullRomSpline> getSerializer() {
         return CutsceneManager.CATMULL_ROM;
     }
 

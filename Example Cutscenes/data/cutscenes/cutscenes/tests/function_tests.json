@@ -1,0 +1,104 @@
+{
+  "version": 0,
+  "length": 220,
+  "start_transition": {
+    "type": "cutscenes:no_op"
+  },
+  "end_transition": {
+    "type": "cutscenes:no_op"
+  },
+  "disable_actions": false,
+  "hide_hand": false,
+  "when_over": "cutscenes:init_battle",
+  "effects": [
+    {
+      "type": "cutscenes:text",
+      "start": 0,
+      "end": 60,
+      "text": {
+        "translate": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec consectetur.",
+        "color": "gold"
+      },
+      "x": 0.5,
+      "y": 0.75,
+      "centered": true
+    },
+    {
+      "type": "cutscenes:text",
+      "start": 60,
+      "end": 120,
+      "text": {
+        "translate": "And now, a countdown!",
+        "color": "gold"
+      },
+      "x": 0.5,
+      "y": 0.75,
+      "centered": true
+    },
+    {
+      "type": "cutscenes:text",
+      "start": 120,
+      "end": 140,
+      "text": {
+        "text": "5",
+        "color": "green"
+      },
+      "x": 0.5,
+      "y": 0.5,
+      "centered": true,
+      "scale": 4
+    },
+    {
+      "type": "cutscenes:text",
+      "start": 140,
+      "end": 160,
+      "text": {
+        "text": "4",
+        "color": "green"
+      },
+      "x": 0.5,
+      "y": 0.5,
+      "centered": true,
+      "scale": 4
+    },
+    {
+      "type": "cutscenes:text",
+      "start": 160,
+      "end": 180,
+      "text": {
+        "text": "3",
+        "color": "yellow"
+      },
+      "x": 0.5,
+      "y": 0.5,
+      "centered": true,
+      "scale": 4
+    },
+    {
+      "type": "cutscenes:text",
+      "start": 180,
+      "end": 200,
+      "text": {
+        "text": "2",
+        "color": "gold"
+      },
+      "x": 0.5,
+      "y": 0.5,
+      "centered": true,
+      "scale": 4
+    },
+    {
+      "type": "cutscenes:text",
+      "start": 200,
+      "end": 220,
+      "text": {
+        "text": "1",
+        "color": "red"
+      },
+      "x": 0.5,
+      "y": 0.5,
+      "centered": true,
+      "scale": 4
+    }
+  ]
+}

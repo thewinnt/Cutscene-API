@@ -11,6 +11,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.path.Path;
+import net.thewinnt.cutscenes.path.PathLike;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 /** The base interface for point types. */
 public interface PointProvider {
@@ -61,13 +63,13 @@ public interface PointProvider {
     }
 
     /** An object that constructs point providers from JSON and network. */
-    public static interface PointSerializer<T extends PointProvider> {
+    interface PointSerializer<T extends PointProvider> {
         /**
          * Reconstructs a point from network, matching its server companion as closely as possible.
          * @param buf the buffer to read from. The data in this buffer is enough to fully recreate the
          *            original segment type.
          * @return a point reconstructed from network.
-         * @see net.thewinnt.cutscenes.path.PathLike.SegmentSerializer#fromNetwork(FriendlyByteBuf, Path) 
+         * @see PathLike.SegmentType#fromNetwork(FriendlyByteBuf, Path)
          */
         T fromNetwork(FriendlyByteBuf buf);
 
@@ -76,22 +78,23 @@ public interface PointProvider {
          * network to be reconstructed on the client.
          * @param json the JSON object representing this segment. It may not contain all the properties this segment
          *             has.
+         * @param context the context for loading the current cutscene.
          * @return a point created from the given JSON object.
          * @throws IllegalArgumentException if there's not enough data to create a point, or it is invalid
-         * @see net.thewinnt.cutscenes.path.PathLike.SegmentSerializer#fromNetwork(FriendlyByteBuf, Path)
+         * @see PathLike.SegmentType#fromJSON(JsonObject, Path, LoadingContext)
          */
-        T fromJSON(JsonObject json);
+        T fromJSON(JsonObject json, LoadingContext context);
 
         /**
          * A helper method to create a segment serializer from 2 functions.
          * @param network a {@link #fromNetwork(FriendlyByteBuf)} implementation
-         * @param json a {@link #fromJSON(JsonObject)} implementation
+         * @param json a {@link #fromJSON(JsonObject, LoadingContext)} implementation
          * @return a segment serializer for the given type
          * @param <T> the class for the segment type
          * @see net.thewinnt.cutscenes.CutsceneManager#STATIC
-         * @see net.thewinnt.cutscenes.path.PathLike.SegmentSerializer#of(BiFunction, BiFunction)
+         * @see PathLike.SegmentType#of(BiFunction, org.apache.commons.lang3.function.TriFunction)
          */
-        public static <T extends PointProvider> PointSerializer<T> of(Function<FriendlyByteBuf, T> network, Function<JsonObject, T> json) {
+        static <T extends PointProvider> PointSerializer<T> of(Function<FriendlyByteBuf, T> network, BiFunction<JsonObject, LoadingContext, T> json) {
             return new PointSerializer<>() {
                 @Override
                 public T fromNetwork(FriendlyByteBuf buf) {
@@ -99,8 +102,8 @@ public interface PointProvider {
                 }
 
                 @Override
-                public T fromJSON(JsonObject obj) {
-                    return json.apply(obj);
+                public T fromJSON(JsonObject obj, LoadingContext context) {
+                    return json.apply(obj, context);
                 }
             };
         }

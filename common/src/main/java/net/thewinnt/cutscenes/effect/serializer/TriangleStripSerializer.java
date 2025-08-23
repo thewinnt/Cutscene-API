@@ -1,6 +1,7 @@
 package net.thewinnt.cutscenes.effect.serializer;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
@@ -9,6 +10,7 @@ import net.thewinnt.cutscenes.effect.configuration.TriangleStripConfiguration;
 import net.thewinnt.cutscenes.effect.type.TriangleStripEffect;
 import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.util.DynamicVertex;
+import net.thewinnt.cutscenes.util.LoadingContext;
 
 public class TriangleStripSerializer implements CutsceneEffectSerializer<TriangleStripConfiguration> {
     public static final TriangleStripSerializer INSTANCE = new TriangleStripSerializer();
@@ -22,11 +24,12 @@ public class TriangleStripSerializer implements CutsceneEffectSerializer<Triangl
     }
 
     @Override
-    public TriangleStripConfiguration fromJSON(JsonObject json) {
+    public TriangleStripConfiguration fromJSON(JsonObject json, LoadingContext context) {
         JsonArray array = GsonHelper.getAsJsonArray(json, "vertices");
         DynamicVertex[] vertices = new DynamicVertex[array.size()];
         for (int i = 0; i < array.size(); i++) {
-            vertices[i] = DynamicVertex.fromJSON(GsonHelper.convertToJsonObject(array.get(i), "vertex"));
+            JsonElement element = array.get(i);
+            vertices[i] = context.wrapLoading("vertices[" + i + "]", () -> DynamicVertex.fromJSON(GsonHelper.convertToJsonObject(element, "vertex"), context));
         }
         return new TriangleStripConfiguration(vertices);
     }
