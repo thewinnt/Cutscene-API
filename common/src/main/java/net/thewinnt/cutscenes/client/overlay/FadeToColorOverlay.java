@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.Overlay;
 import org.joml.Matrix4f;
 
@@ -14,24 +13,22 @@ public class FadeToColorOverlay implements Overlay {
 
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object config) {
-        Profiler.get().push("cutscenes:fade");
+        Minecraft.getInstance().getProfiler().push("cutscenes:fade");
         FadeToColorOverlayConfiguration cfg = ((FadeToColorOverlayConfiguration) config);
         graphics.pose().pushPose();
         PoseStack.Pose pose = graphics.pose().last();
-        graphics.drawSpecial(multiBufferSource -> {
-            VertexConsumer builder = multiBufferSource.getBuffer(RenderType.gui());
-            float[] colorBottomLeft = cfg.bottomLeft.sample(cfg.getProgress());
-            float[] colorBottomRight = cfg.bottomRight.sample(cfg.getProgress());
-            float[] colorTopLeft = cfg.topLeft.sample(cfg.getProgress());
-            float[] colorTopRight = cfg.topRight.sample(cfg.getProgress());
-            float alpha = cfg.getAlpha();
-            builder.addVertex(pose, 0, height, 0).setColor(colorBottomLeft[0], colorBottomLeft[1], colorBottomLeft[2], colorBottomLeft[3] * alpha);
-            builder.addVertex(pose, width, height, 0).setColor(colorBottomRight[0], colorBottomRight[1], colorBottomRight[2], colorBottomRight[3] * alpha);
-            builder.addVertex(pose, width, 0, 0).setColor(colorTopRight[0], colorTopRight[1], colorTopRight[2], colorTopRight[3] * alpha);
-            builder.addVertex(pose, 0, 0, 0).setColor(colorTopLeft[0], colorTopLeft[1], colorTopLeft[2], colorTopLeft[3] * alpha);
-            graphics.pose().popPose();
-            Profiler.get().pop();
-        });
+        VertexConsumer builder = graphics.bufferSource().getBuffer(RenderType.gui());
+        float[] colorBottomLeft = cfg.bottomLeft.sample(cfg.getProgress());
+        float[] colorBottomRight = cfg.bottomRight.sample(cfg.getProgress());
+        float[] colorTopLeft = cfg.topLeft.sample(cfg.getProgress());
+        float[] colorTopRight = cfg.topRight.sample(cfg.getProgress());
+        float alpha = cfg.getAlpha();
+        builder.addVertex(pose, 0, height, 0).setColor(colorBottomLeft[0], colorBottomLeft[1], colorBottomLeft[2], colorBottomLeft[3] * alpha);
+        builder.addVertex(pose, width, height, 0).setColor(colorBottomRight[0], colorBottomRight[1], colorBottomRight[2], colorBottomRight[3] * alpha);
+        builder.addVertex(pose, width, 0, 0).setColor(colorTopRight[0], colorTopRight[1], colorTopRight[2], colorTopRight[3] * alpha);
+        builder.addVertex(pose, 0, 0, 0).setColor(colorTopLeft[0], colorTopLeft[1], colorTopLeft[2], colorTopLeft[3] * alpha);
+        graphics.pose().popPose();
+        minecraft.getProfiler().pop();
 
 //        graphics.drawString(minecraft.font, Component.literal("alpha " + alpha), 0, 0, 16777215);
 //        graphics.drawString(minecraft.font, Component.literal("alpha_bl " + alpha * colorBottomLeft[3]), 0, 9, 16777215);

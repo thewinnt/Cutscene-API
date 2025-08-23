@@ -10,7 +10,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.valueproviders.ConstantFloat;
@@ -65,7 +65,7 @@ public record DynamicColor(Easing r, Easing g, Easing b, Easing a) {
         int g = (int) Mth.clamp(this.g.get(t) * 255, 0, 255);
         int b = (int) Mth.clamp(this.b.get(t) * 255, 0, 255);
         int a = (int) Mth.clamp(this.a.get(t) * 255, 0, 255);
-        return ARGB.color(a, r, g, b);
+        return FastColor.ARGB32.color(a, r, g, b);
     }
 
     public float[] sample(double t) {

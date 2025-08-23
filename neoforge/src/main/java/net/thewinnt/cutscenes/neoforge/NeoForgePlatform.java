@@ -19,7 +19,7 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -54,9 +54,9 @@ public class NeoForgePlatform implements PlatformAbstractions {
     }
 
     @SubscribeEvent
-    public static void addReloadListeners(AddServerReloadListenersEvent event) {
+    public static void addReloadListeners(AddReloadListenerEvent event) {
         NeoForgePlatform platform = CutsceneAPINeoForge.PLATFORM;
-        platform.reloadListeners.forEach((listener, id) -> event.addListener(id, listener));
+        platform.reloadListeners.forEach((listener, id) -> event.addListener(listener));
     }
 
     @Override

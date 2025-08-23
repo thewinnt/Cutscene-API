@@ -53,7 +53,7 @@ public class WaypointEntity extends Entity {
     }
 
     @Override
-    public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+    public boolean hurt(DamageSource damageSource, float f) {
         return false;
     }
 }

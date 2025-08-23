@@ -126,7 +126,7 @@ public interface Easing {
             return fromJSONPrimitive(json.getAsJsonPrimitive(), context);
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.getValue(ResourceLocation.parse(obj.get("type").getAsString()));
+            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.get(ResourceLocation.parse(obj.get("type").getAsString()));
             if (serializer == null) {
                 context.reportError("Unknown easing type: " + GsonHelper.getAsString(obj, "type"));
                 return null;

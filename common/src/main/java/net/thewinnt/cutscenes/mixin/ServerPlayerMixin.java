@@ -78,8 +78,8 @@ public class ServerPlayerMixin implements ServerPlayerExt {
         }
     }
 
-    @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
-    public void hurt(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
+    @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
+    public void hurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
         if (cutscenes$running != null && cutscenes$running.actionToggles.disableDamage()) {
             callback.setReturnValue(false);
         }

@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
@@ -45,7 +44,7 @@ public class CutsceneInstance {
      * @return {@code true} if the cutscene should continue
      */
     public boolean tick() {
-        ProfilerFiller profiler = Profiler.get();
+        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
         if (!initialized) {
             this.timeManager.start();
             this.initialized = true;

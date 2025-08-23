@@ -1,6 +1,7 @@
 package net.thewinnt.cutscenes.client.overlay;
 
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
 import org.joml.Matrix4f;
 
@@ -8,7 +9,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.CoreShaders;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.BlitConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
@@ -34,14 +34,16 @@ public class BlitOverlay implements Overlay {
         float v2 = config.v2().get(t, 1);
         int color = config.tint().toARGB(t);
         float z = config.z();
-        graphics.drawSpecial(source -> {
-            RenderType rendertype = RenderType.guiTextured(config.texture());
-            Matrix4f matrix4f = graphics.pose().last().pose();
-            VertexConsumer vertexconsumer = source.getBuffer(rendertype);
-            vertexconsumer.addVertex(matrix4f, x1, y1, z).setUv(u1, v1).setColor(color);
-            vertexconsumer.addVertex(matrix4f, x1, y2, z).setUv(u1, v2).setColor(color);
-            vertexconsumer.addVertex(matrix4f, x2, y2, z).setUv(u2, v2).setColor(color);
-            vertexconsumer.addVertex(matrix4f, x2, y1, z).setUv(u2, v1).setColor(color);
-        });
+        RenderSystem.setShaderTexture(0, config.texture());
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.enableBlend();
+        Matrix4f matrix4f = graphics.pose().last().pose();
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferbuilder.addVertex(matrix4f, x1, y1, z).setColor(color).setUv(u1, v1);
+        bufferbuilder.addVertex(matrix4f, x1, y2, z).setColor(color).setUv(u1, v2);
+        bufferbuilder.addVertex(matrix4f, x2, y2, z).setColor(color).setUv(u2, v2);
+        bufferbuilder.addVertex(matrix4f, x2, y1, z).setColor(color).setUv(u2, v1);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        RenderSystem.disableBlend();
     }
 }

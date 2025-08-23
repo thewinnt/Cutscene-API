@@ -16,6 +16,6 @@ public class CutsceneAPIEntities {
         .sized(0.1f, 0.1f)
         .clientTrackingRange(9999)
         .canSpawnFarFromPlayer()
-        .build(ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath("cutscenes", "waypoint")))
+        .build("cutscenes:waypoint")
     );
 }

@@ -12,10 +12,11 @@ import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.player.ClientInput;
+import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.ServerLinks;
 import net.minecraft.tags.FluidTags;
@@ -33,6 +34,26 @@ import net.thewinnt.cutscenes.transition.Transition;
 
 public class CutsceneCameraEntity extends LocalPlayer {
     private static final Minecraft MINECRAFT = Minecraft.getInstance();
+    private static final ClientPacketListener NETWORK_HANDLER = new ClientPacketListener(
+        MINECRAFT,
+        MINECRAFT.getConnection().getConnection(),
+        new CommonListenerCookie(
+            new GameProfile(UUID.randomUUID(), "CutsceneAPI$Camera"),
+            MINECRAFT.getTelemetryManager().createWorldSessionManager(false, Duration.ZERO, "cutscene-api$fakedata"),
+            RegistryAccess.Frozen.EMPTY,
+            FeatureFlagSet.of(),
+            "cutscene-api$fakedata",
+            new ServerData("csapi$fakedata", "127.0.0.1", ServerData.Type.OTHER),
+            Minecraft.getInstance().screen,
+            Map.of(),
+            new ChatComponent.State(List.of(), List.of(), List.of()),
+            false,
+            Map.of(),
+            new ServerLinks(List.of())
+        )
+    ) {
+        public void send(Packet<?> pPacket) {}
+    };
 
     private final CutsceneInstance cutscene;
     private final Vec3 startPos;
@@ -41,30 +62,8 @@ public class CutsceneCameraEntity extends LocalPlayer {
     private final float pathPitch;
     private final float pathRoll;
 
-    private static ClientPacketListener createListener() {
-        return new ClientPacketListener(
-            MINECRAFT,
-            MINECRAFT.getConnection().getConnection(),
-            new CommonListenerCookie(
-                    new GameProfile(UUID.randomUUID(), "CutsceneAPI$Camera"),
-                    MINECRAFT.getTelemetryManager().createWorldSessionManager(false, Duration.ZERO, "cutscene-api$fakedata"),
-                    MINECRAFT.getConnection().registryAccess(),
-                    FeatureFlagSet.of(),
-                    "cutscene-api$fakedata",
-                    new ServerData("csapi$fakedata", "127.0.0.1", ServerData.Type.OTHER),
-                    Minecraft.getInstance().screen,
-                    Map.of(),
-                    null,
-                    Map.of(),
-                    new ServerLinks(List.of())
-            )
-        ) {
-            public void send(Packet<?> pPacket) {}
-        };
-    }
-
     public CutsceneCameraEntity(int id, CutsceneInstance cutscene, Vec3 startPos, float camStartYaw, float camStartPitch, float pathYaw, float pathPitch, float pathRoll) {
-        super(MINECRAFT, MINECRAFT.level, createListener(), MINECRAFT.player.getStats(), MINECRAFT.player.getRecipeBook(), false, false);
+        super(MINECRAFT, MINECRAFT.level, NETWORK_HANDLER, MINECRAFT.player.getStats(), MINECRAFT.player.getRecipeBook(), false, false);
         this.setId(id);
         super.setPose(Pose.SWIMMING);
         LocalPlayer mcplayer = MINECRAFT.player;
@@ -78,7 +77,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
         this.xBobO = xBob;
         this.yBobO = yBob;
         this.getAbilities().flying = true;
-        this.input = new ClientInput();
+        this.input = new Input();
         this.startPos = startPos;
         this.noPhysics = true;
         this.pathYaw = (float)Math.toRadians(pathYaw);
@@ -142,7 +141,7 @@ public class CutsceneCameraEntity extends LocalPlayer {
         this.setPosRaw(output.x, output.y, output.z);
         BlockPos pos = BlockPos.containing(output.x, output.y, output.z);
         Level level = level();
-        minecraft.smartCull = !level.getBlockState(pos).isSolidRender();
+        minecraft.smartCull = !level.getBlockState(pos).isSolidRender(level, pos);
         return output;
     }
 

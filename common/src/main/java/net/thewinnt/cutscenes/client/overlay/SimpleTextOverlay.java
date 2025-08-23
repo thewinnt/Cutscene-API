@@ -5,7 +5,6 @@ import com.mojang.math.Axis;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.SimpleTextConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
@@ -19,7 +18,7 @@ public class SimpleTextOverlay implements Overlay {
 
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object cfg) {
-        Profiler.get().push("cutscenes:text");
+        Minecraft.getInstance().getProfiler().push("cutscenes:text");
         PoseStack pose = graphics.pose();
         pose.pushPose();
         TimeProvider time = ((TimeProvider) cfg);
@@ -44,6 +43,6 @@ public class SimpleTextOverlay implements Overlay {
         }
         graphics.drawCenteredString(minecraft.font, config.text(), 0, 0, color);
         pose.popPose();
-        Profiler.get().pop();
+        Minecraft.getInstance().getProfiler().pop();
     }
 }

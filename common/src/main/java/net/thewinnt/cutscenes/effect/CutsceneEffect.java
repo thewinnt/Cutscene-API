@@ -71,7 +71,7 @@ public abstract class CutsceneEffect<T> {
     @SuppressWarnings({"unchecked", "rawtypes"}) // java refuses to acknowledge that the ? is the same in serializer and its fromJSON
     public static ServerEffectWrapper<?> fromJSON(JsonObject json, LoadingContext context) {
         ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(json, "type"));
-        CutsceneEffectSerializer<?> serializer = CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS.getValue(type);
+        CutsceneEffectSerializer<?> serializer = CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS.get(type);
         if (serializer == null) {
             context.reportError("Unknown cutscene effect type: " + type);
             return null;

@@ -11,7 +11,6 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
@@ -31,8 +30,8 @@ public class AppearingTextOverlay implements Overlay {
 
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object config) {
-        Profiler.get().push("cutscenes:appearing_text");
-        Profiler.get().push("prepare");
+        minecraft.getProfiler().push("cutscenes:appearing_text");
+        minecraft.getProfiler().push("prepare");
         TimeProvider time = (TimeProvider) config;
         Component text = this.config.text();
         double tickrate = ClientCutsceneManager.runningCutscene.cutscene.length.manager().ticksPerUnit();
@@ -95,14 +94,14 @@ public class AppearingTextOverlay implements Overlay {
         int lineWidth = (int)this.config.width().get(time.getProgress(), width);
         // i could've used drawWordWrap() here, but it doesn't do a shadow
         // the code below is copied from GuiGraphics#drawWordWrap
-        Profiler.get().popPush("draw");
+        minecraft.getProfiler().popPush("draw");
         for (FormattedCharSequence j : minecraft.font.split(FormattedText.composite(result), lineWidth)) {
             graphics.drawString(minecraft.font, j, 0, 0, 0xffffff, this.config.dropShadow());
             pose.translate(0, minecraft.font.lineHeight, 0);
         }
         pose.popPose();
-        Profiler.get().pop();
-        Profiler.get().pop();
+        minecraft.getProfiler().pop();
+        minecraft.getProfiler().pop();
     }
 
     private static class DrawingState {

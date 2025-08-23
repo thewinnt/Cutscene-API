@@ -1,5 +1,6 @@
 package net.thewinnt.cutscenes.client.overlay;
 
+import net.minecraft.client.renderer.GameRenderer;
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -11,10 +12,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.TextureAnimationConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
@@ -36,7 +35,7 @@ public class TextureAnimationOverlay implements Overlay {
 
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object cfg) {
-        Profiler.get().push("cutscenes:animation");
+        Minecraft.getInstance().getProfiler().push("cutscenes:animation");
         TimeProvider time = (TimeProvider) cfg;
         double t = time.getProgress();
 
@@ -52,7 +51,7 @@ public class TextureAnimationOverlay implements Overlay {
         int frame = (int) (Mth.clamp(config.timeWarp().get(time.getProgress()), 0, 1) * config.frameCount());
 
         RenderSystem.setShaderTexture(0, frames[frame]);
-        RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.enableBlend();
         Matrix4f matrix4f = graphics.pose().last().pose();
         BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -64,6 +63,6 @@ public class TextureAnimationOverlay implements Overlay {
 
         BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
         RenderSystem.disableBlend();
-        Profiler.get().pop();
+        Minecraft.getInstance().getProfiler().pop();
     }
 }

@@ -122,7 +122,7 @@ public class CutsceneAPI {
                     player.position(),
                     player.getRotationVector(),
                     player.serverLevel(),
-                    player.getPermissionLevel(),
+                    player.server.getProfilePermissions(player.getGameProfile()),
                     player.getName().getString(),
                     player.getDisplayName(),
                     player.server,

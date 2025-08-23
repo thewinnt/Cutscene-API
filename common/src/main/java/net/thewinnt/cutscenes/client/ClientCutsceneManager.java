@@ -7,10 +7,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.Input;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.profiling.Profiler;
-import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneAPI;
@@ -162,7 +161,7 @@ public class ClientCutsceneManager {
                 return;
             }
             Level level = Minecraft.getInstance().level;
-            Profiler.get().push("cutscene_tick");
+            Minecraft.getInstance().getProfiler().push("cutscene_tick");
             double now = now();
             dt = now - lastFrameTime;
             lastFrameTime = now;
@@ -170,7 +169,7 @@ public class ClientCutsceneManager {
                 dt = 0;
             }
             if (runningCutscene.tick()) {
-                Profiler.get().popPush("rotation");
+                Minecraft.getInstance().getProfiler().popPush("rotation");
                 Vector3f finalRot;
                 Vec3 initCamRot = new Vec3(initCameraYaw, initCameraPitch, initCameraRoll);
                 Vec3 startRot = new Vec3(startCameraYaw, startCameraPitch, startCameraRoll);
@@ -196,9 +195,9 @@ public class ClientCutsceneManager {
                 event.setYaw(finalRot.x);
                 event.setPitch(finalRot.y);
                 event.setRoll(finalRot.z);
-                Profiler.get().pop();
+                Minecraft.getInstance().getProfiler().pop();
             }
-            Profiler.get().pop();
+            Minecraft.getInstance().getProfiler().pop();
         } else {
             initCameraYaw = event.getYaw();
             initCameraPitch = event.getPitch();
@@ -216,7 +215,9 @@ public class ClientCutsceneManager {
         Minecraft minecraft = Minecraft.getInstance();
         if (isCutsceneRunning && runningCutscene.cutscene.blockMovement) {
             if (minecraft.player != null && minecraft.player.input instanceof KeyboardInput) {
-                minecraft.player.input.keyPresses = new Input(false, false, false, false, false, minecraft.player.input.keyPresses.shift(), false);
+                Input input = new Input();
+                input.shiftKeyDown = minecraft.player.input.shiftKeyDown;
+                minecraft.player.input = input;
             }
         }
     }

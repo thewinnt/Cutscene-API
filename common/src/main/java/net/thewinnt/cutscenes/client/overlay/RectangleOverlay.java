@@ -2,7 +2,6 @@ package net.thewinnt.cutscenes.client.overlay;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.RectangleConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
@@ -16,7 +15,7 @@ public class RectangleOverlay implements Overlay {
 
     @Override
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object cfg) {
-        Profiler.get().push("cutscenes:rectangle");
+        Minecraft.getInstance().getProfiler().push("cutscenes:rectangle");
         TimeProvider time = (TimeProvider) cfg;
         double t = time.getProgress();
         int x = (int) config.x().get(t, width);
@@ -31,6 +30,6 @@ public class RectangleOverlay implements Overlay {
             color2 = config.colorBottom().toARGB(t);
         }
         graphics.fillGradient(x, y, x + rwidth, y + rheight, color1, color2);
-        Profiler.get().pop();
+        Minecraft.getInstance().getProfiler().pop();
     }
 }

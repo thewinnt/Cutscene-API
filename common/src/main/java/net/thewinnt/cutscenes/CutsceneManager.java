@@ -145,7 +145,7 @@ public class CutsceneManager {
 
     /** Returns the segment serializer with this ID, or {@code null} if it doesn't exist */
     public static SegmentType<?> getSegmentType(ResourceLocation id) {
-        return CutsceneAPI.SEGMENT_TYPES.getValue(id);
+        return CutsceneAPI.SEGMENT_TYPES.get(id);
     }
 
     /** Returns the ID of the specified point type, or {@code null} if it's not registered */
@@ -156,7 +156,7 @@ public class CutsceneManager {
     /** Returns the point serializer with this ID, or {@code null} if it doesn't exist */
     @Nullable
     public static PointSerializer<?> getPointType(ResourceLocation id) {
-        return CutsceneAPI.POINT_TYPES.getValue(id);
+        return CutsceneAPI.POINT_TYPES.get(id);
     }
 
     /** Returns the ID of the specified transition type, or {@code null} if it's not registered */
@@ -168,7 +168,7 @@ public class CutsceneManager {
     /** Returns the transition serializer with this ID, or {@code null} if it doesn't exist */
     @Nullable
     public static TransitionSerializer<?> getTransitionType(ResourceLocation id) {
-        return CutsceneAPI.TRANSITION_TYPES.getValue(id);
+        return CutsceneAPI.TRANSITION_TYPES.get(id);
     }
 
     /** Sets the currently previewed cutscene and tells the clients */
