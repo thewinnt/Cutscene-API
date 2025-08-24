@@ -1,17 +1,8 @@
 package net.thewinnt.cutscenes.client.overlay;
 
-import org.joml.Matrix4f;
-
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
@@ -51,19 +42,6 @@ public class TextureAnimationOverlay implements Overlay {
         int color = config.tint().toARGB(t);
         int frame = (int) (Mth.clamp(config.timeWarp().get(time.getProgress()), 0, 1) * config.frameCount());
 
-        RenderSystem.setShaderTexture(0, frames[frame]);
-        RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
-        RenderSystem.enableBlend();
-        Matrix4f matrix4f = graphics.pose().last().pose();
-        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        
-        bufferbuilder.addVertex(matrix4f, x1, y1, config.zIndex()).setColor(color).setUv(u1, v1);
-        bufferbuilder.addVertex(matrix4f, x1, y2, config.zIndex()).setColor(color).setUv(u1, v2);
-        bufferbuilder.addVertex(matrix4f, x2, y2, config.zIndex()).setColor(color).setUv(u2, v2);
-        bufferbuilder.addVertex(matrix4f, x2, y1, config.zIndex()).setColor(color).setUv(u2, v1);
-
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
-        RenderSystem.disableBlend();
-        Profiler.get().pop();
+        graphics.blit(RenderPipelines.GUI_TEXTURED, frames[frame], (int) x1, (int) y1, u1, v1, (int)(x2 - x1), (int)(y2 - y1), (int)(u2 - u1), (int)(v2 - v1), 1, 1, color);
     }
 }

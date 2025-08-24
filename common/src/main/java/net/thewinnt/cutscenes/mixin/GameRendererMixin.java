@@ -1,10 +1,16 @@
 package net.thewinnt.cutscenes.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
 import net.thewinnt.cutscenes.client.CutsceneOverlayManager;
@@ -18,32 +24,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
-    @Shadow @Final Minecraft minecraft;
-
-    @Inject(
-        method = "render",
-        at = @At(value = "JUMP"),
-        slice = @Slice(
-            from = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/client/gui/GuiGraphics;<init>(Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getOverlay()Lnet/minecraft/client/gui/screens/Overlay;", ordinal = 0)
-        )
-    )
-    private void cs$render(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci, @Local GuiGraphics guigraphics) {
-        // this method gets called several times, but we only want the first one
-        if (!ClientCutsceneManager.renderedOverlaysThisFrame) {
-            Profiler.get().push("cutscene_overlay");
-            if (ClientCutsceneManager.isCutsceneRunning()) {
-                CutsceneOverlayManager.render(minecraft, guigraphics, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
-            } else {
-                CutsceneOverlayManager.clearOverlays();
-            }
-            Profiler.get().pop();
-            ClientCutsceneManager.renderedOverlaysThisFrame = true;
+    @WrapOperation(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderHandsWithItems(FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/player/LocalPlayer;I)V"))
+    private void wrap(ItemInHandRenderer instance, float partialTicks, PoseStack poseStack, MultiBufferSource.BufferSource buffer, LocalPlayer playerEntity, int combinedLight, Operation<Void> original) {
+        if (ClientCutsceneManager.runningCutscene == null || !ClientCutsceneManager.runningCutscene.cutscene.hideHand) {
+            original.call(instance, partialTicks, poseStack, buffer, playerEntity, combinedLight);
         }
-    }
-
-    @Inject(method = "render", at = @At("HEAD"))
-    private void cs$markNewFrame(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci) {
-        ClientCutsceneManager.renderedOverlaysThisFrame = false;
     }
 }

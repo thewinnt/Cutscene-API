@@ -18,15 +18,12 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.event.EndingReason;
-import net.thewinnt.cutscenes.networking.packets.StartCutscenePacket;
-import net.thewinnt.cutscenes.util.ServerPlayerExt;
+import net.thewinnt.cutscenes.util.PlayerExt;
 
 import static net.minecraft.commands.Commands.*;
 
@@ -288,7 +285,7 @@ public class CutsceneCommand {
                         .executes(context -> {
                             CommandSourceStack stack = context.getSource();
                             ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                            ServerPlayerExt ext = ((ServerPlayerExt) player);
+                            PlayerExt ext = ((PlayerExt) player);
                             if (ext.csapi$isWatchingCutscene()) {
                                 stack.sendSuccess(() -> Component.translatable("commands.cutscene.get.start_reason", player.getName(), ext.csapi$getStartReason()), false);
                                 return 1;

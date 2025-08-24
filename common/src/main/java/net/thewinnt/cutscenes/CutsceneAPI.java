@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.netty.channel.nio.AbstractNioByteChannel;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.functions.CommandFunction;
@@ -47,7 +46,6 @@ import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
 import net.thewinnt.cutscenes.path.PathLike.SegmentType;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.PointProvider.PointSerializer;
-import net.thewinnt.cutscenes.platform.ClientPlatformAbstractions;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 import net.thewinnt.cutscenes.rotation.RotationSerializer;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
@@ -71,7 +69,7 @@ public class CutsceneAPI {
      */
     private static long WAYPOINT_SALT = RANDOM.nextLong();
     private static PlatformAbstractions PLATFORM;
-    private static ClientPlatformAbstractions CLIENT_PLATFORM;
+    private static PlatformAbstractions CLIENT_PLATFORM;
 
     // registry keys
     public static final ResourceKey<Registry<EasingSerializer<?>>> EASING_SERIALIZER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:easing_types"));
@@ -108,9 +106,9 @@ public class CutsceneAPI {
 
         // event listeners
         CutsceneEvents.CUTSCENE_OVER_SERVER.addListener((type, id, player, reason) -> {
-            ServerFunctionManager manager = player.server.getFunctions();
+            ServerFunctionManager manager = player.getServer().getFunctions();
             ResourceOrTag resourceOrTag = type.onOver;
-            ServerPlayerExt ext = (ServerPlayerExt) player;
+            PlayerExt ext = (PlayerExt) player;
             if (resourceOrTag == null) return;
 
             CommandSourceStack stack;
@@ -121,11 +119,11 @@ public class CutsceneAPI {
                     CommandSource.NULL,
                     player.position(),
                     player.getRotationVector(),
-                    player.serverLevel(),
+                    player.level(),
                     player.getPermissionLevel(),
                     player.getName().getString(),
                     player.getDisplayName(),
-                    player.server,
+                    player.getServer(),
                     player
                 );
             }
@@ -139,7 +137,7 @@ public class CutsceneAPI {
         });
     }
 
-    public static void onInitializeClient(@NotNull ClientPlatformAbstractions abstractions) {
+    public static void onInitializeClient(@NotNull PlatformAbstractions abstractions) {
         CutsceneAPI.CLIENT_PLATFORM = abstractions;
         abstractions.submitCameraAngleModifier(ClientCutsceneManager::setCameraPosition);
         abstractions.submitOnLogout(ClientCutsceneManager::onLogout);
@@ -164,7 +162,7 @@ public class CutsceneAPI {
         return PLATFORM;
     }
 
-    public static ClientPlatformAbstractions clientPlatform() {
+    public static PlatformAbstractions clientPlatform() {
         return CLIENT_PLATFORM;
     }
 

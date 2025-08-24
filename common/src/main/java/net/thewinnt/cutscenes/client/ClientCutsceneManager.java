@@ -72,9 +72,6 @@ public class ClientCutsceneManager {
         runningCutscene = new CutsceneInstance(type);
         // initialize minecraft
         Minecraft minecraft = Minecraft.getInstance();
-        if (runningCutscene.cutscene.hideHand) {
-            minecraft.gameRenderer.setRenderHand(false);
-        }
         if (runningCutscene.cutscene.hideBlockOutline) {
             minecraft.gameRenderer.setRenderBlockOutline(false);
         }
@@ -101,7 +98,6 @@ public class ClientCutsceneManager {
 
     public static void stopCutsceneImmediate(EndingReason reason) {
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.gameRenderer.setRenderHand(true);
         minecraft.setCameraEntity(minecraft.player);
         minecraft.gameRenderer.setRenderBlockOutline(true);
         if (camera != null) {

@@ -2,13 +2,16 @@ package net.thewinnt.cutscenes.mixin;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
 import net.thewinnt.cutscenes.event.CutsceneEvents;
 import net.thewinnt.cutscenes.event.EndingReason;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,14 +19,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.thewinnt.cutscenes.util.ServerPlayerExt;
+import net.thewinnt.cutscenes.util.PlayerExt;
 
-@Mixin(ServerPlayer.class)
-public class ServerPlayerMixin implements ServerPlayerExt {
+@Mixin(Player.class)
+public abstract class PlayerMixin extends LivingEntity implements PlayerExt {
     @Unique private CutsceneType cutscenes$running;
     @Unique private int cutscenes$ticksRemaining;
     @Unique private String cutscenes$startReason = "";
     @Unique private EndingReason cutscenes$endReason;
+
+    public PlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
+        super(entityType, level);
+        throw new AssertionError("Can't instantiate a mixin!");
+    }
 
     @Override
     public int csapi$getCutsceneTicks() {
@@ -51,7 +59,9 @@ public class ServerPlayerMixin implements ServerPlayerExt {
     public void csapi$finishCutscene(EndingReason reason) {
         if (cutscenes$running != null) {
             this.cutscenes$endReason = reason;
-            CutsceneEvents.CUTSCENE_OVER_SERVER.invoke(listener -> listener.accept(cutscenes$running, CutsceneManager.REGISTRY.inverse().get(cutscenes$running), ((ServerPlayer) (Object) this), reason));
+            if (!this.level().isClientSide && ((Object) this) instanceof ServerPlayer player) {
+                CutsceneEvents.CUTSCENE_OVER_SERVER.invoke(listener -> listener.accept(cutscenes$running, CutsceneManager.REGISTRY.inverse().get(cutscenes$running), player, reason));
+            }
             this.cutscenes$running = null;
             this.cutscenes$ticksRemaining = 0;
         }
@@ -69,6 +79,7 @@ public class ServerPlayerMixin implements ServerPlayerExt {
             cutscenes$endReason = null;
             cutscenes$ticksRemaining--;
         }
+
     }
 
     @Inject(method = "isSpectator", at = @At("HEAD"), cancellable = true)

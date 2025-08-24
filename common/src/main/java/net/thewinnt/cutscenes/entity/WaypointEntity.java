@@ -10,6 +10,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class WaypointEntity extends Entity {
     public static final EntityDataAccessor<String> NAME = SynchedEntityData.defineId(WaypointEntity.class, EntityDataSerializers.STRING);
@@ -29,12 +31,12 @@ public class WaypointEntity extends Entity {
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag nbt) {
-        this.entityData.set(NAME, nbt.getString("Name"));
+    protected void readAdditionalSaveData(ValueInput nbt) {
+        this.entityData.set(NAME, nbt.getStringOr("Name", "undefined"));
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag nbt) {
+    protected void addAdditionalSaveData(ValueOutput nbt) {
         nbt.putString("Name", this.entityData.get(NAME));
     }
     

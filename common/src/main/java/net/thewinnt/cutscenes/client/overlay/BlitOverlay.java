@@ -1,14 +1,17 @@
 package net.thewinnt.cutscenes.client.overlay;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
+import net.thewinnt.cutscenes.mixin.GuiGraphicsAccessor;
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.CoreShaders;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.BlitConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
@@ -33,15 +36,6 @@ public class BlitOverlay implements Overlay {
         float u2 = config.u2().get(t, 1);
         float v2 = config.v2().get(t, 1);
         int color = config.tint().toARGB(t);
-        float z = config.z();
-        graphics.drawSpecial(source -> {
-            RenderType rendertype = RenderType.guiTextured(config.texture());
-            Matrix4f matrix4f = graphics.pose().last().pose();
-            VertexConsumer vertexconsumer = source.getBuffer(rendertype);
-            vertexconsumer.addVertex(matrix4f, x1, y1, z).setUv(u1, v1).setColor(color);
-            vertexconsumer.addVertex(matrix4f, x1, y2, z).setUv(u1, v2).setColor(color);
-            vertexconsumer.addVertex(matrix4f, x2, y2, z).setUv(u2, v2).setColor(color);
-            vertexconsumer.addVertex(matrix4f, x2, y1, z).setUv(u2, v1).setColor(color);
-        });
+        graphics.blit(RenderPipelines.GUI_TEXTURED, config.texture(), (int) x1, (int) y1, u1, v1, (int)(x2 - x1), (int)(y2 - y1), (int)(u2 - u1), (int)(v2 - v1), 1, 1, color);
     }
 }

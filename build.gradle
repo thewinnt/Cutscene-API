@@ -50,7 +50,7 @@ subprojects {
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
         mappings loom.layered() {
             officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-1.21:2024.07.28@zip")
+            parchment("org.parchmentmc.data:parchment-1.21.8:2025.07.20@zip")
         }
     }
 

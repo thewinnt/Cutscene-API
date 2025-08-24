@@ -23,6 +23,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -64,14 +65,14 @@ public class CutsceneCameraEntity extends LocalPlayer {
     }
 
     public CutsceneCameraEntity(int id, CutsceneInstance cutscene, Vec3 startPos, float camStartYaw, float camStartPitch, float pathYaw, float pathPitch, float pathRoll) {
-        super(MINECRAFT, MINECRAFT.level, createListener(), MINECRAFT.player.getStats(), MINECRAFT.player.getRecipeBook(), false, false);
+        super(MINECRAFT, MINECRAFT.level, createListener(), MINECRAFT.player.getStats(), MINECRAFT.player.getRecipeBook(), Input.EMPTY, false);
         this.setId(id);
         super.setPose(Pose.SWIMMING);
         LocalPlayer mcplayer = MINECRAFT.player;
         this.cutscene = cutscene;
         Vec3 startReal = cutscene.cutscene.getPathPoint(0, MINECRAFT.level, startPos);
         if (startReal != null) {
-            this.moveTo(startReal.x, startReal.y, startReal.z, mcplayer.getYRot(), mcplayer.getXRot());
+            this.snapTo(startReal.x, startReal.y, startReal.z, mcplayer.getYRot(), mcplayer.getXRot());
         }
         this.xBob = getXRot();
         this.yBob = getYRot();

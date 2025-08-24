@@ -35,8 +35,8 @@ public class PathPreviewRenderer {
     private static final Vector3f COLOR_START = new Vector3f(0.25f, 0.5f, 1);
 
     public static void beforeDebugRender(PoseStack stack, VertexConsumer consumer) {
-        if (ClientCutsceneManager.getPreviewedCutscene() == null) return;
         CutsceneType type = ClientCutsceneManager.getPreviewedCutscene();
+        if (type == null) return;
         Path path = type.path;
         if (path == null) return;
         float yRot = (float)Math.toRadians(ClientCutsceneManager.previewPathYaw);

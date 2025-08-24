@@ -3,8 +3,12 @@ package net.thewinnt.cutscenes.fabric.client;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.NoopRenderer;
+import net.minecraft.resources.ResourceLocation;
 import net.thewinnt.cutscenes.CutsceneAPI;
+import net.thewinnt.cutscenes.client.CutsceneOverlayManager;
 import net.thewinnt.cutscenes.fabric.CutsceneAPIFabric;
 import net.thewinnt.cutscenes.fabric.FabricClientPlatform;
 import net.thewinnt.cutscenes.fabric.FabricPlatform;
@@ -23,6 +27,8 @@ public final class CutsceneAPIFabricClient implements ClientModInitializer {
         });
         CutsceneAPI.onInitializeClient(CLIENT_PLATFORM);
         EntityRendererRegistry.register(CutsceneAPIFabric.WAYPOINT, NoopRenderer::new);
-
+        HudElementRegistry.addFirst(ResourceLocation.parse("cutscenes:overlays"), (guiGraphics, deltaTracker) -> {
+            CutsceneOverlayManager.render(Minecraft.getInstance(), guiGraphics, guiGraphics.guiWidth(), guiGraphics.guiHeight());
+        });
     }
 }

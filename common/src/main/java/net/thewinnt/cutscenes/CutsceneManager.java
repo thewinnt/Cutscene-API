@@ -28,7 +28,7 @@ import net.thewinnt.cutscenes.transition.FadeToColorTransition;
 import net.thewinnt.cutscenes.transition.NoopTransition;
 import net.thewinnt.cutscenes.transition.SmoothEaseTransition;
 import net.thewinnt.cutscenes.transition.Transition.TransitionSerializer;
-import net.thewinnt.cutscenes.util.ServerPlayerExt;
+import net.thewinnt.cutscenes.util.PlayerExt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -207,7 +207,7 @@ public class CutsceneManager {
      */
     public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player, String startingReason) {
         CutsceneType type = REGISTRY.get(id);
-        ServerPlayerExt ext = (ServerPlayerExt) player;
+        PlayerExt ext = (PlayerExt) player;
         ext.csapi$finishCutscene(EndingReason.INTERRUPT);
         if (type.length.manager().isServerSynched()) {
             double lengthUnits = type.length.length() + type.startTransition.getOffCutsceneTime() + type.endTransition.getOffCutsceneTime();
@@ -260,7 +260,7 @@ public class CutsceneManager {
      * @param reason The reason why the cutscene is stopped
      */
     public static void stopCutscene(ServerPlayer player, EndingReason reason) {
-        ((ServerPlayerExt)player).csapi$finishCutscene(reason);
+        ((PlayerExt)player).csapi$finishCutscene(reason);
         CutsceneAPI.platform().sendPacketToPlayer(new StopCutscenePacket(reason), player);
     }
 

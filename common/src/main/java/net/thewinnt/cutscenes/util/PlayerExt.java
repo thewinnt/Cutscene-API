@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A duck interface for some functions added to {@link net.minecraft.server.level.ServerPlayer}
  */
-public interface ServerPlayerExt {
+public interface PlayerExt {
     /**
      * @return the remaining ticks for the cutscene the player's watching, or 0 if they aren't
      */

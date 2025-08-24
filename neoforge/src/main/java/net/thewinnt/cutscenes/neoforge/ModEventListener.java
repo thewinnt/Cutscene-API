@@ -14,7 +14,7 @@ import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
 import net.thewinnt.cutscenes.rotation.RotationSerializer;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber
 public class ModEventListener {
     @SubscribeEvent
     public static void registerNetwork(final RegisterPayloadHandlersEvent event) {

@@ -17,6 +17,7 @@ import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
 import net.thewinnt.cutscenes.effect.chardelays.DelayProvider;
+import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,20 +88,20 @@ public class AppearingTextOverlay implements Overlay {
         float x = this.config.rx().get(time.getProgress(), width);
         float y = this.config.ry().get(time.getProgress(), height);
 
-        PoseStack pose = graphics.pose();
-        pose.pushPose();
-        pose.scale(scale, scale, scale);
-        pose.translate(x, y, 0);
-        pose.mulPose(Axis.ZP.rotationDegrees(rotation));
+        Matrix3x2fStack pose = graphics.pose();
+        pose.pushMatrix();
+        pose.scale(scale, scale);
+        pose.translate(x, y);
+        pose.rotate(rotation);
         int lineWidth = (int)this.config.width().get(time.getProgress(), width);
         // i could've used drawWordWrap() here, but it doesn't do a shadow
         // the code below is copied from GuiGraphics#drawWordWrap
         Profiler.get().popPush("draw");
         for (FormattedCharSequence j : minecraft.font.split(FormattedText.composite(result), lineWidth)) {
-            graphics.drawString(minecraft.font, j, 0, 0, 0xffffff, this.config.dropShadow());
-            pose.translate(0, minecraft.font.lineHeight, 0);
+            graphics.drawString(minecraft.font, j, 0, 0, 0xffffffff, this.config.dropShadow());
+            pose.translate(0, minecraft.font.lineHeight);
         }
-        pose.popPose();
+        pose.popMatrix();
         Profiler.get().pop();
         Profiler.get().pop();
     }

@@ -6,7 +6,7 @@ import net.thewinnt.cutscenes.event.CutsceneEvents;
 import net.thewinnt.cutscenes.neoforge.event.CutsceneOverEvent;
 
 public class CutsceneAPINeoForgeClient {
-    public static final NeoForgeClientPlatform CLIENT_PLATFORM = new NeoForgeClientPlatform();
+    public static final NeoForgePlatform CLIENT_PLATFORM = new NeoForgePlatform();
 
     public static void init() {
         CutsceneAPI.onInitializeClient(CLIENT_PLATFORM);

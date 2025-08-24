@@ -14,7 +14,6 @@ public record BlitConfiguration(
     CoordinateProvider v1,
     CoordinateProvider u2,
     CoordinateProvider v2,
-    DynamicColor tint,
-    float z
+    DynamicColor tint
 ) {
 }

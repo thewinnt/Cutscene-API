@@ -1,12 +1,19 @@
 package net.thewinnt.cutscenes.client.overlay;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.Overlay;
+import net.thewinnt.cutscenes.mixin.GuiGraphicsAccessor;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 public class FadeToColorOverlay implements Overlay {
@@ -16,21 +23,42 @@ public class FadeToColorOverlay implements Overlay {
     public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object config) {
         Profiler.get().push("cutscenes:fade");
         FadeToColorOverlayConfiguration cfg = ((FadeToColorOverlayConfiguration) config);
-        graphics.pose().pushPose();
-        PoseStack.Pose pose = graphics.pose().last();
-        graphics.drawSpecial(multiBufferSource -> {
-            VertexConsumer builder = multiBufferSource.getBuffer(RenderType.gui());
-            float[] colorBottomLeft = cfg.bottomLeft.sample(cfg.getProgress());
-            float[] colorBottomRight = cfg.bottomRight.sample(cfg.getProgress());
-            float[] colorTopLeft = cfg.topLeft.sample(cfg.getProgress());
-            float[] colorTopRight = cfg.topRight.sample(cfg.getProgress());
-            float alpha = cfg.getAlpha();
-            builder.addVertex(pose, 0, height, 0).setColor(colorBottomLeft[0], colorBottomLeft[1], colorBottomLeft[2], colorBottomLeft[3] * alpha);
-            builder.addVertex(pose, width, height, 0).setColor(colorBottomRight[0], colorBottomRight[1], colorBottomRight[2], colorBottomRight[3] * alpha);
-            builder.addVertex(pose, width, 0, 0).setColor(colorTopRight[0], colorTopRight[1], colorTopRight[2], colorTopRight[3] * alpha);
-            builder.addVertex(pose, 0, 0, 0).setColor(colorTopLeft[0], colorTopLeft[1], colorTopLeft[2], colorTopLeft[3] * alpha);
-            graphics.pose().popPose();
-            Profiler.get().pop();
+        ((GuiGraphicsAccessor) graphics).guiRenderState().submitGuiElement(new GuiElementRenderState() {
+            @Override
+            public void buildVertices(VertexConsumer consumer, float z) {
+                graphics.pose().pushMatrix();
+                Matrix4f matrix4f = new Matrix4f().mul(graphics.pose()).translate(0.0F, 0.0F, z);
+                float[] colorBottomLeft = cfg.bottomLeft.sample(cfg.getProgress());
+                float[] colorBottomRight = cfg.bottomRight.sample(cfg.getProgress());
+                float[] colorTopLeft = cfg.topLeft.sample(cfg.getProgress());
+                float[] colorTopRight = cfg.topRight.sample(cfg.getProgress());
+                float alpha = cfg.getAlpha();
+                consumer.addVertex(matrix4f, 0, height, 0).setColor(colorBottomLeft[0], colorBottomLeft[1], colorBottomLeft[2], colorBottomLeft[3] * alpha);
+                consumer.addVertex(matrix4f, width, height, 0).setColor(colorBottomRight[0], colorBottomRight[1], colorBottomRight[2], colorBottomRight[3] * alpha);
+                consumer.addVertex(matrix4f, width, 0, 0).setColor(colorTopRight[0], colorTopRight[1], colorTopRight[2], colorTopRight[3] * alpha);
+                consumer.addVertex(matrix4f, 0, 0, 0).setColor(colorTopLeft[0], colorTopLeft[1], colorTopLeft[2], colorTopLeft[3] * alpha);
+                graphics.pose().popMatrix();
+            }
+
+            @Override
+            public RenderPipeline pipeline() {
+                return RenderPipelines.GUI;
+            }
+
+            @Override
+            public TextureSetup textureSetup() {
+                return TextureSetup.noTexture();
+            }
+
+            @Override
+            public @Nullable ScreenRectangle scissorArea() {
+                return null;
+            }
+
+            @Override
+            public @Nullable ScreenRectangle bounds() {
+                return new ScreenRectangle(0, 0, width, height);
+            }
         });
 
 //        graphics.drawString(minecraft.font, Component.literal("alpha " + alpha), 0, 0, 16777215);

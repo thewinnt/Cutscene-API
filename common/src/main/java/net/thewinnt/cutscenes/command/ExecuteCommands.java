@@ -13,10 +13,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.commands.ExecuteCommand;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
-import net.thewinnt.cutscenes.util.ServerPlayerExt;
+import net.thewinnt.cutscenes.util.PlayerExt;
 import org.slf4j.Logger;
 
 import java.util.Collection;
@@ -104,8 +103,8 @@ public class ExecuteCommands {
         });
     }
 
-    private static ServerPlayerExt getPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        return ((ServerPlayerExt) EntityArgument.getPlayer(context, "player"));
+    private static PlayerExt getPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        return ((PlayerExt) EntityArgument.getPlayer(context, "player"));
     }
 
     @FunctionalInterface

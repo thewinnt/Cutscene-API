@@ -4,7 +4,7 @@
   "package": "net.thewinnt.cutscenes.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ServerPlayerMixin"
+    "PlayerMixin"
   ],
   "client": [
     "CameraMixin",
@@ -12,10 +12,13 @@
     "DebugRendererMixin",
     "EntityMixin",
     "GameRendererMixin",
+    "GuiGraphicsAccessor",
     "GuiMixin",
+    "LevelRendererMixin",
     "MinecraftMixin",
     "MultiPlayerGameModeMixin",
-    "OptionsMixin"
+    "OptionsMixin",
+    "RenderPipelinesAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
