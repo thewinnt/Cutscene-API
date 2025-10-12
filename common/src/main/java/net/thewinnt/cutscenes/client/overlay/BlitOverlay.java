@@ -36,6 +36,6 @@ public class BlitOverlay implements Overlay {
         float u2 = config.u2().get(t, 1);
         float v2 = config.v2().get(t, 1);
         int color = config.tint().toARGB(t);
-        graphics.blit(RenderPipelines.GUI_TEXTURED, config.texture(), (int) x1, (int) y1, u1, v1, (int)(x2 - x1), (int)(y2 - y1), (int)(u2 - u1), (int)(v2 - v1), 1, 1, color);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, config.texture(), (int) x1, (int) y1, u1 * 1000000, v1 * 1000000, (int)(x2 - x1), (int)(y2 - y1), (int)((u2 - u1) * 1000000), (int)((v2 - v1) * 1000000), 1000000, 1000000, color);
     }
 }

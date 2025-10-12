@@ -3,8 +3,6 @@ package net.thewinnt.cutscenes.client;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.logging.LogUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.KeyboardInput;
@@ -56,8 +54,7 @@ public class ClientCutsceneManager {
     public static float initCameraYaw;
     public static float initCameraPitch;
     public static float initCameraRoll;
-    
-    @Environment(EnvType.CLIENT)
+
     public static void startCutscene(CutsceneType type, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll, long gameTime) {
         CutsceneAPI.updateSalt();
         stopCutsceneImmediate(EndingReason.INTERRUPT);
@@ -166,7 +163,7 @@ public class ClientCutsceneManager {
                 dt = 0;
             }
             if (runningCutscene.tick()) {
-                Profiler.get().popPush("rotation");
+                Profiler.get().push("rotation");
                 Vector3f finalRot;
                 Vec3 initCamRot = new Vec3(initCameraYaw, initCameraPitch, initCameraRoll);
                 Vec3 startRot = new Vec3(startCameraYaw, startCameraPitch, startCameraRoll);

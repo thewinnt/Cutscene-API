@@ -2,8 +2,6 @@ package net.thewinnt.cutscenes.client.preview;
 
 import java.util.List;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -22,7 +20,6 @@ import net.thewinnt.cutscenes.path.PathLike;
 import net.thewinnt.cutscenes.path.point.PointProvider;
 import net.thewinnt.cutscenes.path.point.StaticPointProvider;
 
-@Environment(EnvType.CLIENT)
 public class PathPreviewRenderer {
     private static final List<Vector3f> POINT_COLORS = List.of(
         new Vector3f(1, 0.5f, 1),
