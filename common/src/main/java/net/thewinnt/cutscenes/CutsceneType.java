@@ -158,9 +158,9 @@ public class CutsceneType {
         length.toNetwork(buf);
         buf.writeNullable(path, (buf1, path) -> path.toNetwork(buf1));
         buf.writeNullable(rotationProvider, (buf1, path) -> path.toNetwork(buf1));
-        buf.writeResourceLocation(CutsceneManager.getTransitionTypeId(startTransition.getSerializer()));
+        buf.writeIdentifier(CutsceneManager.getTransitionTypeId(startTransition.getSerializer()));
         startTransition.toNetwork(buf);
-        buf.writeResourceLocation(CutsceneManager.getTransitionTypeId(endTransition.getSerializer()));
+        buf.writeIdentifier(CutsceneManager.getTransitionTypeId(endTransition.getSerializer()));
         endTransition.toNetwork(buf);
         buf.writeBoolean(blockMovement);
         RotationHandler.toNetwork(buf, rotationHandler);

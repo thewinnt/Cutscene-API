@@ -1,6 +1,6 @@
 package net.thewinnt.cutscenes.neoforge.event;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.thewinnt.cutscenes.CutsceneType;
@@ -12,9 +12,9 @@ import net.thewinnt.cutscenes.CutsceneType;
  */
 public abstract class CutsceneEvent extends PlayerEvent {
     private final CutsceneType type;
-    private final ResourceLocation id;
+    private final Identifier id;
 
-    public CutsceneEvent(Player player, CutsceneType type, ResourceLocation id) {
+    public CutsceneEvent(Player player, CutsceneType type, Identifier id) {
         super(player);
         this.type = type;
         this.id = id;
@@ -24,7 +24,7 @@ public abstract class CutsceneEvent extends PlayerEvent {
         return type;
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 }

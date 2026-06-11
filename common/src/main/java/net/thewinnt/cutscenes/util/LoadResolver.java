@@ -2,7 +2,7 @@ package net.thewinnt.cutscenes.util;
 
 import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -16,18 +16,18 @@ import java.util.function.Function;
 /** Loads some things that may refer to others of their kind. */
 public class LoadResolver<T> {
     public static final Logger LOGGER = LogUtils.getLogger();
-    private final Map<ResourceLocation, JsonElement> saveData;
-    private final Map<ResourceLocation, T> resolved = new HashMap<>();
-    private final Set<ResourceLocation> resolvingNow = new HashSet<>();
+    private final Map<Identifier, JsonElement> saveData;
+    private final Map<Identifier, T> resolved = new HashMap<>();
+    private final Set<Identifier> resolvingNow = new HashSet<>();
     private final boolean allowExceptions;
-    private BiFunction<JsonElement, ResourceLocation, T> reader;
+    private BiFunction<JsonElement, Identifier, T> reader;
 
     /**
      * @param saveData the saved items
      * @param allowExceptions if true, will skip items with errors.
      *                        Otherwise, will throw the exception that occured when loading.
      */
-    public LoadResolver(Map<ResourceLocation, JsonElement> saveData, boolean allowExceptions) {
+    public LoadResolver(Map<Identifier, JsonElement> saveData, boolean allowExceptions) {
         this.saveData = saveData;
         this.allowExceptions = allowExceptions;
     }
@@ -40,7 +40,7 @@ public class LoadResolver<T> {
      * @throws LoopingReferenceException in case of an infinite loop
      * @throws NullPointerException if called not while executing {@link #load(BiFunction)}
      */
-    public @Nullable T resolve(ResourceLocation id) {
+    public @Nullable T resolve(Identifier id) {
         return resolve(id, reader);
     }
 
@@ -50,7 +50,7 @@ public class LoadResolver<T> {
      * and throws the exception otherwise.
      * @throws LoopingReferenceException in case of an infinite loop
      */
-    public @Nullable T resolve(ResourceLocation id, BiFunction<JsonElement, ResourceLocation, T> reader) {
+    public @Nullable T resolve(Identifier id, BiFunction<JsonElement, Identifier, T> reader) {
         if (reader == null) {
             throw new NullPointerException("Missing object reader");
         }
@@ -81,9 +81,9 @@ public class LoadResolver<T> {
      * @return a map of ids to objects
      * @throws LoopingReferenceException in case of an infinite loop
      */
-    public Map<ResourceLocation, T> load(BiFunction<JsonElement, ResourceLocation, T> reader) {
+    public Map<Identifier, T> load(BiFunction<JsonElement, Identifier, T> reader) {
         this.reader = reader;
-        for (ResourceLocation i : saveData.keySet()) {
+        for (Identifier i : saveData.keySet()) {
             if (!resolved.containsKey(i)) {
                 resolve(i, reader);
             }
@@ -100,9 +100,9 @@ public class LoadResolver<T> {
      * this exception will be thrown.
      */
     public static class LoopingReferenceException extends RuntimeException {
-        private final ResourceLocation cause;
+        private final Identifier cause;
 
-        public LoopingReferenceException(ResourceLocation id) {
+        public LoopingReferenceException(Identifier id) {
             this.cause = id;
         }
 

@@ -2,16 +2,17 @@ package net.thewinnt.cutscenes.networking.packets;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
+import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.platform.AbstractClientboundPacket;
 import net.thewinnt.cutscenes.platform.AbstractPacket;
 
 public final class StartCutscenePacket implements AbstractClientboundPacket {
-    public static final Type<StartCutscenePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("cutscenes", "start_cutscene"));
-    private final ResourceLocation cutscene;
+    public static final Type<StartCutscenePacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath("cutscenes", "start_cutscene"));
+    private final Identifier cutscene;
     private final Vec3 startPos;
     private final float cameraYaw;
     private final float cameraPitch;
@@ -21,11 +22,11 @@ public final class StartCutscenePacket implements AbstractClientboundPacket {
     private final float pathRoll;
     private final long startGameTime;
 
-    public StartCutscenePacket(ResourceLocation cutscene, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll) {
+    public StartCutscenePacket(Identifier cutscene, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll) {
         this(cutscene, startPos, cameraYaw, cameraPitch, cameraRoll, pathYaw, pathPitch, pathRoll, CutsceneAPI.platform().getServer().overworld().getGameTime());
     }
 
-    private StartCutscenePacket(ResourceLocation cutscene, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll, long startGameTime) {
+    private StartCutscenePacket(Identifier cutscene, Vec3 startPos, float cameraYaw, float cameraPitch, float cameraRoll, float pathYaw, float pathPitch, float pathRoll, long startGameTime) {
         this.cutscene = cutscene;
         this.startPos = startPos;
         this.cameraYaw = cameraYaw;
@@ -38,8 +39,8 @@ public final class StartCutscenePacket implements AbstractClientboundPacket {
     }
 
     public static StartCutscenePacket read(FriendlyByteBuf buf) {
-        ResourceLocation type = buf.readNullable(FriendlyByteBuf::readResourceLocation);
-        Vec3 startPos = buf.readVec3();
+        Identifier type = buf.readNullable(FriendlyByteBuf::readIdentifier);
+        Vec3 startPos = CutsceneNetworkHandler.readVec3(buf);
         float cameraYaw = buf.readFloat();
         float cameraPitch = buf.readFloat();
         float cameraRoll = buf.readFloat();
@@ -52,8 +53,8 @@ public final class StartCutscenePacket implements AbstractClientboundPacket {
 
     @Override
     public void write(FriendlyByteBuf buf) {
-        buf.writeNullable(cutscene, FriendlyByteBuf::writeResourceLocation);
-        buf.writeVec3(startPos);
+        buf.writeNullable(cutscene, FriendlyByteBuf::writeIdentifier);
+        CutsceneNetworkHandler.writeVec3(buf, startPos);
         buf.writeFloat(cameraYaw);
         buf.writeFloat(cameraPitch);
         buf.writeFloat(cameraRoll);

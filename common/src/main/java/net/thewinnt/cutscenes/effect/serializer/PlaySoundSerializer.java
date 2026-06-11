@@ -2,13 +2,14 @@ package net.thewinnt.cutscenes.effect.serializer;
 
 import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
 import net.thewinnt.cutscenes.effect.configuration.PlaySoundConfiguration;
 import net.thewinnt.cutscenes.effect.type.PlaySoundEffect;
+import net.thewinnt.cutscenes.networking.CutsceneNetworkHandler;
 import net.thewinnt.cutscenes.util.JsonHelper;
 import net.thewinnt.cutscenes.util.LoadingContext;
 
@@ -22,17 +23,17 @@ public class PlaySoundSerializer implements CutsceneEffectSerializer<PlaySoundCo
 
     @Override
     public PlaySoundConfiguration fromNetwork(FriendlyByteBuf buf) {
-        ResourceLocation sound = buf.readResourceLocation();
+        Identifier sound = buf.readIdentifier();
         SoundSource source = buf.readEnum(SoundSource.class);
         float volume = buf.readFloat();
         float pitch = buf.readFloat();
-        Optional<Vec3> pos = buf.readOptional(object -> object.readVec3());
+        Optional<Vec3> pos = Optional.ofNullable(CutsceneNetworkHandler.readVec3(buf));
         return new PlaySoundConfiguration(sound, source, volume, pitch, pos);
     }
 
     @Override
     public PlaySoundConfiguration fromJSON(JsonObject json, LoadingContext context) {
-        ResourceLocation sound = ResourceLocation.parse(context.wrapLoading("sound", () -> GsonHelper.getAsString(json, "sound"), "loading_error"));
+        Identifier sound = Identifier.parse(context.wrapLoading("sound", () -> GsonHelper.getAsString(json, "sound"), "loading_error"));
         SoundSource source = SoundSource.valueOf(GsonHelper.getAsString(json, "source", "master").toUpperCase(Locale.ROOT));
         float volume = GsonHelper.getAsFloat(json, "volume", 1);
         float pitch = GsonHelper.getAsFloat(json, "pitch", 1);
@@ -42,11 +43,11 @@ public class PlaySoundSerializer implements CutsceneEffectSerializer<PlaySoundCo
 
     @Override
     public void toNetwork(PlaySoundConfiguration data, FriendlyByteBuf buf) {
-        buf.writeResourceLocation(data.event());
+        buf.writeIdentifier(data.event());
         buf.writeEnum(data.source());
         buf.writeFloat(data.volume());
         buf.writeFloat(data.pitch());
-        buf.writeOptional(data.pos(), (object, object2) -> object.writeVec3(object2));
+        CutsceneNetworkHandler.writeVec3(buf, data.pos().orElse(null));
     }
 
     @Override

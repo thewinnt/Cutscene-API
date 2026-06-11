@@ -59,7 +59,7 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerExt {
     public void csapi$finishCutscene(EndingReason reason) {
         if (cutscenes$running != null) {
             this.cutscenes$endReason = reason;
-            if (!this.level().isClientSide && ((Object) this) instanceof ServerPlayer player) {
+            if (!this.level().isClientSide() && ((Object) this) instanceof ServerPlayer player) {
                 CutsceneEvents.CUTSCENE_OVER_SERVER.invoke(listener -> listener.accept(cutscenes$running, CutsceneManager.REGISTRY.inverse().get(cutscenes$running), player, reason));
             }
             this.cutscenes$running = null;

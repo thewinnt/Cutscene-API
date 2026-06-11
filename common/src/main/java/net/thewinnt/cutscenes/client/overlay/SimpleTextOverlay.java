@@ -1,10 +1,7 @@
 package net.thewinnt.cutscenes.client.overlay;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.SimpleTextConfiguration;
@@ -19,7 +16,7 @@ public class SimpleTextOverlay implements Overlay {
     }
 
     @Override
-    public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object cfg) {
+    public void render(Minecraft minecraft, GuiGraphicsExtractor graphics, int width, int height, Object cfg) {
         Profiler.get().push("cutscenes:text");
         Matrix3x2fStack pose = graphics.pose();
         pose.pushMatrix();
@@ -43,7 +40,7 @@ public class SimpleTextOverlay implements Overlay {
         } else {
             color = -1;
         }
-        graphics.drawCenteredString(minecraft.font, config.text(), 0, 0, color);
+        graphics.centeredText(minecraft.font, config.text(), 0, 0, color);
         pose.popMatrix();
         Profiler.get().pop();
     }

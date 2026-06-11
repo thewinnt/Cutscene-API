@@ -9,7 +9,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -178,7 +178,7 @@ public class Path implements PathLike {
         Path output = new Path(buf.readInt());
         int length = buf.readInt();
         for (int i = 0; i < length; i++) {
-            ResourceLocation id = buf.readResourceLocation();
+            Identifier id = buf.readIdentifier();
             SegmentType<?> type = CutsceneManager.getSegmentType(id);
             if (type == null) {
                 throw new IllegalArgumentException("Unknown segment type: " + id);
@@ -202,7 +202,7 @@ public class Path implements PathLike {
         buf.writeInt(weight);
         buf.writeInt(this.segments.size());
         for (PathLike segment : this.segments) {
-            buf.writeResourceLocation(CutsceneManager.getSegmentTypeId(segment.getSerializer()));
+            buf.writeIdentifier(CutsceneManager.getSegmentTypeId(segment.getSerializer()));
             segment.toNetwork(buf);
         }
     }
@@ -216,7 +216,7 @@ public class Path implements PathLike {
         for (JsonElement i : segments_j) {
             context.pushElement("segments[" + index+ "]");
             JsonObject j = i.getAsJsonObject();
-            ResourceLocation id = context.wrapLoading("type", () -> ResourceLocation.parse(j.get("type").getAsString()));
+            Identifier id = context.wrapLoading("type", () -> Identifier.parse(j.get("type").getAsString()));
             SegmentType<?> type = CutsceneManager.getSegmentType(id);
             if (type == null) {
                 context.reportError("Unknown segment type: " + id);

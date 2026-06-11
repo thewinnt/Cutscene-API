@@ -2,7 +2,7 @@ package net.thewinnt.cutscenes.neoforge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.NoopRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -22,7 +22,7 @@ public class ClientEventListener {
 
     @SubscribeEvent
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
-        event.registerBelowAll(ResourceLocation.parse("cutscenes:overlays"), (graphics, deltaTracker) -> {
+        event.registerBelowAll(Identifier.parse("cutscenes:overlays"), (graphics, deltaTracker) -> {
             CutsceneOverlayManager.render(Minecraft.getInstance(), graphics, graphics.guiWidth(), graphics.guiHeight());
         });
     }

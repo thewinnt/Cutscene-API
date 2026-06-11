@@ -1,11 +1,11 @@
 package net.thewinnt.cutscenes.effect.configuration;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.thewinnt.cutscenes.util.CoordinateProvider;
 import net.thewinnt.cutscenes.util.DynamicColor;
 
 public record BlitConfiguration(
-    ResourceLocation texture,
+    Identifier texture,
     CoordinateProvider x1,
     CoordinateProvider y1,
     CoordinateProvider x2,

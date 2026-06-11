@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +39,7 @@ public interface DelayProvider {
             return fromJSONPrimitive(json.getAsJsonPrimitive());
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
+            Identifier type = Identifier.parse(GsonHelper.getAsString(obj, "type"));
             DelayProviderSerializer<?> serializer = CutsceneAPI.DELAY_PROVIDERS.getValue(type);
             if (serializer == null) {
                 throw new IllegalArgumentException("Unknown delay provider type: " + type);
@@ -63,7 +63,7 @@ public interface DelayProvider {
 
     static DelayProvider fromJSONPrimitive(JsonPrimitive json) {
         String value = json.getAsString();
-        ResourceLocation test = ResourceLocation.parse(value);
+        Identifier test = Identifier.parse(value);
         if (DelayProviderSerializer.SINGLETONS.containsKey(test)) {
             return DelayProviderSerializer.SINGLETONS.get(test);
         }

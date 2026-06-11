@@ -12,12 +12,15 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionCheck;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
@@ -37,20 +40,20 @@ public class CutsceneCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("cutscene")
-            .requires((s) -> s.hasPermission(2))
+            .requires(s -> s.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
             .then(literal("start")
                 .then(argument("player", EntityArgument.player())
-                .then(argument("type", ResourceLocationArgument.id()).suggests(SUGGEST_CUTSCENES)
+                .then(argument("type", IdentifierArgument.id()).suggests(SUGGEST_CUTSCENES)
                 .executes(arg -> {
                     CommandSourceStack source = arg.getSource();
-                    ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                    Identifier type = IdentifierArgument.getId(arg, "type");
                     ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                     return showCutscene(source, type, player, source.getPosition(), Vec3.ZERO, Vec3.ZERO, "command");
                 })
                 .then(literal("at_preview")
                     .executes(arg -> {
                         CommandSourceStack source = arg.getSource();
-                        ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                        Identifier type = IdentifierArgument.getId(arg, "type");
                         ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                         if (CutsceneManager.getPreviewedCutscene() != null && !type.equals(CutsceneManager.REGISTRY.inverse().get(CutsceneManager.getPreviewedCutscene()))) {
                             arg.getSource().sendSuccess(() -> Component.translatable("commands.cutscene.warning.cutscene_mismatch").withStyle(ChatFormatting.GOLD), false);
@@ -61,7 +64,7 @@ public class CutsceneCommand {
                         .then(argument("camera_rotation_z", DoubleArgumentType.doubleArg())
                         .executes(arg -> {
                             CommandSourceStack source = arg.getSource();
-                            ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                            Identifier type = IdentifierArgument.getId(arg, "type");
                             ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                             Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
                             double rotZ = DoubleArgumentType.getDouble(arg, "camera_rotation_z");
@@ -76,7 +79,7 @@ public class CutsceneCommand {
                         .then(argument("reason", StringArgumentType.string())
                             .executes(arg -> {
                                 CommandSourceStack source = arg.getSource();
-                                ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                                Identifier type = IdentifierArgument.getId(arg, "type");
                                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                                 Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
                                 double rotZ = DoubleArgumentType.getDouble(arg, "camera_rotation_z");
@@ -92,7 +95,7 @@ public class CutsceneCommand {
                     .then(argument("reason", StringArgumentType.string())
                         .executes(arg -> {
                             CommandSourceStack source = arg.getSource();
-                            ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                            Identifier type = IdentifierArgument.getId(arg, "type");
                             ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                             Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
                             double rotZ = DoubleArgumentType.getDouble(arg, "camera_rotation_z");
@@ -108,7 +111,7 @@ public class CutsceneCommand {
                 .then(argument("reason", StringArgumentType.string())
                     .executes(arg -> {
                         CommandSourceStack source = arg.getSource();
-                        ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                        Identifier type = IdentifierArgument.getId(arg, "type");
                         ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                         String reason = StringArgumentType.getString(arg, "reason");
                         return showCutscene(source, type, player, source.getPosition(), Vec3.ZERO, Vec3.ZERO, reason);
@@ -116,7 +119,7 @@ public class CutsceneCommand {
             .then(argument("start_pos", Vec3Argument.vec3())
                 .executes(arg -> {
                     CommandSourceStack source = arg.getSource();
-                    ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                    Identifier type = IdentifierArgument.getId(arg, "type");
                     ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                     Vec3 pos = Vec3Argument.getVec3(arg, "start_pos");
                     if (CutsceneManager.getPreviewedCutscene() != null && type != CutsceneManager.REGISTRY.inverse().get(CutsceneManager.getPreviewedCutscene())) {
@@ -128,7 +131,7 @@ public class CutsceneCommand {
                     .then(argument("camera_rotation_z", DoubleArgumentType.doubleArg())
                     .executes(arg -> {
                         CommandSourceStack source = arg.getSource();
-                        ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                        Identifier type = IdentifierArgument.getId(arg, "type");
                         ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                         Vec3 pos = Vec3Argument.getVec3(arg, "start_pos");
                         Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
@@ -145,7 +148,7 @@ public class CutsceneCommand {
                         .then(argument("path_rotation_z", DoubleArgumentType.doubleArg())
                         .executes(arg -> {
                             CommandSourceStack source = arg.getSource();
-                            ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                            Identifier type = IdentifierArgument.getId(arg, "type");
                             ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                             Vec3 pos = Vec3Argument.getVec3(arg, "start_pos");
                             Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
@@ -163,7 +166,7 @@ public class CutsceneCommand {
                         .then(argument("reason", StringArgumentType.string())
                             .executes(arg -> {
                                 CommandSourceStack source = arg.getSource();
-                                ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                                Identifier type = IdentifierArgument.getId(arg, "type");
                                 ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                                 Vec3 pos = Vec3Argument.getVec3(arg, "start_pos");
                                 Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
@@ -182,7 +185,7 @@ public class CutsceneCommand {
                     .then(argument("reason", StringArgumentType.string())
                         .executes(arg -> {
                             CommandSourceStack source = arg.getSource();
-                            ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                            Identifier type = IdentifierArgument.getId(arg, "type");
                             ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                             Vec3 pos = Vec3Argument.getVec3(arg, "start_pos");
                             Vec2 rot = RotationArgument.getRotation(arg, "camera_rotation_xy").getRotation(source);
@@ -199,7 +202,7 @@ public class CutsceneCommand {
                 .then(argument("reason", StringArgumentType.string())
                     .executes(arg -> {
                         CommandSourceStack source = arg.getSource();
-                        ResourceLocation type = ResourceLocationArgument.getId(arg, "type");
+                        Identifier type = IdentifierArgument.getId(arg, "type");
                         ServerPlayer player = EntityArgument.getPlayer(arg, "player");
                         Vec3 pos = Vec3Argument.getVec3(arg, "start_pos");
                         if (CutsceneManager.getPreviewedCutscene() != null && type != CutsceneManager.REGISTRY.inverse().get(CutsceneManager.getPreviewedCutscene())) {
@@ -229,11 +232,11 @@ public class CutsceneCommand {
 
             .then(literal("preview")
             .then(literal("set")
-            .then(argument("cutscene", ResourceLocationArgument.id())
+            .then(argument("cutscene", IdentifierArgument.id())
                 .suggests(SUGGEST_CUTSCENES)
             .executes(arg -> {
                 CommandSourceStack source = arg.getSource();
-                ResourceLocation id = ResourceLocationArgument.getId(arg, "cutscene");
+                Identifier id = IdentifierArgument.getId(arg, "cutscene");
                 CutsceneType type = CutsceneManager.REGISTRY.get(id);
                 if (type == null) {
                     throw NO_CUTSCENE.create(id.toString());
@@ -245,7 +248,7 @@ public class CutsceneCommand {
             .then(argument("start_pos", Vec3Argument.vec3())
             .executes(arg -> {
                 CommandSourceStack source = arg.getSource();
-                ResourceLocation id = ResourceLocationArgument.getId(arg, "cutscene");
+                Identifier id = IdentifierArgument.getId(arg, "cutscene");
                 CutsceneType type = CutsceneManager.REGISTRY.get(id);
                 if (type == null) {
                     throw NO_CUTSCENE.create(id.toString());
@@ -259,7 +262,7 @@ public class CutsceneCommand {
             .then(argument("path_rotation_z", DoubleArgumentType.doubleArg())
             .executes(arg -> {
                 CommandSourceStack source = arg.getSource();
-                ResourceLocation id = ResourceLocationArgument.getId(arg, "cutscene");
+                Identifier id = IdentifierArgument.getId(arg, "cutscene");
                 CutsceneType type = CutsceneManager.REGISTRY.get(id);
                 if (type == null) {
                     throw NO_CUTSCENE.create(id.toString());
@@ -296,7 +299,7 @@ public class CutsceneCommand {
             ));
     }
 
-    private static int showCutscene(CommandSourceStack source, ResourceLocation id, ServerPlayer player, Vec3 pos, Vec3 camRot, Vec3 pathRot, String startingReason) throws CommandSyntaxException {
+    private static int showCutscene(CommandSourceStack source, Identifier id, ServerPlayer player, Vec3 pos, Vec3 camRot, Vec3 pathRot, String startingReason) throws CommandSyntaxException {
         if (!CutsceneManager.REGISTRY.containsKey(id)) {
             throw NO_CUTSCENE.create(id.toString());
         }

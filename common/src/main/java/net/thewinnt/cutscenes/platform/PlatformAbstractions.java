@@ -7,7 +7,7 @@ import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -27,7 +27,8 @@ import net.thewinnt.cutscenes.entity.WaypointEntity;
  */
 public interface PlatformAbstractions {
     // reload listeners
-    void registerReloadListener(PreparableReloadListener listener, ResourceLocation id);
+    void registerReloadListener(PreparableReloadListener listener, Identifier id);
+    default void addListenerOrdering(Identifier first, Identifier second) {}
 
     // networking
     <T extends AbstractClientboundPacket> void registerClientboundPacket(CustomPacketPayload.Type<T> type, AbstractPacket.PacketReader<T> reader);

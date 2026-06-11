@@ -11,7 +11,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.CutsceneType;
@@ -46,12 +46,12 @@ public class ExecuteCommands {
                 .then(Commands.argument("player", EntityArgument.player())
                     .then(addConditional(
                         rootNode,
-                        Commands.argument("cutscene", ResourceLocationArgument.id())
+                        Commands.argument("cutscene", IdentifierArgument.id())
                             .suggests(SUGGEST_CUTSCENES),
                         isIf,
                         context -> {
                             CutsceneType type = getPlayer(context).csapi$getRunningCutscene();
-                            return Objects.equals(CutsceneManager.REGISTRY.inverse().get(type), ResourceLocationArgument.getId(context, "cutscene"));
+                            return Objects.equals(CutsceneManager.REGISTRY.inverse().get(type), IdentifierArgument.getId(context, "cutscene"));
                         }
                     ))))
             .then(Commands.literal("start_reason")

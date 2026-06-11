@@ -1,7 +1,7 @@
 package net.thewinnt.cutscenes.util;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.thewinnt.cutscenes.easing.Easing;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

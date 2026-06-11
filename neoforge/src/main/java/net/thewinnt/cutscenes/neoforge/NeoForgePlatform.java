@@ -12,7 +12,7 @@ import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -29,6 +29,7 @@ import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.thewinnt.cutscenes.CutsceneManager;
+import net.thewinnt.cutscenes.client.ClientPlatformAbstractions;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
@@ -40,8 +41,8 @@ import net.thewinnt.cutscenes.platform.PacketType;
 import net.thewinnt.cutscenes.platform.PlatformAbstractions;
 
 @EventBusSubscriber
-public class NeoForgePlatform implements PlatformAbstractions {
-    private final SequencedMap<PreparableReloadListener, ResourceLocation> reloadListeners = new LinkedHashMap<>();
+public class NeoForgePlatform implements PlatformAbstractions, ClientPlatformAbstractions {
+    private final SequencedMap<PreparableReloadListener, Identifier> reloadListeners = new LinkedHashMap<>();
     protected final List<Consumer<CameraAngleSetter>> angleSetters = new ArrayList<>();
     private final List<Consumer<CommandDispatcher<CommandSourceStack>>> commandMakers = new ArrayList<>();
     public final List<Runnable> onLogout = new ArrayList<>();
@@ -50,7 +51,7 @@ public class NeoForgePlatform implements PlatformAbstractions {
     public List<PacketType<? extends AbstractServerboundPacket>> serverboundPackets = new ArrayList<>();
 
     @Override
-    public void registerReloadListener(PreparableReloadListener listener, ResourceLocation id) {
+    public void registerReloadListener(PreparableReloadListener listener, Identifier id) {
         reloadListeners.put(listener, id);
     }
 

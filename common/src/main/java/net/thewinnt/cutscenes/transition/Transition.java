@@ -8,7 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -95,7 +95,7 @@ public interface Transition {
     default void onFrame(double progress, CutsceneType cutscene) {}
 
     public static Transition fromJSON(JsonObject json, LoadingContext context) {
-        ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(json, "type"));
+        Identifier type = Identifier.parse(GsonHelper.getAsString(json, "type"));
         TransitionSerializer<?> serializer = CutsceneManager.getTransitionType(type);
         if (serializer == null) {
             throw new IllegalArgumentException("Unknown transition type: " + type);
@@ -112,7 +112,7 @@ public interface Transition {
     }
 
     public static Transition fromNetwork(FriendlyByteBuf buf) {
-        ResourceLocation type = buf.readResourceLocation();
+        Identifier type = buf.readIdentifier();
         TransitionSerializer<?> serializer = CutsceneManager.getTransitionType(type);
         if (serializer == null) {
             throw new IllegalStateException("Received an invalid transition type: " + type);

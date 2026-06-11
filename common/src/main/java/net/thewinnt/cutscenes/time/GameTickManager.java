@@ -1,6 +1,6 @@
 package net.thewinnt.cutscenes.time;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.thewinnt.cutscenes.client.ClientCutsceneManager;
@@ -12,9 +12,9 @@ public class GameTickManager implements TimeManager {
     private double prevRealTime;
     private double currentRealTime;
     private double nextRealTime;
-    private long prevGameTime;
+    private double prevGameTime;
     private double currentGameTime;
-    private long nextGameTime;
+    private double nextGameTime;
 
     @Override
     public double tick() {
@@ -26,7 +26,7 @@ public class GameTickManager implements TimeManager {
             return currentGameTime - startGameTime;
         }
         this.currentRealTime = now();
-        this.currentGameTime = Mth.clampedMap(currentRealTime, prevRealTime, nextRealTime, prevGameTime, nextGameTime);
+        this.currentGameTime = Mth.map(currentRealTime, prevRealTime, nextRealTime, prevGameTime, nextGameTime);
         return currentGameTime - startGameTime;
     }
 
@@ -55,7 +55,7 @@ public class GameTickManager implements TimeManager {
     public void syncGameTime(long gameTime) {
         this.prevRealTime = currentRealTime;
         this.nextRealTime = now() + 20 / tickrate;
-        this.prevGameTime = (long)currentGameTime;
+        this.prevGameTime = currentGameTime;
         this.nextGameTime = gameTime + 20;
     }
 

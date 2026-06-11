@@ -3,7 +3,7 @@ package net.thewinnt.cutscenes.effect;
 import com.google.gson.JsonObject;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.CutsceneType;
@@ -70,7 +70,7 @@ public abstract class CutsceneEffect<T> {
 
     @SuppressWarnings({"unchecked", "rawtypes"}) // java refuses to acknowledge that the ? is the same in serializer and its fromJSON
     public static ServerEffectWrapper<?> fromJSON(JsonObject json, LoadingContext context) {
-        ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(json, "type"));
+        Identifier type = Identifier.parse(GsonHelper.getAsString(json, "type"));
         CutsceneEffectSerializer<?> serializer = CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS.getValue(type);
         if (serializer == null) {
             context.reportError("Unknown cutscene effect type: " + type);

@@ -1,7 +1,7 @@
 package net.thewinnt.cutscenes.effect.configuration;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.valueproviders.FloatProvider;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.effect.chardelays.DelayProvider;
@@ -13,7 +13,7 @@ public record AppearingTextConfiguration(
     CoordinateProvider ry,
     CoordinateProvider width,
     boolean dropShadow,
-    ResourceLocation soundbite,
+    Identifier soundbite,
     DelayProvider delays,
     FloatProvider pitch,
     Easing scale,

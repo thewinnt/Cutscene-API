@@ -8,7 +8,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
@@ -31,14 +31,14 @@ import java.util.function.Function;
  * @see SimpleEasing
  */
 public interface Easing {
-    Map<ResourceLocation, Easing> EASING_MACROS = new HashMap<>();
+    Map<Identifier, Easing> EASING_MACROS = new HashMap<>();
     Codec<Easing> DISPATCH_CODEC = CutsceneAPI.EASING_SERIALIZERS.byNameCodec().dispatch(Easing::getSerializer, EasingSerializer::codec);
-    Codec<Easing> MACRO_CODEC = ResourceLocation.CODEC.flatXmap(
-            resourceLocation -> {
-                if (EASING_MACROS.containsKey(resourceLocation)) {
-                    return DataResult.success(EASING_MACROS.get(resourceLocation));
+    Codec<Easing> MACRO_CODEC = Identifier.CODEC.flatXmap(
+            Identifier -> {
+                if (EASING_MACROS.containsKey(Identifier)) {
+                    return DataResult.success(EASING_MACROS.get(Identifier));
                 } else {
-                    return DataResult.error(() -> "Unknown easing macro: " + resourceLocation);
+                    return DataResult.error(() -> "Unknown easing macro: " + Identifier);
                 }
             },
             easing -> DataResult.error(() -> "Cannot convert easing macros to their IDs")
@@ -126,7 +126,7 @@ public interface Easing {
             return fromJSONPrimitive(json.getAsJsonPrimitive(), context);
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.getValue(ResourceLocation.parse(obj.get("type").getAsString()));
+            EasingSerializer<?> serializer = CutsceneAPI.EASING_SERIALIZERS.getValue(Identifier.parse(obj.get("type").getAsString()));
             if (serializer == null) {
                 context.reportError("Unknown easing type: " + GsonHelper.getAsString(obj, "type"));
                 return null;
@@ -164,7 +164,7 @@ public interface Easing {
         }
 
         // then, a preloaded macro
-        final ResourceLocation id = ResourceLocation.parse(value);
+        final Identifier id = Identifier.parse(value);
         if (EASING_MACROS.containsKey(id)) {
             return EASING_MACROS.get(id);
         }

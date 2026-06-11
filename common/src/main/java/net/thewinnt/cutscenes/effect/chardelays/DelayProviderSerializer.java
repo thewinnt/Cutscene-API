@@ -3,7 +3,7 @@ package net.thewinnt.cutscenes.effect.chardelays;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
@@ -17,20 +17,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 public interface DelayProviderSerializer<T extends DelayProvider> {
-    Map<ResourceLocation, DelayProvider> SINGLETONS = new HashMap<>();
+    Map<Identifier, DelayProvider> SINGLETONS = new HashMap<>();
 
-    DelayProviderSerializer<UndertaleDelayProvider> UNDERTALE = registerSingle(ResourceLocation.parse("cutscenes:undertale"), UndertaleDelayProvider.INSTANCE);
-    DelayProviderSerializer<UserDefinedDelays> USER_DEFINED = register(ResourceLocation.parse("cutscenes:custom"), UserDelaySerializer.INSTANCE);
-    DelayProviderSerializer<InstantDelayProvider> INSTANT = registerSingle(ResourceLocation.parse("cutscenes:instant"), InstantDelayProvider.INSTANCE);
+    DelayProviderSerializer<UndertaleDelayProvider> UNDERTALE = registerSingle(Identifier.parse("cutscenes:undertale"), UndertaleDelayProvider.INSTANCE);
+    DelayProviderSerializer<UserDefinedDelays> USER_DEFINED = register(Identifier.parse("cutscenes:custom"), UserDelaySerializer.INSTANCE);
+    DelayProviderSerializer<InstantDelayProvider> INSTANT = registerSingle(Identifier.parse("cutscenes:instant"), InstantDelayProvider.INSTANCE);
 
     T fromNetwork(FriendlyByteBuf buf);
     T fromJSON(JsonObject json);
 
-    static <T extends DelayProvider> DelayProviderSerializer<T> register(ResourceLocation id, DelayProviderSerializer<T> serializer) {
+    static <T extends DelayProvider> DelayProviderSerializer<T> register(Identifier id, DelayProviderSerializer<T> serializer) {
         return Registry.register(CutsceneAPI.DELAY_PROVIDERS, id, serializer);
     }
 
-    static <T extends DelayProvider> DelayProviderSerializer<T> registerSingle(ResourceLocation id, T instance) {
+    static <T extends DelayProvider> DelayProviderSerializer<T> registerSingle(Identifier id, T instance) {
         SINGLETONS.put(id, instance);
         return Registry.register(CutsceneAPI.DELAY_PROVIDERS, id, new SingletonDelaySerializer<>(instance));
     }

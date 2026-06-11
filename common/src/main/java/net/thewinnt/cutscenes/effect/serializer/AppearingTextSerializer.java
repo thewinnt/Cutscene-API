@@ -9,10 +9,11 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.ConstantFloat;
 import net.minecraft.util.valueproviders.FloatProvider;
+import net.minecraft.util.valueproviders.FloatProviders;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.Easing;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
@@ -37,9 +38,9 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         CoordinateProvider ry = CoordinateProvider.fromNetwork(buf);
         CoordinateProvider lineWidth = CoordinateProvider.fromNetwork(buf);
         boolean dropShadow = buf.readBoolean();
-        ResourceLocation soundbite = buf.readResourceLocation();
+        Identifier soundbite = buf.readIdentifier();
         DelayProvider delayProvider = DelayProvider.fromNetwork(buf);
-        FloatProvider pitch = buf.readWithCodecTrusted(NbtOps.INSTANCE, FloatProvider.CODEC);
+        FloatProvider pitch = buf.readWithCodecTrusted(NbtOps.INSTANCE, FloatProviders.CODEC);
         Easing scale = Easing.fromNetwork(buf);
         Easing rotation = Easing.fromNetwork(buf);
         return new AppearingTextConfiguration(text, rx, ry, lineWidth, dropShadow, soundbite, delayProvider, pitch, scale, rotation);
@@ -52,9 +53,9 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         CoordinateProvider ry = CoordinateProvider.loadWrapped(json, "y", context);
         CoordinateProvider lineWidth = CoordinateProvider.loadWrapped(json, "line_width", context, ConstantEasing.ONE);
         boolean dropShadow = GsonHelper.getAsBoolean(json, "drop_shadow", true);
-        ResourceLocation soundbite = tryGetSoundEffect(json.get("soundbite"));
+        Identifier soundbite = tryGetSoundEffect(json.get("soundbite"));
         DelayProvider delayProvider = context.wrapLoading("delays", () -> DelayProvider.fromJSON(json.get("delays"), UndertaleDelayProvider.INSTANCE));
-        DataResult<FloatProvider> pitchResult = FloatProvider.CODEC.parse(JsonOps.INSTANCE, json.get("pitch"));
+        DataResult<FloatProvider> pitchResult = FloatProviders.CODEC.parse(JsonOps.INSTANCE, json.get("pitch"));
         FloatProvider pitch;
         if (json.has("pitch") && !json.get("pitch").isJsonNull()) {
             if (pitchResult.isSuccess()) {
@@ -78,9 +79,9 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         config.ry().toNetwork(buf);
         config.width().toNetwork(buf);
         buf.writeBoolean(config.dropShadow());
-        buf.writeResourceLocation(config.soundbite());
+        buf.writeIdentifier(config.soundbite());
         DelayProvider.toNetwork(config.delays(), buf);
-        buf.writeWithCodec(NbtOps.INSTANCE, FloatProvider.CODEC, config.pitch());
+        buf.writeWithCodec(NbtOps.INSTANCE, FloatProviders.CODEC, config.pitch());
         Easing.toNetwork(config.scale(), buf);
         Easing.toNetwork(config.rotation(), buf);
     }
@@ -90,9 +91,9 @@ public class AppearingTextSerializer implements CutsceneEffectSerializer<Appeari
         return AppearingTextEffect::new;
     }
 
-    private static ResourceLocation tryGetSoundEffect(JsonElement json) {
-        if (json == null) return ResourceLocation.parse("minecraft:empty");
-        if (json.isJsonPrimitive()) return ResourceLocation.parse(json.getAsString());
-        return ResourceLocation.parse(GsonHelper.getAsString(json.getAsJsonObject(), "sound_id", "minecraft:empty"));
+    private static Identifier tryGetSoundEffect(JsonElement json) {
+        if (json == null) return Identifier.parse("minecraft:empty");
+        if (json.isJsonPrimitive()) return Identifier.parse(json.getAsString());
+        return Identifier.parse(GsonHelper.getAsString(json.getAsJsonObject(), "sound_id", "minecraft:empty"));
     }
 }

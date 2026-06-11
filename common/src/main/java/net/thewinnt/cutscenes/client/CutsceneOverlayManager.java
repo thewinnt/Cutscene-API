@@ -1,7 +1,8 @@
 package net.thewinnt.cutscenes.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public class CutsceneOverlayManager {
         configs.clear();
     }
 
-    public static void render(Minecraft minecraft, GuiGraphics graphics, int width, int height) {
+    public static void render(Minecraft minecraft, GuiGraphicsExtractor graphics, int width, int height) {
         for (int i = 0; i < overlays.size(); i++) {
             overlays.get(i).render(minecraft, graphics, width, height, configs.get(i));
         }

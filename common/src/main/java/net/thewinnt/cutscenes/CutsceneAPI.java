@@ -12,6 +12,7 @@ import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.server.ServerFunctionManager;
 import net.thewinnt.cutscenes.command.ExecuteCommands;
 import net.thewinnt.cutscenes.event.CutsceneEvents;
+import net.thewinnt.cutscenes.platform.Services;
 import net.thewinnt.cutscenes.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -72,13 +73,13 @@ public class CutsceneAPI {
     private static PlatformAbstractions CLIENT_PLATFORM;
 
     // registry keys
-    public static final ResourceKey<Registry<EasingSerializer<?>>> EASING_SERIALIZER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:easing_types"));
-    public static final ResourceKey<Registry<CutsceneEffectSerializer<?>>> CUTSCENE_EFFECT_SERIALIZER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:effect_serializers"));
-    public static final ResourceKey<Registry<SegmentType<?>>> SEGMENT_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:segment_types"));
-    public static final ResourceKey<Registry<PointSerializer<?>>> POINT_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:point_providers"));
-    public static final ResourceKey<Registry<TransitionSerializer<?>>> TRANSITION_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:transition_types"));
-    public static final ResourceKey<Registry<DelayProviderSerializer<?>>> DELAY_PROVIDER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:delay_providers"));
-    public static final ResourceKey<Registry<RotationSerializer<?>>> ROTATION_HANDLER_KEY = ResourceKey.createRegistryKey(ResourceLocation.parse("cutscenes:rotation_handlers"));
+    public static final ResourceKey<Registry<EasingSerializer<?>>> EASING_SERIALIZER_KEY = ResourceKey.createRegistryKey(Identifier.parse("cutscenes:easing_types"));
+    public static final ResourceKey<Registry<CutsceneEffectSerializer<?>>> CUTSCENE_EFFECT_SERIALIZER_KEY = ResourceKey.createRegistryKey(Identifier.parse("cutscenes:effect_serializers"));
+    public static final ResourceKey<Registry<SegmentType<?>>> SEGMENT_TYPE_KEY = ResourceKey.createRegistryKey(Identifier.parse("cutscenes:segment_types"));
+    public static final ResourceKey<Registry<PointSerializer<?>>> POINT_TYPE_KEY = ResourceKey.createRegistryKey(Identifier.parse("cutscenes:point_providers"));
+    public static final ResourceKey<Registry<TransitionSerializer<?>>> TRANSITION_TYPE_KEY = ResourceKey.createRegistryKey(Identifier.parse("cutscenes:transition_types"));
+    public static final ResourceKey<Registry<DelayProviderSerializer<?>>> DELAY_PROVIDER_KEY = ResourceKey.createRegistryKey(Identifier.parse("cutscenes:delay_providers"));
+    public static final ResourceKey<Registry<RotationSerializer<?>>> ROTATION_HANDLER_KEY = ResourceKey.createRegistryKey(Identifier.parse("cutscenes:rotation_handlers"));
 
     // registries
     public static final MappedRegistry<EasingSerializer<?>> EASING_SERIALIZERS = new MappedRegistry<>(EASING_SERIALIZER_KEY, Lifecycle.stable());
@@ -89,26 +90,25 @@ public class CutsceneAPI {
     public static final MappedRegistry<DelayProviderSerializer<?>> DELAY_PROVIDERS = new MappedRegistry<>(DELAY_PROVIDER_KEY, Lifecycle.stable());
     public static final MappedRegistry<RotationSerializer<?>> ROTATION_HANDLERS = new MappedRegistry<>(ROTATION_HANDLER_KEY, Lifecycle.stable());
 
-    public static void onInitialize(@NotNull PlatformAbstractions abstractions) {
-        CutsceneAPI.PLATFORM = abstractions;
+    public static void onInitialize() {
+        CutsceneAPI.PLATFORM = Services.PLATFORM;
 
         // networking
-        abstractions.registerClientboundPacket(PreviewCutscenePacket.TYPE, PreviewCutscenePacket::read);
-        abstractions.registerClientboundPacket(StartCutscenePacket.TYPE, StartCutscenePacket::read);
-        abstractions.registerClientboundPacket(StopCutscenePacket.TYPE, StopCutscenePacket::read);
-        abstractions.registerClientboundPacket(UpdateCutscenesPacket.TYPE, UpdateCutscenesPacket::read);
-        abstractions.registerServerboundPacket(CutsceneOverPacket.TYPE, buf -> new CutsceneOverPacket());
+        PLATFORM.registerClientboundPacket(PreviewCutscenePacket.TYPE, PreviewCutscenePacket::read);
+        PLATFORM.registerClientboundPacket(StartCutscenePacket.TYPE, StartCutscenePacket::read);
+        PLATFORM.registerClientboundPacket(StopCutscenePacket.TYPE, StopCutscenePacket::read);
+        PLATFORM.registerClientboundPacket(UpdateCutscenesPacket.TYPE, UpdateCutscenesPacket::read);
+        PLATFORM.registerServerboundPacket(CutsceneOverPacket.TYPE, buf -> new CutsceneOverPacket());
 
         // other stuff
-        addReloadListeners(abstractions);
-        abstractions.submitOnRegisterCommand(CutsceneCommand::register);
-        abstractions.submitOnRegisterCommand(ExecuteCommands::register);
+        addReloadListeners(PLATFORM);
+        PLATFORM.submitOnRegisterCommand(CutsceneCommand::register);
+        PLATFORM.submitOnRegisterCommand(ExecuteCommands::register);
 
         // event listeners
-        CutsceneEvents.CUTSCENE_OVER_SERVER.addListener((type, id, player, reason) -> {
-            ServerFunctionManager manager = player.getServer().getFunctions();
+        CutsceneEvents.CUTSCENE_OVER_SERVER.addListener((type, _, player, _) -> {
+            ServerFunctionManager manager = player.level().getServer().getFunctions();
             ResourceOrTag resourceOrTag = type.onOver;
-            PlayerExt ext = (PlayerExt) player;
             if (resourceOrTag == null) return;
 
             CommandSourceStack stack;
@@ -120,10 +120,10 @@ public class CutsceneAPI {
                     player.position(),
                     player.getRotationVector(),
                     player.level(),
-                    player.getPermissionLevel(),
+                    player.permissions(),
                     player.getName().getString(),
                     player.getDisplayName(),
-                    player.getServer(),
+                    player.level().getServer(),
                     player
                 );
             }
@@ -171,11 +171,11 @@ public class CutsceneAPI {
             private static final Marker MARKER = MarkerFactory.getMarker("EasingMacroLoader");
 
             @Override
-            protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
+            protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 Easing.EASING_MACROS.clear();
                 LoadResolver<Easing> macroLoader = new LoadResolver<>(files, true);
                 LoadingContext context = new LoadingContext(macroLoader);
-                Map<ResourceLocation, Easing> easings = macroLoader.load((json, id) -> context.wrapStrict(id.toString(), () -> Easing.fromJSON(json, context)));
+                Map<Identifier, Easing> easings = macroLoader.load((json, id) -> context.wrapStrict(id.toString(), () -> Easing.fromJSON(json, context)));
                 List<String> errors = context.getErrors();
                 if (!errors.isEmpty()) {
                     LOGGER.error(MARKER, "Error loading easing macros");
@@ -190,12 +190,12 @@ public class CutsceneAPI {
                 }
                 LOGGER.info(MARKER, "Loaded {}/{} easing macros", Easing.EASING_MACROS.size(), files.size());
             }
-        }, ResourceLocation.parse("cutscenes:easing_macros"));
+        }, id("easing_macros"));
         abstractions.registerReloadListener(new JsonLoader(GSON, "cutscenes") {
             private static final Marker MARKER = MarkerFactory.getMarker("CutsceneLoader");
 
             @Override
-            protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
+            protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller filler) {
                 CutsceneManager.REGISTRY.clear();
                 PointProvider.POINT_CACHE.clear();
                 AtomicInteger loaded = new AtomicInteger();
@@ -222,6 +222,11 @@ public class CutsceneAPI {
                 });
                 LOGGER.info(MARKER, "Loaded {}/{} cutscenes", loaded.get(), files.size());
             }
-        }, ResourceLocation.parse("cutscenes:cutscenes"));
+        }, id("cutscenes"));
+        abstractions.addListenerOrdering(id("easing_macros"), id("cutscenes"));
+    }
+
+    public static Identifier id(String name) {
+        return Identifier.fromNamespaceAndPath("cutscenes", name);
     }
 }

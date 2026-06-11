@@ -1,39 +1,28 @@
 package net.thewinnt.cutscenes.fabric;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
-
 import com.mojang.brigadier.CommandDispatcher;
-
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
-import net.thewinnt.cutscenes.platform.AbstractClientboundPacket;
-import net.thewinnt.cutscenes.platform.AbstractPacket;
-import net.thewinnt.cutscenes.platform.AbstractServerboundPacket;
-import net.thewinnt.cutscenes.platform.CameraAngleSetter;
-import net.thewinnt.cutscenes.platform.PacketType;
-import net.thewinnt.cutscenes.platform.PlatformAbstractions;
+import net.thewinnt.cutscenes.platform.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class FabricPlatform implements PlatformAbstractions {
     public List<PacketType<? extends AbstractClientboundPacket>> clientboundPackets = new ArrayList<>();
@@ -43,18 +32,13 @@ public class FabricPlatform implements PlatformAbstractions {
     public MinecraftServer server;
 
     @Override
-    public void registerReloadListener(PreparableReloadListener listener, ResourceLocation id) {
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
-            @Override
-            public ResourceLocation getFabricId() {
-                return id;
-            }
+    public void registerReloadListener(PreparableReloadListener listener, Identifier id) {
+        ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(id, listener);
+    }
 
-            @Override
-            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor executor, Executor executor2) {
-                return listener.reload(preparationBarrier, resourceManager, executor, executor2);
-            }
-        });
+    @Override
+    public void addListenerOrdering(Identifier first, Identifier second) {
+        ResourceLoader.get(PackType.SERVER_DATA).addListenerOrdering(first, second);
     }
 
     @Override
@@ -67,7 +51,7 @@ public class FabricPlatform implements PlatformAbstractions {
 
     @Override
     public void sendPacketToPlayer(AbstractClientboundPacket packet, ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         packet.write(buf);
         ServerPlayNetworking.send(player, packet);
     }
@@ -82,7 +66,7 @@ public class FabricPlatform implements PlatformAbstractions {
 
     @Override
     public void sendPacketFromPlayer(AbstractServerboundPacket packet) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         packet.write(buf);
         ClientPlayNetworking.send(packet);
     }
@@ -122,10 +106,10 @@ public class FabricPlatform implements PlatformAbstractions {
     }
 
     public static <T extends AbstractClientboundPacket> void registerClientboundPacket(PacketType<T> type) {
-        PayloadTypeRegistry.playS2C().register(type.type(), type.codec());
+        PayloadTypeRegistry.clientboundPlay().register(type.type(), type.codec());
     }
 
     public static <T extends AbstractServerboundPacket> void registerServerboundPacket(PacketType<T> type) {
-        PayloadTypeRegistry.playC2S().register(type.type(), type.codec());
+        PayloadTypeRegistry.serverboundPlay().register(type.type(), type.codec());
     }
 }

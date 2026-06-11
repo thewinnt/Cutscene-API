@@ -7,14 +7,15 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.event.CutsceneEvents;
 import net.thewinnt.cutscenes.neoforge.event.CutsceneOverEvent;
+import net.thewinnt.cutscenes.platform.Services;
 
 @Mod("cutscene_api")
 public final class CutsceneAPINeoForge {
-    public static final NeoForgePlatform PLATFORM = new NeoForgePlatform();
+    public static final NeoForgePlatform PLATFORM = ((NeoForgePlatform) Services.PLATFORM);
 
-    public CutsceneAPINeoForge(IEventBus bus, Dist dist) {
+    public CutsceneAPINeoForge(IEventBus bus) {
         // Run our common setup.
-        CutsceneAPI.onInitialize(PLATFORM);
+        CutsceneAPI.onInitialize();
         CutsceneAPIEntities.REGISTRY.register(bus);
         CutsceneAPIArgumentTypes.REGISTRY.register(bus);
         CutsceneEvents.CUTSCENE_OVER_SERVER.addListener((type, id, player, reason) -> {

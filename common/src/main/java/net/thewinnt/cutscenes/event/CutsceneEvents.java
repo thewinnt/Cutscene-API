@@ -1,7 +1,7 @@
 package net.thewinnt.cutscenes.event;
 
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.thewinnt.cutscenes.CutsceneType;
 
@@ -14,11 +14,11 @@ public class CutsceneEvents {
 
     @FunctionalInterface
     public interface CutsceneOverClient {
-        void accept(CutsceneType type, ResourceLocation id, LocalPlayer player, EndingReason reason);
+        void accept(CutsceneType type, Identifier id, LocalPlayer player, EndingReason reason);
     }
 
     @FunctionalInterface
     public interface CutsceneOverServer {
-        void accept(CutsceneType type, ResourceLocation id, ServerPlayer player, EndingReason reason);
+        void accept(CutsceneType type, Identifier id, ServerPlayer player, EndingReason reason);
     }
 }

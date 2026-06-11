@@ -1,8 +1,9 @@
 package net.thewinnt.cutscenes.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public interface Overlay {
-    void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object config);
+    void render(Minecraft minecraft, GuiGraphicsExtractor graphics, int width, int height, Object config);
 }

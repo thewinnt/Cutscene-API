@@ -3,7 +3,7 @@ package net.thewinnt.cutscenes.rotation;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.phys.Vec3;
@@ -16,14 +16,14 @@ import net.thewinnt.cutscenes.util.LoadingContext;
  * Defines how to handle the player's rotation.
  */
 public interface RotationHandler {
-    ResourceLocation UNKNOWN = ResourceLocation.withDefaultNamespace("null");
+    Identifier UNKNOWN = Identifier.withDefaultNamespace("null");
     /**
      * Applies the rotation transform. There is at most one rotation handler ticked at any point in time, so you
      * can freely store data in your instances.
      *
      * @param initCamRot  the initial player rotation, right before the cutscene started
      * @param startRot    the start rotation of the cutscene, aka the third argument in
-     *                    {@link CutsceneManager#startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer) CutsceneManager#startCutscene}
+     *                    {@link CutsceneManager#startCutscene(Identifier, Vec3, Vec3, Vec3, ServerPlayer) CutsceneManager#startCutscene}
      * @param playerRot   the current player rotation (as if the cutscene never began)
      * @param cutsceneRot the rotation value output by the cutscene, relative to zero
      * @param dt          the time difference since last call of this method, in <b>seconds</b>.
@@ -41,18 +41,18 @@ public interface RotationHandler {
     @SuppressWarnings("unchecked")
     static <T extends RotationHandler> void toNetwork(FriendlyByteBuf buf, T handler) {
         RotationSerializer<T> serializer = ((RotationSerializer<T>) handler.serializer());
-        ResourceLocation id = CutsceneAPI.ROTATION_HANDLERS.getKey(serializer);
+        Identifier id = CutsceneAPI.ROTATION_HANDLERS.getKey(serializer);
         if (id == null) {
             CutsceneAPI.LOGGER.error("Unregistered rotation serializer: {}", serializer);
-            buf.writeResourceLocation(UNKNOWN);
+            buf.writeIdentifier(UNKNOWN);
             return;
         }
-        buf.writeResourceLocation(id);
+        buf.writeIdentifier(id);
         serializer.toNetwork(buf, handler);
     }
 
     static RotationHandler fromNetwork(FriendlyByteBuf buf) {
-        ResourceLocation id = buf.readResourceLocation();
+        Identifier id = buf.readIdentifier();
         if (id.equals(UNKNOWN)) {
             CutsceneAPI.LOGGER.warn("Unknown rotation handler, returning default (cutscenes:block). Check server logs for more details.");
             return CutsceneRotation.INSTANCE;
@@ -75,7 +75,7 @@ public interface RotationHandler {
             return CutsceneRotation.INSTANCE;
         } else if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
-            ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
+            Identifier id = Identifier.parse(GsonHelper.getAsString(obj, "type"));
             RotationSerializer<?> serializer = CutsceneAPI.ROTATION_HANDLERS.getValue(id);
             if (serializer != null) {
                 return serializer.fromJson(obj, context);

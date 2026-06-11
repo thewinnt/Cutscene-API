@@ -1,7 +1,7 @@
 package net.thewinnt.cutscenes.time;
 
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.thewinnt.cutscenes.transition.SmoothEaseTransition;
 import net.thewinnt.cutscenes.transition.Transition;
 

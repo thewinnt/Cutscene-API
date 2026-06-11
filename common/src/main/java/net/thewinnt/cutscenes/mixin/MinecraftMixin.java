@@ -20,7 +20,7 @@ public class MinecraftMixin {
     }
 
     // don't pick blocks
-    @Inject(method = "pickBlock", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "pickBlockOrEntity", at = @At("HEAD"), cancellable = true)
     public void pickBlock(CallbackInfo callback) {
         if (ClientCutsceneManager.actionToggles().disablePickingBlocks()) {
             callback.cancel();

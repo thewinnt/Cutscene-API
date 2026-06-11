@@ -6,7 +6,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
@@ -117,7 +117,7 @@ public class JsonHelper {
             context.popElement();
             return null;
         }
-        ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
+        Identifier type = Identifier.parse(GsonHelper.getAsString(obj, "type"));
         PointSerializer<?> serializer = CutsceneManager.getPointType(type);
         if (serializer == null) {
             context.reportError("Unknown point type: " + type);
@@ -152,7 +152,7 @@ public class JsonHelper {
         Vec3 test = vec3FromJson(json);
         if (test != null) return new StaticPointProvider(test);
         JsonObject obj = json.getAsJsonObject();
-        ResourceLocation type = ResourceLocation.parse(GsonHelper.getAsString(obj, "type"));
+        Identifier type = Identifier.parse(GsonHelper.getAsString(obj, "type"));
         PointSerializer<?> serializer = CutsceneManager.getPointType(type);
         if (serializer == null) {
             context.reportError("Unknown point type: " + type);

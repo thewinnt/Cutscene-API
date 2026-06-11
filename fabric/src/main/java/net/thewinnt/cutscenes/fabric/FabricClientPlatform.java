@@ -1,15 +1,11 @@
 package net.thewinnt.cutscenes.fabric;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
-import net.thewinnt.cutscenes.platform.PlatformAbstractions;
+import net.thewinnt.cutscenes.client.ClientPlatformAbstractions;
 
-public class FabricClientPlatform extends FabricPlatform {
+public class FabricClientPlatform extends FabricPlatform implements ClientPlatformAbstractions {
     @Override
     public void submitOnLogout(Runnable runnable) {
-        ClientPlayConnectionEvents.DISCONNECT.register((clientHandshakePacketListener, minecraft) -> runnable.run());
+        ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> runnable.run());
     }
 }

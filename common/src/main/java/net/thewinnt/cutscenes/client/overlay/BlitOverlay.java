@@ -1,17 +1,8 @@
 package net.thewinnt.cutscenes.client.overlay;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderType;
-import net.thewinnt.cutscenes.mixin.GuiGraphicsAccessor;
-import org.joml.Matrix4f;
-
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.thewinnt.cutscenes.client.Overlay;
 import net.thewinnt.cutscenes.effect.configuration.BlitConfiguration;
 import net.thewinnt.cutscenes.util.TimeProvider;
@@ -24,7 +15,7 @@ public class BlitOverlay implements Overlay {
     }
 
     @Override
-    public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object cfg) {
+    public void render(Minecraft minecraft, GuiGraphicsExtractor graphics, int width, int height, Object cfg) {
         TimeProvider time = (TimeProvider) cfg;
         double t = time.getProgress();
         float x1 = config.x1().get(t, width);

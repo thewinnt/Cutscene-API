@@ -7,7 +7,7 @@ import com.google.gson.JsonParser;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -20,7 +20,7 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class JsonLoader extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
+public abstract class JsonLoader extends SimplePreparableReloadListener<Map<Identifier, JsonElement>> {
     private static final Logger LOGGER = LogUtils.getLogger();
     protected final Gson gson;
     protected final String folder;
@@ -31,13 +31,13 @@ public abstract class JsonLoader extends SimplePreparableReloadListener<Map<Reso
     }
 
     @Override
-    protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-        Map<ResourceLocation, JsonElement> map = new HashMap<>();
+    protected Map<Identifier, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+        Map<Identifier, JsonElement> map = new HashMap<>();
         FileToIdConverter fileToIdConverter = FileToIdConverter.json(this.folder);
 
-        for(Map.Entry<ResourceLocation, Resource> entry : fileToIdConverter.listMatchingResources(resourceManager).entrySet()) {
-            ResourceLocation resourceId = entry.getKey();
-            ResourceLocation elementId = fileToIdConverter.fileToId(resourceId);
+        for(Map.Entry<Identifier, Resource> entry : fileToIdConverter.listMatchingResources(resourceManager).entrySet()) {
+            Identifier resourceId = entry.getKey();
+            Identifier elementId = fileToIdConverter.fileToId(resourceId);
 
             try (Reader reader = (entry.getValue()).openAsReader()) {
                 map.putIfAbsent(elementId, JsonParser.parseReader(reader));

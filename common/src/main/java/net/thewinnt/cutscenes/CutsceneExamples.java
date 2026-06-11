@@ -1,6 +1,6 @@
 package net.thewinnt.cutscenes;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.easing.types.SimpleEasing;
 import net.thewinnt.cutscenes.path.BezierCurve;
@@ -16,11 +16,11 @@ public class CutsceneExamples {
     // They're not used anywhere and are here to show how you can make some yourself with code
     // You can also use datapacks to create cutscenes, it has all the same functionality, except it's better
 
-    public static final ResourceLocation ASCEND_ID = ResourceLocation.parse("cutscenes:tests/ascend");
-    public static final ResourceLocation COOL_PATH_ID = ResourceLocation.parse("cutscenes:tests/cool_path");
-    public static final ResourceLocation MULTI_TYPE_ID = ResourceLocation.parse("cutscenes:tests/multi_type");
-    public static final ResourceLocation HORIZONTAL_LINE_ID = ResourceLocation.parse("cutscenes:tests/horizontal_line");
-    public static final ResourceLocation CATMULL_ROM_TEST_ID = ResourceLocation.parse("cutscenes:tests/catmull_rom_test");
+    public static final Identifier ASCEND_ID = Identifier.parse("cutscenes:tests/ascend");
+    public static final Identifier COOL_PATH_ID = Identifier.parse("cutscenes:tests/cool_path");
+    public static final Identifier MULTI_TYPE_ID = Identifier.parse("cutscenes:tests/multi_type");
+    public static final Identifier HORIZONTAL_LINE_ID = Identifier.parse("cutscenes:tests/horizontal_line");
+    public static final Identifier CATMULL_ROM_TEST_ID = Identifier.parse("cutscenes:tests/catmull_rom_test");
     /**
      * Ascends you 25 blocks up with a little twist
      */

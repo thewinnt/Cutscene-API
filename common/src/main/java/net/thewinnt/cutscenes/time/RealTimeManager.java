@@ -1,6 +1,6 @@
 package net.thewinnt.cutscenes.time;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 
 /**

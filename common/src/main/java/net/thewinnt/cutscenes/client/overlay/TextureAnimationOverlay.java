@@ -1,9 +1,9 @@
 package net.thewinnt.cutscenes.client.overlay;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.Profiler;
 import net.thewinnt.cutscenes.client.Overlay;
@@ -12,21 +12,21 @@ import net.thewinnt.cutscenes.util.TimeProvider;
 
 public class TextureAnimationOverlay implements Overlay {
     private final TextureAnimationConfiguration config;
-    private final ResourceLocation[] frames;
+    private final Identifier[] frames;
 
     public TextureAnimationOverlay(TextureAnimationConfiguration config) {
         this.config = config;
-        this.frames = new ResourceLocation[config.frameCount()];
+        this.frames = new Identifier[config.frameCount()];
         for (int i = 0; i < frames.length; i++) {
             String texture = config.textureMask();
             String[] frameFormat = texture.split("%");
             texture = texture.replaceAll("%[0-9]*%", String.format("%0" + frameFormat[1] + "d", i + config.frameOffset()));
-            this.frames[i] = ResourceLocation.parse(texture);
+            this.frames[i] = Identifier.parse(texture);
         }
     }
 
     @Override
-    public void render(Minecraft minecraft, GuiGraphics graphics, int width, int height, Object cfg) {
+    public void render(Minecraft minecraft, GuiGraphicsExtractor graphics, int width, int height, Object cfg) {
         Profiler.get().push("cutscenes:animation");
         TimeProvider time = (TimeProvider) cfg;
         double t = time.getProgress();

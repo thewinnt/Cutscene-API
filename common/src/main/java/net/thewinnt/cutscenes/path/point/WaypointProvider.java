@@ -53,7 +53,7 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
         buf.writeUtf(name);
         buf.writeInt(searchRadius);
         buf.writeEnum(sorting);
-        buf.writeVec3(searchOffset);
+        CutsceneNetworkHandler.writeVec3(buf, searchOffset);
         CutsceneNetworkHandler.writePointProvider(buf, offset);
         buf.writeOptional(fallback, CutsceneNetworkHandler::writePointProvider);
     }
@@ -72,7 +72,7 @@ public record WaypointProvider(String name, int searchRadius, SortType sorting, 
         String name = buf.readUtf();
         int searchRadius = buf.readInt();
         SortType sortType = buf.readEnum(SortType.class);
-        Vec3 searchOffset = buf.readVec3();
+        Vec3 searchOffset = CutsceneNetworkHandler.readVec3(buf);
         PointProvider offset = CutsceneNetworkHandler.readPointProvider(buf);
         Optional<PointProvider> fallback = buf.readOptional(CutsceneNetworkHandler::readPointProvider);
         return new WaypointProvider(name, searchRadius, sortType, searchOffset, offset, fallback);

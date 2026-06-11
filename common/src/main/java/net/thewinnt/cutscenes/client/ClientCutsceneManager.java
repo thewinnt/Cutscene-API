@@ -3,10 +3,10 @@ package net.thewinnt.cutscenes.client;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.logging.LogUtils;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.KeyboardInput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.level.Level;
@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class ClientCutsceneManager {
     public static final Logger LOGGER = LogUtils.getLogger();
-    public static final BiMap<ResourceLocation, CutsceneType> CLIENT_REGISTRY = HashBiMap.create();
+    public static final BiMap<Identifier, CutsceneType> CLIENT_REGISTRY = HashBiMap.create();
     public static final ActionToggles DEFAULT_ACTION_TOGGLES = new ActionToggles.Builder(false).build();
     public static boolean renderedOverlaysThisFrame = false; // whether the overlays were rendered this frame
     private static boolean isCutsceneRunning = false;
@@ -83,13 +83,13 @@ public class ClientCutsceneManager {
         startPosition = startPos;
     }
 
-    public static void updateRegistry(Map<ResourceLocation, CutsceneType> registry) {
+    public static void updateRegistry(Map<Identifier, CutsceneType> registry) {
         CLIENT_REGISTRY.clear();
         CLIENT_REGISTRY.putAll(registry);
         if (isCutsceneRunning) CutsceneAPI.updateSalt();
     }
 
-    public static void registerCutscene(ResourceLocation id, CutsceneType type) {
+    public static void registerCutscene(Identifier id, CutsceneType type) {
         CLIENT_REGISTRY.put(id, type);
     }
 

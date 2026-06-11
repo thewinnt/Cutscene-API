@@ -9,9 +9,8 @@ import com.mojang.authlib.GameProfile;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ChatComponent;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.CommonListenerCookie;
-import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.*;
+import net.minecraft.client.multiplayer.chat.ChatAbilities;
 import net.minecraft.client.player.ClientInput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -41,23 +40,27 @@ public class CutsceneCameraEntity extends LocalPlayer {
     private final float pathYaw;
     private final float pathPitch;
     private final float pathRoll;
+    private final ClientLevel clientLevel;
 
     private static ClientPacketListener createListener() {
         return new ClientPacketListener(
             MINECRAFT,
             MINECRAFT.getConnection().getConnection(),
             new CommonListenerCookie(
-                    new GameProfile(UUID.randomUUID(), "CutsceneAPI$Camera"),
-                    MINECRAFT.getTelemetryManager().createWorldSessionManager(false, Duration.ZERO, "cutscene-api$fakedata"),
-                    MINECRAFT.getConnection().registryAccess(),
-                    FeatureFlagSet.of(),
-                    "cutscene-api$fakedata",
-                    new ServerData("csapi$fakedata", "127.0.0.1", ServerData.Type.OTHER),
-                    Minecraft.getInstance().screen,
-                    Map.of(),
-                    null,
-                    Map.of(),
-                    new ServerLinks(List.of())
+                new LevelLoadTracker(),
+                new GameProfile(UUID.randomUUID(), "CutsceneAPI$Camera"),
+                MINECRAFT.getTelemetryManager().createWorldSessionManager(false, Duration.ZERO, "cutscene-api$fakedata"),
+                MINECRAFT.getConnection().registryAccess(),
+                FeatureFlagSet.of(),
+                null,
+                null,
+                null,
+                Map.of(),
+                null,
+                Map.of(),
+                new ServerLinks(List.of()),
+                Map.of(),
+                true
             )
         ) {
             public void send(Packet<?> pPacket) {}
@@ -65,8 +68,9 @@ public class CutsceneCameraEntity extends LocalPlayer {
     }
 
     public CutsceneCameraEntity(int id, CutsceneInstance cutscene, Vec3 startPos, float camStartYaw, float camStartPitch, float pathYaw, float pathPitch, float pathRoll) {
-        super(MINECRAFT, MINECRAFT.level, createListener(), MINECRAFT.player.getStats(), MINECRAFT.player.getRecipeBook(), Input.EMPTY, false);
+        super(MINECRAFT, MINECRAFT.level, createListener(), MINECRAFT.player.getStats(), MINECRAFT.player.getRecipeBook(), Input.EMPTY, false, ChatAbilities.NO_RESTRICTIONS);
         this.setId(id);
+        this.clientLevel = MINECRAFT.level;
         super.setPose(Pose.SWIMMING);
         LocalPlayer mcplayer = MINECRAFT.player;
         this.cutscene = cutscene;

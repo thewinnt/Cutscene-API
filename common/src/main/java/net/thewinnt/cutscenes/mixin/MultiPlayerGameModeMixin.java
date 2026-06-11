@@ -28,15 +28,7 @@ public class MultiPlayerGameModeMixin {
 
     // don't interact with entities
     @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
-    public void interactEntity(Player player, Entity target, InteractionHand hand, CallbackInfoReturnable<InteractionResult> callback) {
-        if (ClientCutsceneManager.actionToggles().disableEntityInteractions()) {
-            callback.setReturnValue(InteractionResult.PASS);
-        }
-    }
-
-    // don't interact with entities
-    @Inject(method = "interactAt", at = @At("HEAD"), cancellable = true)
-    public void interactEntityAtLocation(Player player, Entity target, EntityHitResult ray, InteractionHand hand, CallbackInfoReturnable<InteractionResult> callback) {
+    public void interactEntity(Player player, Entity entity, EntityHitResult hitResult, InteractionHand hand, CallbackInfoReturnable<InteractionResult> callback) {
         if (ClientCutsceneManager.actionToggles().disableEntityInteractions()) {
             callback.setReturnValue(InteractionResult.PASS);
         }

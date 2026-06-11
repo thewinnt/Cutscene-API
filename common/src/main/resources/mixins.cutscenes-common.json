@@ -9,7 +9,6 @@
   "client": [
     "CameraMixin",
     "ClientPacketListenerMixin",
-    "DebugRendererMixin",
     "EntityMixin",
     "GameRendererMixin",
     "GuiGraphicsAccessor",

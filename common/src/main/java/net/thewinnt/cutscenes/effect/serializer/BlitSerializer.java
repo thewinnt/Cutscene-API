@@ -2,7 +2,7 @@ package net.thewinnt.cutscenes.effect.serializer;
 
 import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.thewinnt.cutscenes.easing.types.ConstantEasing;
 import net.thewinnt.cutscenes.effect.CutsceneEffectSerializer;
@@ -19,7 +19,7 @@ public class BlitSerializer implements CutsceneEffectSerializer<BlitConfiguratio
 
     @Override
     public BlitConfiguration fromNetwork(FriendlyByteBuf buf) {
-        ResourceLocation texture = buf.readResourceLocation();
+        Identifier texture = buf.readIdentifier();
         CoordinateProvider x1 = CoordinateProvider.fromNetwork(buf);
         CoordinateProvider y1 = CoordinateProvider.fromNetwork(buf);
         CoordinateProvider x2 = CoordinateProvider.fromNetwork(buf);
@@ -34,7 +34,7 @@ public class BlitSerializer implements CutsceneEffectSerializer<BlitConfiguratio
 
     @Override
     public BlitConfiguration fromJSON(JsonObject json, LoadingContext context) {
-        ResourceLocation texture = ResourceLocation.parse(GsonHelper.getAsString(json, "texture"));
+        Identifier texture = Identifier.parse(GsonHelper.getAsString(json, "texture"));
         CoordinateProvider x1 = CoordinateProvider.loadWrapped(json, "x1", context, ConstantEasing.ZERO);
         CoordinateProvider y1 = CoordinateProvider.loadWrapped(json, "y1", context, ConstantEasing.ZERO);
         CoordinateProvider x2 = CoordinateProvider.loadWrapped(json, "x2", context, ConstantEasing.ONE);
@@ -49,7 +49,7 @@ public class BlitSerializer implements CutsceneEffectSerializer<BlitConfiguratio
 
     @Override
     public void toNetwork(BlitConfiguration object, FriendlyByteBuf buf) {
-        buf.writeResourceLocation(object.texture());
+        buf.writeIdentifier(object.texture());
         object.x1().toNetwork(buf);
         object.y1().toNetwork(buf);
         object.x2().toNetwork(buf);

@@ -32,7 +32,10 @@ public abstract class CameraMixin implements CameraExt {
     @Shadow @Final private Vector3f up;
     @Shadow @Final private Vector3f left;
 
-    @WrapOperation(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FF)V"))
+    @Shadow
+    private int matrixPropertiesDirty;
+
+    @WrapOperation(method = "alignWithEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FF)V"))
     private void setup(Camera instance, float yRot, float xRot, Operation<Void> original) {
         if (!ClientCutsceneManager.isCutsceneRunning()) {
             original.call(instance, yRot, xRot); // keep it non-intrusive
@@ -44,12 +47,13 @@ public abstract class CameraMixin implements CameraExt {
     }
 
     @Unique
-    private void setRotation(float x, float y, float z) {
-        this.xRot = y;
-        this.yRot = x;
-        this.rotation.rotationYXZ((float) Math.PI - x * (float) (Math.PI / 180.0), -y * (float) (Math.PI / 180.0), -z * (float) (Math.PI / 180.0));
+    private void setRotation(float yRot, float xRot, float roll) {
+        this.xRot = xRot;
+        this.yRot = yRot;
+        this.rotation.rotationYXZ((float) Math.PI - yRot * (float) (Math.PI / 180.0), -xRot * (float) (Math.PI / 180.0), -roll * (float) (Math.PI / 180.0));
         FORWARDS.rotate(this.rotation, this.forwards);
         UP.rotate(this.rotation, this.up);
         LEFT.rotate(this.rotation, this.left);
+        this.matrixPropertiesDirty |= 3;
     }
 }

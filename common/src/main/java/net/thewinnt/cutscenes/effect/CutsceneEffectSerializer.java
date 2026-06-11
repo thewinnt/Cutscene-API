@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.thewinnt.cutscenes.CutsceneAPI;
 import net.thewinnt.cutscenes.easing.EasingSerializer;
 import net.thewinnt.cutscenes.effect.configuration.AppearingTextConfiguration;
@@ -25,22 +25,22 @@ import net.thewinnt.cutscenes.effect.serializer.VoidEffectSerializer;
 import net.thewinnt.cutscenes.util.LoadingContext;
 
 public interface CutsceneEffectSerializer<T> {
-    CutsceneEffectSerializer<AppearingTextConfiguration> APPEARING_TEXT = register(ResourceLocation.parse("cutscenes:appearing_text"), AppearingTextSerializer.INSTANCE);
-    CutsceneEffectSerializer<TriangleStripConfiguration> TRIANGLE_STRIP = register(ResourceLocation.parse("cutscenes:triangle_strip"), TriangleStripSerializer.INSTANCE);
-    CutsceneEffectSerializer<RectangleConfiguration> RECTANGLE = register(ResourceLocation.parse("cutscenes:rectangle"), RectangleSerializer.INSTANCE);
-    CutsceneEffectSerializer<BlitConfiguration> BLIT = register(ResourceLocation.parse("cutscenes:blit"), BlitSerializer.INSTANCE);
-    CutsceneEffectSerializer<PlaySoundConfiguration> PLAY_SOUND = register(ResourceLocation.parse("cutscenes:play_sound"), PlaySoundSerializer.INSTANCE);
-    CutsceneEffectSerializer<Void> HIDE_CHUNKS = register(ResourceLocation.parse("cutscenes:hide_chunks"), new VoidEffectSerializer(HideChunksEffect::new));
-    CutsceneEffectSerializer<Void> HIDE_GUI = register(ResourceLocation.parse("cutscenes:hide_gui"), new VoidEffectSerializer(HideGuiEffect::new));
-    CutsceneEffectSerializer<SimpleTextConfiguration> TEXT = register(ResourceLocation.parse("cutscenes:text"), SimpleTextSerializer.INSTANCE);
-    CutsceneEffectSerializer<TextureAnimationConfiguration> ANIMATION = register(ResourceLocation.parse("cutscenes:animation"), TextureAnimationSerializer.INSTANCE);
+    CutsceneEffectSerializer<AppearingTextConfiguration> APPEARING_TEXT = register(Identifier.parse("cutscenes:appearing_text"), AppearingTextSerializer.INSTANCE);
+    CutsceneEffectSerializer<TriangleStripConfiguration> TRIANGLE_STRIP = register(Identifier.parse("cutscenes:triangle_strip"), TriangleStripSerializer.INSTANCE);
+    CutsceneEffectSerializer<RectangleConfiguration> RECTANGLE = register(Identifier.parse("cutscenes:rectangle"), RectangleSerializer.INSTANCE);
+    CutsceneEffectSerializer<BlitConfiguration> BLIT = register(Identifier.parse("cutscenes:blit"), BlitSerializer.INSTANCE);
+    CutsceneEffectSerializer<PlaySoundConfiguration> PLAY_SOUND = register(Identifier.parse("cutscenes:play_sound"), PlaySoundSerializer.INSTANCE);
+    CutsceneEffectSerializer<Void> HIDE_CHUNKS = register(Identifier.parse("cutscenes:hide_chunks"), new VoidEffectSerializer(HideChunksEffect::new));
+    CutsceneEffectSerializer<Void> HIDE_GUI = register(Identifier.parse("cutscenes:hide_gui"), new VoidEffectSerializer(HideGuiEffect::new));
+    CutsceneEffectSerializer<SimpleTextConfiguration> TEXT = register(Identifier.parse("cutscenes:text"), SimpleTextSerializer.INSTANCE);
+    CutsceneEffectSerializer<TextureAnimationConfiguration> ANIMATION = register(Identifier.parse("cutscenes:animation"), TextureAnimationSerializer.INSTANCE);
 
     T fromNetwork(FriendlyByteBuf buf);
     T fromJSON(JsonObject json, LoadingContext context);
     void toNetwork(T object, FriendlyByteBuf buf);
     CutsceneEffectFactory<T> factory();
 
-    static <T> CutsceneEffectSerializer<T> register(ResourceLocation id, CutsceneEffectSerializer<T> serializer) {
+    static <T> CutsceneEffectSerializer<T> register(Identifier id, CutsceneEffectSerializer<T> serializer) {
         return Registry.register(CutsceneAPI.CUTSCENE_EFFECT_SERIALIZERS, id, serializer);
     }
 

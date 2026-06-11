@@ -3,7 +3,7 @@ package net.thewinnt.cutscenes;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.event.EndingReason;
@@ -35,7 +35,7 @@ import org.joml.Vector3f;
 
 public class CutsceneManager {
     /** The cutscene registry, where all cutscenes are stored. Only read from this, please */
-    public static final BiMap<ResourceLocation, CutsceneType> REGISTRY = HashBiMap.create();
+    public static final BiMap<Identifier, CutsceneType> REGISTRY = HashBiMap.create();
 
     /** The currently previewed cutscene */
     private static CutsceneType previewedCutscene;
@@ -97,7 +97,7 @@ public class CutsceneManager {
     // UTILITY CONSTANTS //
     // Some constants of variable usefulness.
 
-    /** Pass this as a camera rotation to {@link #startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer)} and it will make the start camera rotation equal to the current rotation. */
+    /** Pass this as a camera rotation to {@link #startCutscene(Identifier, Vec3, Vec3, Vec3, ServerPlayer)} and it will make the start camera rotation equal to the current rotation. */
     public static final Vec3 KEEP_ROTATION = new Vec3(Double.NaN, Double.NaN, Double.NaN);
 
     /** 
@@ -106,7 +106,7 @@ public class CutsceneManager {
      * @param type The actual cutscene type you want to register
      * @return Your cutscene type for storing
      */
-    public static CutsceneType registerCutscene(ResourceLocation id, @NotNull CutsceneType type) {
+    public static CutsceneType registerCutscene(Identifier id, @NotNull CutsceneType type) {
         REGISTRY.put(id, type);
         return type;
     }
@@ -116,7 +116,7 @@ public class CutsceneManager {
      * @param id The ID of the segment type that will be used in datapacks
      * @param type The serializer to register
      */
-    public static void registerSegmentType(ResourceLocation id, SegmentType<?> type) {
+    public static void registerSegmentType(Identifier id, SegmentType<?> type) {
         Registry.register(CutsceneAPI.SEGMENT_TYPES, id, type);
     }
 
@@ -125,7 +125,7 @@ public class CutsceneManager {
      * @param id The ID of the point type that will be used in datapacks
      * @param type The serializer to register
      */
-    public static void registerPointType(ResourceLocation id, PointSerializer<?> type) {
+    public static void registerPointType(Identifier id, PointSerializer<?> type) {
         Registry.register(CutsceneAPI.POINT_TYPES, id, type);
     }
 
@@ -134,40 +134,40 @@ public class CutsceneManager {
      * @param id The ID of the transition type that will be used in datapacks
      * @param type The serializer to register
      */
-    public static void registerTransitionType(ResourceLocation id, TransitionSerializer<?> type) {
+    public static void registerTransitionType(Identifier id, TransitionSerializer<?> type) {
         Registry.register(CutsceneAPI.TRANSITION_TYPES, id, type);
     }
 
     /** Returns the ID of the specified serializer, or {@code null} if it's not registered */
-    public static ResourceLocation getSegmentTypeId(SegmentType<?> type) {
+    public static Identifier getSegmentTypeId(SegmentType<?> type) {
         return CutsceneAPI.SEGMENT_TYPES.getKey(type);
     }
 
     /** Returns the segment serializer with this ID, or {@code null} if it doesn't exist */
-    public static SegmentType<?> getSegmentType(ResourceLocation id) {
+    public static SegmentType<?> getSegmentType(Identifier id) {
         return CutsceneAPI.SEGMENT_TYPES.getValue(id);
     }
 
     /** Returns the ID of the specified point type, or {@code null} if it's not registered */
-    public static ResourceLocation getPointTypeId(PointSerializer<?> type) {
+    public static Identifier getPointTypeId(PointSerializer<?> type) {
         return CutsceneAPI.POINT_TYPES.getKey(type);
     }
 
     /** Returns the point serializer with this ID, or {@code null} if it doesn't exist */
     @Nullable
-    public static PointSerializer<?> getPointType(ResourceLocation id) {
+    public static PointSerializer<?> getPointType(Identifier id) {
         return CutsceneAPI.POINT_TYPES.getValue(id);
     }
 
     /** Returns the ID of the specified transition type, or {@code null} if it's not registered */
     @Nullable
-    public static ResourceLocation getTransitionTypeId(TransitionSerializer<?> type) {
+    public static Identifier getTransitionTypeId(TransitionSerializer<?> type) {
         return CutsceneAPI.TRANSITION_TYPES.getKey(type);
     }
 
     /** Returns the transition serializer with this ID, or {@code null} if it doesn't exist */
     @Nullable
-    public static TransitionSerializer<?> getTransitionType(ResourceLocation id) {
+    public static TransitionSerializer<?> getTransitionType(Identifier id) {
         return CutsceneAPI.TRANSITION_TYPES.getValue(id);
     }
 
@@ -205,7 +205,7 @@ public class CutsceneManager {
      * @param player The player to play the cutscene to
      * @see CutsceneManager#KEEP_ROTATION
      */
-    public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player, String startingReason) {
+    public static void startCutscene(Identifier id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player, String startingReason) {
         CutsceneType type = REGISTRY.get(id);
         PlayerExt ext = (PlayerExt) player;
         ext.csapi$finishCutscene(EndingReason.INTERRUPT);
@@ -229,7 +229,7 @@ public class CutsceneManager {
      * @param player The player to play the cutscene to
      * @see CutsceneManager#KEEP_ROTATION
      */
-    public static void startCutscene(ResourceLocation id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
+    public static void startCutscene(Identifier id, Vec3 startPos, Vec3 camRot, Vec3 pathRot, ServerPlayer player) {
         startCutscene(id, startPos, camRot, pathRot, player, "unspecified");
     }
 
@@ -237,9 +237,9 @@ public class CutsceneManager {
      * Starts a cutscene for a player from their position with no preset rotation and starting reason {@code unspecified}
      * @param id The ID of the cutscene to start
      * @param player The player to play the cutscene to
-     * @see CutsceneManager#startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer, String)
+     * @see CutsceneManager#startCutscene(Identifier, Vec3, Vec3, Vec3, ServerPlayer, String)
      */
-    public static void startCutscene(ResourceLocation id, ServerPlayer player) {
+    public static void startCutscene(Identifier id, ServerPlayer player) {
         startCutscene(id, player.position(), Vec3.ZERO, Vec3.ZERO, player);
     }
 
@@ -248,9 +248,9 @@ public class CutsceneManager {
      * @param id The ID of the cutscene to start
      * @param player The player to play the cutscene to
      * @param camRot The initial camera rotation of the player as a vector of (yaw, pitch, roll)
-     * @see CutsceneManager#startCutscene(ResourceLocation, Vec3, Vec3, Vec3, ServerPlayer, String)
+     * @see CutsceneManager#startCutscene(Identifier, Vec3, Vec3, Vec3, ServerPlayer, String)
      */
-    public static void startCutscene(ResourceLocation id, ServerPlayer player, Vec3 camRot) {
+    public static void startCutscene(Identifier id, ServerPlayer player, Vec3 camRot) {
         startCutscene(id, player.position(), camRot, Vec3.ZERO, player);
     }
 

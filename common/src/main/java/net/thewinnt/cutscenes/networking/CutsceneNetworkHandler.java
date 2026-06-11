@@ -3,7 +3,7 @@ package net.thewinnt.cutscenes.networking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamDecoder;
 import net.minecraft.network.codec.StreamEncoder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import net.thewinnt.cutscenes.CutsceneManager;
 import net.thewinnt.cutscenes.path.point.PointProvider;
@@ -11,8 +11,6 @@ import net.thewinnt.cutscenes.path.point.PointProvider;
 import java.util.function.IntFunction;
 
 public class CutsceneNetworkHandler {
-    /** @deprecated use {@link FriendlyByteBuf#readVec3()} instead */
-    @Deprecated(forRemoval = true)
     public static Vec3 readVec3(FriendlyByteBuf buf) {
         if (buf.readBoolean()) {
             double x = buf.readDouble();
@@ -26,15 +24,13 @@ public class CutsceneNetworkHandler {
 
     public static PointProvider readPointProvider(FriendlyByteBuf buf) {
         if (buf.readBoolean()) {
-            ResourceLocation id = buf.readResourceLocation();
+            Identifier id = buf.readIdentifier();
             return CutsceneManager.getPointType(id).fromNetwork(buf);
         } else {
             return null;
         }
     }
 
-    /** @deprecated use {@link FriendlyByteBuf#writeVec3(Vec3)} instead */
-    @Deprecated(forRemoval = true)
     public static void writeVec3(FriendlyByteBuf buf, Vec3 vec) {
         if (vec == null) {
             buf.writeBoolean(false); // is present
@@ -54,7 +50,7 @@ public class CutsceneNetworkHandler {
         } else {
             buf.writeBoolean(true);
         }
-        buf.writeResourceLocation(CutsceneManager.getPointTypeId(point.getSerializer()));
+        buf.writeIdentifier(CutsceneManager.getPointTypeId(point.getSerializer()));
         point.toNetwork(buf);
     }
 

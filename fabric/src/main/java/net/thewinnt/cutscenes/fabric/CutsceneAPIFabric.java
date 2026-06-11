@@ -11,7 +11,7 @@ import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.thewinnt.cutscenes.CutsceneAPI;
@@ -23,15 +23,16 @@ import net.thewinnt.cutscenes.effect.chardelays.DelayProviderSerializer;
 import net.thewinnt.cutscenes.entity.WaypointEntity;
 import net.thewinnt.cutscenes.networking.packets.PreviewCutscenePacket;
 import net.thewinnt.cutscenes.networking.packets.UpdateCutscenesPacket;
+import net.thewinnt.cutscenes.platform.Services;
 import net.thewinnt.cutscenes.rotation.RotationSerializer;
 
 public final class CutsceneAPIFabric implements ModInitializer {
-    public static final FabricPlatform PLATFORM = new FabricPlatform();
+    public static final FabricPlatform PLATFORM = ((FabricPlatform) Services.PLATFORM);
     public static final EntityType<WaypointEntity> WAYPOINT = EntityType.Builder.of(WaypointEntity::new, MobCategory.MISC)
         .sized(0.1f, 0.1f)
         .clientTrackingRange(9999)
         .canSpawnFarFromPlayer()
-        .build(ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath("cutscenes", "waypoint")));
+        .build(ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath("cutscenes", "waypoint")));
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -41,7 +42,7 @@ public final class CutsceneAPIFabric implements ModInitializer {
         // Proceed with mild caution.
 
         // Run our common setup.
-        CutsceneAPI.onInitialize(PLATFORM);
+        CutsceneAPI.onInitialize();
         ServerLifecycleEvents.SERVER_STARTING.register(PLATFORM::setServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> PLATFORM.setServer(null));
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) -> {
@@ -60,22 +61,22 @@ public final class CutsceneAPIFabric implements ModInitializer {
         ((WritableRegistry) BuiltInRegistries.REGISTRY).register(CutsceneAPI.ROTATION_HANDLER_KEY, CutsceneAPI.ROTATION_HANDLERS, RegistrationInfo.BUILT_IN);
         Registry.register(BuiltInRegistries.ENTITY_TYPE, "cutscenes:waypoint", WAYPOINT);
 
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "line"), CutsceneManager.LINE);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "bezier"), CutsceneManager.BEZIER);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "catmull_rom"), CutsceneManager.CATMULL_ROM);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "path"), CutsceneManager.PATH);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "constant"), CutsceneManager.CONSTANT);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "look_at_point"), CutsceneManager.LOOK_AT_POINT);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "transition"), CutsceneManager.PATH_TRANSITION);
-        CutsceneManager.registerSegmentType(ResourceLocation.fromNamespaceAndPath("cutscenes", "calculated"), CutsceneManager.CALCULATED_POINT);
+        CutsceneManager.registerSegmentType(Identifier.fromNamespaceAndPath("cutscenes", "line"), CutsceneManager.LINE);
+        CutsceneManager.registerSegmentType(Identifier.fromNamespaceAndPath("cutscenes", "bezier"), CutsceneManager.BEZIER);
+        CutsceneManager.registerSegmentType(Identifier.fromNamespaceAndPath("cutscenes", "catmull_rom"), CutsceneManager.CATMULL_ROM);
+        CutsceneManager.registerSegmentType(Identifier.fromNamespaceAndPath("cutscenes", "path"), CutsceneManager.PATH);
+        CutsceneManager.registerSegmentType(Identifier.fromNamespaceAndPath("cutscenes", "constant"), CutsceneManager.CONSTANT);
+        CutsceneManager.registerSegmentType(Identifier.fromNamespaceAndPath("cutscenes", "look_at_point"), CutsceneManager.LOOK_AT_POINT);
+        CutsceneManager.registerSegmentType(Identifier.fromNamespaceAndPath("cutscenes", "transition"), CutsceneManager.PATH_TRANSITION);
+        CutsceneManager.registerSegmentType(Identifier.fromNamespaceAndPath("cutscenes", "calculated"), CutsceneManager.CALCULATED_POINT);
 
-        CutsceneManager.registerPointType(ResourceLocation.fromNamespaceAndPath("cutscenes", "static"), CutsceneManager.STATIC);
-        CutsceneManager.registerPointType(ResourceLocation.fromNamespaceAndPath("cutscenes", "waypoint"), CutsceneManager.WAYPOINT);
-        CutsceneManager.registerPointType(ResourceLocation.fromNamespaceAndPath("cutscenes", "world"), CutsceneManager.WORLD);
+        CutsceneManager.registerPointType(Identifier.fromNamespaceAndPath("cutscenes", "static"), CutsceneManager.STATIC);
+        CutsceneManager.registerPointType(Identifier.fromNamespaceAndPath("cutscenes", "waypoint"), CutsceneManager.WAYPOINT);
+        CutsceneManager.registerPointType(Identifier.fromNamespaceAndPath("cutscenes", "world"), CutsceneManager.WORLD);
 
-        CutsceneManager.registerTransitionType(ResourceLocation.fromNamespaceAndPath("cutscenes", "no_op"), CutsceneManager.NO_OP);
-        CutsceneManager.registerTransitionType(ResourceLocation.fromNamespaceAndPath("cutscenes", "smooth_ease"), CutsceneManager.SMOOTH_EASE);
-        CutsceneManager.registerTransitionType(ResourceLocation.fromNamespaceAndPath("cutscenes", "fade"), CutsceneManager.FADE);
+        CutsceneManager.registerTransitionType(Identifier.fromNamespaceAndPath("cutscenes", "no_op"), CutsceneManager.NO_OP);
+        CutsceneManager.registerTransitionType(Identifier.fromNamespaceAndPath("cutscenes", "smooth_ease"), CutsceneManager.SMOOTH_EASE);
+        CutsceneManager.registerTransitionType(Identifier.fromNamespaceAndPath("cutscenes", "fade"), CutsceneManager.FADE);
 
         EasingSerializer.init();
         CutsceneEffectSerializer.init();
@@ -83,7 +84,7 @@ public final class CutsceneAPIFabric implements ModInitializer {
         RotationSerializer.init();
 
         ArgumentTypeRegistry.registerArgumentType(
-            ResourceLocation.fromNamespaceAndPath("cutscenes", "ending_reason"),
+            Identifier.fromNamespaceAndPath("cutscenes", "ending_reason"),
             EndingReasonArgument.class,
             SingletonArgumentInfo.contextFree(EndingReasonArgument::endingReason)
         );
