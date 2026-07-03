@@ -32,9 +32,9 @@ public interface TimeManager {
     });
 
     /**
-     * Updates the internal state and returns the current time.
+     * Updates the internal state and returns the current time.<br>
+     * <b>Note: </b> calling this method after {@link #start()} does not guarantee that the return value is exactly zero.
      * @return a value representing the current time since a cutscene started, in time units.
-     * @apiNote calling this method after {@link #start()} does not guarantee that the return value is exactly zero.
      */
     double tick();
 

@@ -30,9 +30,14 @@ import net.thewinnt.cutscenes.effect.HideChunksEffect;
 
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
+    @Shadow @Final private LevelTargetBundle targets;
+    @Shadow @Final private LevelRenderState levelRenderState;
+
     @Inject(method = "renderLevel", at = @At("HEAD"), cancellable = true)
     private void renderLevel(GraphicsResourceAllocator resourceAllocator, DeltaTracker deltaTracker, boolean renderOutline, CameraRenderState cameraState, Matrix4fc modelViewMatrix, GpuBufferSlice terrainFog, Vector4f fogColor, boolean shouldRenderSky, ChunkSectionsToRender chunkSectionsToRender, CallbackInfo callback) {
         if (HideChunksEffect.active()) {
+            this.targets.clear();
+            this.levelRenderState.reset();
             callback.cancel();
         }
     }

@@ -53,7 +53,6 @@ public interface PointProvider {
      * @param level the level the point is being obtained in.
      * @param startPosition the starting position of the cutscene
      * @return a point, relative to the starting position, or a rotation relative to the starting rotation
-     * @implNote
      */
     static Vec3 getPoint(PointProvider point, Level level, Vec3 startPosition) {
         if (point.shouldCache()) {
